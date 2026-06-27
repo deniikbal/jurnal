@@ -1,0 +1,96 @@
+import { cookies } from "next/headers"
+import { ChevronDownIcon, LogOutIcon } from "lucide-react"
+
+import { DashboardBreadcrumb } from "@/components/dashboard-breadcrumb"
+import { DashboardSidebar } from "@/components/dashboard-sidebar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Separator } from "@/components/ui/separator"
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar"
+import { logout } from "@/lib/auth-actions"
+import { getCurrentUser } from "@/lib/dal"
+
+function getInitials(name?: string | null, email?: string | null) {
+  const source = name || email || "User"
+  return source
+    .split(" ")
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase()
+}
+
+export default async function DashboardLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode
+}>) {
+  const [cookieStore, user] = await Promise.all([cookies(), getCurrentUser()])
+  const defaultOpen = cookieStore.get("sidebar_state")?.value !== "false"
+
+  return (
+    <SidebarProvider defaultOpen={defaultOpen}>
+      <DashboardSidebar />
+      <SidebarInset>
+        <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-background px-4">
+          <SidebarTrigger className="-ml-1" />
+          <Separator orientation="vertical" className="mr-2 h-4" />
+          <DashboardBreadcrumb />
+
+          <div className="ml-auto flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-2 rounded-lg p-1.5 text-left outline-hidden hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring">
+                <Avatar className="size-8 rounded-lg">
+                  <AvatarImage src={user?.image ?? undefined} alt={user?.name ?? "User"} />
+                  <AvatarFallback className="rounded-lg">
+                    {getInitials(user?.name, user?.email)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="hidden min-w-0 text-sm leading-tight sm:grid">
+                  <span className="truncate font-medium">{user?.name ?? "User"}</span>
+                  <span className="truncate text-xs text-muted-foreground">
+                    {user?.email}
+                  </span>
+                </div>
+                <ChevronDownIcon className="hidden size-4 text-muted-foreground sm:block" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>
+                  <div className="flex flex-col gap-1">
+                    <span className="font-medium text-foreground">
+                      {user?.name ?? "User"}
+                    </span>
+                    <span className="truncate">{user?.email}</span>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <form action={logout}>
+                  <DropdownMenuItem asChild variant="destructive">
+                    <button type="submit" className="w-full">
+                      <LogOutIcon />
+                      Logout
+                    </button>
+                  </DropdownMenuItem>
+                </form>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </header>
+        <div className="flex flex-1 flex-col gap-4 p-4 sm:p-6">
+          {children}
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
+  )
+}

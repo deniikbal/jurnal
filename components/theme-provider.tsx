@@ -1,23 +1,50 @@
 "use client"
 
 import * as React from "react"
-import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes"
 
-function ThemeProvider({
-  children,
-  ...props
-}: React.ComponentProps<typeof NextThemesProvider>) {
+type Theme = "light" | "dark" | "system"
+
+function getSystemTheme() {
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light"
+}
+
+function getStoredTheme(): Theme {
+  const theme = window.localStorage.getItem("theme")
+  return theme === "light" || theme === "dark" || theme === "system"
+    ? theme
+    : "system"
+}
+
+function applyTheme(theme: Theme) {
+  const resolvedTheme = theme === "system" ? getSystemTheme() : theme
+  document.documentElement.classList.toggle("dark", resolvedTheme === "dark")
+}
+
+function ThemeProvider({ children }: { children: React.ReactNode }) {
+  React.useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
+
+    function syncTheme() {
+      applyTheme(getStoredTheme())
+    }
+
+    syncTheme()
+    mediaQuery.addEventListener("change", syncTheme)
+    window.addEventListener("storage", syncTheme)
+
+    return () => {
+      mediaQuery.removeEventListener("change", syncTheme)
+      window.removeEventListener("storage", syncTheme)
+    }
+  }, [])
+
   return (
-    <NextThemesProvider
-      attribute="class"
-      defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
-      {...props}
-    >
+    <>
       <ThemeHotkey />
       {children}
-    </NextThemesProvider>
+    </>
   )
 }
 
@@ -35,27 +62,21 @@ function isTypingTarget(target: EventTarget | null) {
 }
 
 function ThemeHotkey() {
-  const { resolvedTheme, setTheme } = useTheme()
-
   React.useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
-      if (event.defaultPrevented || event.repeat) {
-        return
-      }
+      if (event.defaultPrevented || event.repeat) return
+      if (event.metaKey || event.ctrlKey || event.altKey) return
+      if (typeof event.key !== "string") return
+      if (event.key.toLowerCase() !== "d") return
+      if (isTypingTarget(event.target)) return
 
-      if (event.metaKey || event.ctrlKey || event.altKey) {
-        return
-      }
+      const currentTheme = document.documentElement.classList.contains("dark")
+        ? "dark"
+        : "light"
+      const nextTheme = currentTheme === "dark" ? "light" : "dark"
 
-      if (event.key.toLowerCase() !== "d") {
-        return
-      }
-
-      if (isTypingTarget(event.target)) {
-        return
-      }
-
-      setTheme(resolvedTheme === "dark" ? "light" : "dark")
+      window.localStorage.setItem("theme", nextTheme)
+      applyTheme(nextTheme)
     }
 
     window.addEventListener("keydown", onKeyDown)
@@ -63,7 +84,7 @@ function ThemeHotkey() {
     return () => {
       window.removeEventListener("keydown", onKeyDown)
     }
-  }, [resolvedTheme, setTheme])
+  }, [])
 
   return null
 }

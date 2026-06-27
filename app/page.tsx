@@ -1,19 +1,34 @@
+import type { Metadata } from "next"
+import Link from "next/link"
+
+import { auth } from "@/auth"
 import { Button } from "@/components/ui/button"
 
-export default function Page() {
+export const metadata: Metadata = {
+  title: "Beranda",
+}
+
+export default async function Page() {
+  const session = await auth()
+
   return (
-    <div className="flex min-h-svh p-6">
-      <div className="flex max-w-md min-w-0 flex-col gap-4 text-sm leading-loose">
-        <div>
-          <h1 className="font-medium">Project ready!</h1>
-          <p>You may now add components and start building.</p>
-          <p>We&apos;ve already added the button component for you.</p>
-          <Button className="mt-2">Button</Button>
+    <main className="flex min-h-svh items-center justify-center p-6">
+      <div className="flex max-w-xl flex-col gap-6 text-center">
+        <div className="space-y-3">
+          <h1 className="text-4xl font-semibold tracking-tight">Jurnal</h1>
+          <p className="text-muted-foreground">
+            Aplikasi jurnal publik dengan login Google. Data kelas, siswa, dan jurnal
+            akan terpisah sesuai user yang login.
+          </p>
         </div>
-        <div className="font-mono text-xs text-muted-foreground">
-          (Press <kbd>d</kbd> to toggle dark mode)
+        <div>
+          <Button asChild>
+            <Link href={session?.user ? "/dashboard" : "/login"}>
+              {session?.user ? "Buka Dashboard" : "Login dengan Google"}
+            </Link>
+          </Button>
         </div>
       </div>
-    </div>
+    </main>
   )
 }
