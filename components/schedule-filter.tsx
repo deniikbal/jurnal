@@ -56,7 +56,7 @@ export function ScheduleFilter({
   return (
     <div className="grid gap-2 sm:grid-cols-[180px_1fr_1fr_auto]">
       <Select value={day} onValueChange={(value) => updateParam("day", value)}>
-        <SelectTrigger className="w-full" aria-label="Filter hari">
+        <SelectTrigger className="w-full !h-9" aria-label="Filter hari">
           <SelectValue placeholder="Pilih hari" />
         </SelectTrigger>
         <SelectContent>
@@ -73,7 +73,7 @@ export function ScheduleFilter({
         value={subjectId}
         onValueChange={(value) => updateParam("subjectId", value)}
       >
-        <SelectTrigger className="w-full" aria-label="Filter mapel">
+        <SelectTrigger className="w-full !h-9" aria-label="Filter mapel">
           <SelectValue placeholder="Pilih mapel" />
         </SelectTrigger>
         <SelectContent>
@@ -90,7 +90,7 @@ export function ScheduleFilter({
         value={classroomId}
         onValueChange={(value) => updateParam("classroomId", value)}
       >
-        <SelectTrigger className="w-full" aria-label="Filter kelas">
+        <SelectTrigger className="w-full !h-9" aria-label="Filter kelas">
           <SelectValue placeholder="Pilih kelas" />
         </SelectTrigger>
         <SelectContent>

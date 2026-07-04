@@ -6,7 +6,13 @@ import { SearchIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 type KelasFilterProps = {
   q: string
@@ -83,18 +89,22 @@ export function KelasFilter({ q, filter }: KelasFilterProps) {
           aria-label="Cari nama kelas"
         />
       </div>
-      <NativeSelect
+      <Select
         value={filter}
-        onChange={(event) => handleFilterChange(event.target.value)}
-        className="w-full"
+        onValueChange={handleFilterChange}
         aria-label="Urutkan kelas"
       >
-        <NativeSelectOption value="natural">Natural</NativeSelectOption>
-        <NativeSelectOption value="az">Nama A-Z</NativeSelectOption>
-        <NativeSelectOption value="za">Nama Z-A</NativeSelectOption>
-        <NativeSelectOption value="terbaru">Terbaru</NativeSelectOption>
-        <NativeSelectOption value="terlama">Terlama</NativeSelectOption>
-      </NativeSelect>
+        <SelectTrigger className="w-full !h-9">
+          <SelectValue placeholder="Urutkan" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="natural">Natural</SelectItem>
+          <SelectItem value="az">Nama A-Z</SelectItem>
+          <SelectItem value="za">Nama Z-A</SelectItem>
+          <SelectItem value="terbaru">Terbaru</SelectItem>
+          <SelectItem value="terlama">Terlama</SelectItem>
+        </SelectContent>
+      </Select>
       <Button
         type="button"
         variant="outline"

@@ -6,7 +6,13 @@ import { SearchIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 type GradeWeightFilterProps = {
   q: string
@@ -60,21 +66,36 @@ export function GradeWeightFilter({ q, filter, subjectId, status, subjects }: Gr
         <SearchIcon className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Cari nama bobot..." className="pl-8" aria-label="Cari bobot nilai" />
       </div>
-      <NativeSelect value={subjectId} onChange={(event) => updateParam("subjectId", event.target.value, "all")} className="w-full" aria-label="Filter mapel">
-        <NativeSelectOption value="all">Semua Mapel</NativeSelectOption>
-        {subjects.map((subject) => <NativeSelectOption key={subject.id} value={subject.id}>{subject.name}</NativeSelectOption>)}
-      </NativeSelect>
-      <NativeSelect value={status} onChange={(event) => updateParam("status", event.target.value, "all")} className="w-full" aria-label="Filter status">
-        <NativeSelectOption value="all">Semua Status</NativeSelectOption>
-        <NativeSelectOption value="aktif">Aktif</NativeSelectOption>
-        <NativeSelectOption value="nonaktif">Nonaktif</NativeSelectOption>
-      </NativeSelect>
-      <NativeSelect value={filter} onChange={(event) => updateParam("filter", event.target.value, "natural")} className="w-full" aria-label="Urutkan bobot">
-        <NativeSelectOption value="natural">Natural</NativeSelectOption>
-        <NativeSelectOption value="za">Nama Z-A</NativeSelectOption>
-        <NativeSelectOption value="terbesar">Bobot Terbesar</NativeSelectOption>
-        <NativeSelectOption value="terkecil">Bobot Terkecil</NativeSelectOption>
-      </NativeSelect>
+      <Select value={subjectId} onValueChange={(value) => updateParam("subjectId", value, "all")}>
+        <SelectTrigger className="w-full !h-9" aria-label="Filter mapel">
+          <SelectValue placeholder="Semua Mapel" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">Semua Mapel</SelectItem>
+          {subjects.map((subject) => <SelectItem key={subject.id} value={subject.id}>{subject.name}</SelectItem>)}
+        </SelectContent>
+      </Select>
+      <Select value={status} onValueChange={(value) => updateParam("status", value, "all")}>
+        <SelectTrigger className="w-full !h-9" aria-label="Filter status">
+          <SelectValue placeholder="Semua Status" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">Semua Status</SelectItem>
+          <SelectItem value="aktif">Aktif</SelectItem>
+          <SelectItem value="nonaktif">Nonaktif</SelectItem>
+        </SelectContent>
+      </Select>
+      <Select value={filter} onValueChange={(value) => updateParam("filter", value, "natural")}>
+        <SelectTrigger className="w-full !h-9" aria-label="Urutkan bobot">
+          <SelectValue placeholder="Natural" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="natural">Natural</SelectItem>
+          <SelectItem value="za">Nama Z-A</SelectItem>
+          <SelectItem value="terbesar">Bobot Terbesar</SelectItem>
+          <SelectItem value="terkecil">Bobot Terkecil</SelectItem>
+        </SelectContent>
+      </Select>
       <Button type="button" variant="outline" onClick={handleReset} disabled={isPending || (!search && filter === "natural" && subjectId === "all" && status === "all")}>Reset</Button>
     </div>
   )

@@ -1,15 +1,26 @@
 import type { Metadata } from "next"
-import { Geist_Mono, Inter, Noto_Sans } from "next/font/google"
+import { DM_Sans, Lora, IBM_Plex_Mono } from "next/font/google"
 
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import { cn } from "@/lib/utils";
 
-const notoSansHeading = Noto_Sans({subsets:['latin'],variable:'--font-heading'});
+const fontSans = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+})
 
-const inter = Inter({subsets:['latin'],variable:'--font-sans'})
+const fontSerif = Lora({
+  subsets: ["latin"],
+  variable: "--font-serif",
+})
+
+const fontMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  variable: "--font-mono",
+})
 
 export const metadata: Metadata = {
   title: {
@@ -18,11 +29,6 @@ export const metadata: Metadata = {
   },
   description: "Aplikasi jurnal kesiswaan dengan login Google.",
 }
-
-const fontMono = Geist_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-})
 
 export default function RootLayout({
   children,
@@ -33,7 +39,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn("antialiased", fontMono.variable, "font-sans", inter.variable, notoSansHeading.variable)}
+      className={`${fontSans.variable} ${fontSerif.variable} ${fontMono.variable} antialiased`}
     >
       <body>
         <ThemeProvider>

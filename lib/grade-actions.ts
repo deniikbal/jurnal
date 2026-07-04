@@ -137,6 +137,48 @@ export async function saveAssessment(
     )
   }
 
+  // ponytail: applyAll — salin assessment ke semua kelas dengan mapel yang sama
+  if (!assessmentId && formData.get("applyAll") === "1") {
+    const otherSchedules = await db
+      .select({ classroomId: schedule.classroomId })
+      .from(schedule)
+      .where(
+        and(
+          eq(schedule.subjectId, selectedSubject.id),
+          eq(schedule.userId, session.userId),
+        ),
+      )
+
+    const otherClassroomIds = [
+      ...new Set(otherSchedules.map((s) => s.classroomId)),
+    ].filter((id) => id !== selectedClassroom.id)
+
+    for (const classroomId of otherClassroomIds) {
+      const [cls] = await db
+        .select({ id: classroom.id, name: classroom.name })
+        .from(classroom)
+        .where(
+          and(eq(classroom.id, classroomId), eq(classroom.userId, session.userId)),
+        )
+        .limit(1)
+      if (!cls) continue
+
+      await db.insert(assessment).values({
+        title,
+        description: description || null,
+        date: date || null,
+        gradeWeightId,
+        gradeWeightName: selectedWeight.name,
+        subjectId: selectedSubject.id,
+        subjectName: selectedSubject.name,
+        subjectKode: selectedSubject.kode,
+        classroomId: cls.id,
+        classroomName: cls.name,
+        userId: session.userId,
+      })
+    }
+  }
+
   revalidatePath("/dashboard/jurnal")
 
   return successState(

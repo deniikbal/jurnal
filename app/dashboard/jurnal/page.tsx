@@ -237,6 +237,23 @@ export default async function JurnalPage({ searchParams }: JurnalPageProps) {
                       ]),
                     )
 
+                    // ponytail: summary data — semua kelas & assessment untuk mapel ini
+                    const subjectClassrooms = classrooms.filter((c) =>
+                      schedules.some(
+                        (s) => s.subjectId === schedule.subjectId && s.classroomId === c.id,
+                      ),
+                    )
+                    const allSubjectAssessments = assessments.filter(
+                      (a) => a.subjectId === schedule.subjectId,
+                    )
+                    const studentCountsByClassroom: Record<string, number> = {}
+                    for (const c of subjectClassrooms) {
+                      studentCountsByClassroom[c.id] = (
+                        studentsByClassroom.get(c.id) ?? []
+                      ).length
+                    }
+                    const allScoresByAssessment = Object.fromEntries(scoresByAssessment)
+
                     return (
                       <div key={schedule.id} className="rounded-lg border bg-card p-4 shadow-sm">
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -279,6 +296,10 @@ export default async function JurnalPage({ searchParams }: JurnalPageProps) {
                               weights={scheduleWeights}
                               assessments={scheduleAssessments}
                               scoresByAssessment={scheduleScoresByAssessment}
+                              allClassrooms={subjectClassrooms}
+                              allAssessments={allSubjectAssessments}
+                              studentCountsByClassroom={studentCountsByClassroom}
+                              allScoresByAssessment={allScoresByAssessment}
                             />
                           </div>
                         </div>

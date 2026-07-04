@@ -1,5 +1,10 @@
 import type { Metadata } from "next"
-import { GraduationCapIcon, TableIcon, UserCheckIcon, UserXIcon } from "lucide-react"
+import {
+  GraduationCapIcon,
+  LayoutListIcon,
+  UserCheckIcon,
+  UserXIcon,
+} from "lucide-react"
 
 import { SiswaActions } from "@/components/siswa-actions"
 import { SiswaCreateDialog } from "@/components/siswa-create-dialog"
@@ -133,7 +138,7 @@ export default async function SiswaPage({ searchParams }: SiswaPageProps) {
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Ditampilkan
             </CardTitle>
-            <TableIcon className="size-4 text-muted-foreground" />
+            <LayoutListIcon className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-semibold">{totalFiltered}</p>

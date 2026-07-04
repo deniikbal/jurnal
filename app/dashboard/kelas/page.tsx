@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { SchoolIcon, TableIcon } from "lucide-react"
+import { CalculatorIcon, SchoolIcon, SparklesIcon, UsersIcon } from "lucide-react"
 
 import { KelasActions } from "@/components/kelas-actions"
 import { KelasCreateDialog } from "@/components/kelas-create-dialog"
@@ -67,6 +67,7 @@ export default async function KelasPage({ searchParams }: KelasPageProps) {
     getSiswaForCurrentUser(),
   ])
   const totalKelas = daftarKelas.length
+  const totalSiswa = daftarSiswa.length
 
   const filteredKelas = daftarKelas
     .filter((item) => item.name.toLowerCase().includes(q.toLowerCase()))
@@ -85,16 +86,20 @@ export default async function KelasPage({ searchParams }: KelasPageProps) {
   const newestKelas = daftarKelas.toSorted(
     (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
   )[0]
+  const avgSiswaPerKelas =
+    totalKelas > 0 ? Math.round((totalSiswa / totalKelas) * 10) / 10 : 0
 
   return (
     <>
+      {/* ===== Page Header ===== */}
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Kelas</h1>
         <p className="text-sm text-muted-foreground">
-          Kelola data kelas milik akun yang sedang login.
+          Kelola data kelas, wali kelas, dan lihat daftar siswa per kelas.
         </p>
       </div>
 
+      {/* ===== Stat Cards ===== */}
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -110,40 +115,52 @@ export default async function KelasPage({ searchParams }: KelasPageProps) {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Ditampilkan
+              Total Siswa
             </CardTitle>
-            <TableIcon className="size-4 text-muted-foreground" />
+            <UsersIcon className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-semibold">{totalFiltered}</p>
+            <p className="text-3xl font-semibold">{totalSiswa}</p>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Halaman
+              Rata-rata
             </CardTitle>
+            <CalculatorIcon className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-semibold">
-              {safePage}/{totalPages}
+              {totalKelas > 0 ? avgSiswaPerKelas : "-"}
             </p>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Kelas Terbaru
             </CardTitle>
+            <SparklesIcon className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <p className="truncate text-lg font-semibold">
-              {newestKelas?.name ?? "Belum ada"}
+            <p className="text-xl font-semibold truncate">
+              {newestKelas?.name ?? "—"}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {newestKelas
+                ? newestKelas.createdAt.toLocaleDateString("id-ID", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })
+                : "Belum ada kelas"}
             </p>
           </CardContent>
         </Card>
       </section>
 
+      {/* ===== Data Table ===== */}
       <Card>
         <CardHeader className="gap-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -188,7 +205,9 @@ export default async function KelasPage({ searchParams }: KelasPageProps) {
                       <TableCell>
                         <KelasSiswaDialog
                           kelasName={item.name}
-                          siswa={daftarSiswa.filter((siswa) => siswa.classroomId === item.id)}
+                          siswa={daftarSiswa.filter(
+                            (siswa) => siswa.classroomId === item.id,
+                          )}
                         />
                       </TableCell>
                       <TableCell>
@@ -200,7 +219,10 @@ export default async function KelasPage({ searchParams }: KelasPageProps) {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
+                    <TableCell
+                      colSpan={6}
+                      className="h-32 text-center text-muted-foreground"
+                    >
                       Tidak ada data kelas yang cocok.
                     </TableCell>
                   </TableRow>
@@ -212,23 +234,33 @@ export default async function KelasPage({ searchParams }: KelasPageProps) {
           <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-muted-foreground">
               Menampilkan {paginatedKelas.length ? startIndex + 1 : 0}-
-              {Math.min(startIndex + paginatedKelas.length, totalFiltered)} dari {totalFiltered} data
+              {Math.min(startIndex + paginatedKelas.length, totalFiltered)} dari{" "}
+              {totalFiltered} data
             </p>
             <Pagination className="sm:mx-0 sm:w-auto">
               <PaginationContent>
                 <PaginationItem>
                   <PaginationPrevious
                     text="Sebelumnya"
-                    href={createPageHref({ q, filter, page: Math.max(safePage - 1, 1) })}
+                    href={createPageHref({
+                      q,
+                      filter,
+                      page: Math.max(safePage - 1, 1),
+                    })}
                     aria-disabled={safePage === 1}
-                    className={safePage === 1 ? "pointer-events-none opacity-50" : undefined}
+                    className={
+                      safePage === 1
+                        ? "pointer-events-none opacity-50"
+                        : undefined
+                    }
                   />
                 </PaginationItem>
                 {Array.from({ length: totalPages }, (_, index) => index + 1)
-                  .filter((page) =>
-                    page === 1 ||
-                    page === totalPages ||
-                    Math.abs(page - safePage) <= 1
+                  .filter(
+                    (page) =>
+                      page === 1 ||
+                      page === totalPages ||
+                      Math.abs(page - safePage) <= 1,
                   )
                   .map((page) => (
                     <PaginationItem key={page}>
@@ -243,9 +275,17 @@ export default async function KelasPage({ searchParams }: KelasPageProps) {
                 <PaginationItem>
                   <PaginationNext
                     text="Berikutnya"
-                    href={createPageHref({ q, filter, page: Math.min(safePage + 1, totalPages) })}
+                    href={createPageHref({
+                      q,
+                      filter,
+                      page: Math.min(safePage + 1, totalPages),
+                    })}
                     aria-disabled={safePage === totalPages}
-                    className={safePage === totalPages ? "pointer-events-none opacity-50" : undefined}
+                    className={
+                      safePage === totalPages
+                        ? "pointer-events-none opacity-50"
+                        : undefined
+                    }
                   />
                 </PaginationItem>
               </PaginationContent>

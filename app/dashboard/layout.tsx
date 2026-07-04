@@ -1,8 +1,9 @@
 import { cookies } from "next/headers"
 import { ChevronDownIcon, LogOutIcon } from "lucide-react"
 
+import { AppSidebar } from "@/components/app-sidebar"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { DashboardBreadcrumb } from "@/components/dashboard-breadcrumb"
-import { DashboardSidebar } from "@/components/dashboard-sidebar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -13,11 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Separator } from "@/components/ui/separator"
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar"
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { logout } from "@/lib/auth-actions"
 import { getCurrentUser } from "@/lib/dal"
 
@@ -41,7 +38,7 @@ export default async function DashboardLayout({
 
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
-      <DashboardSidebar />
+      <AppSidebar />
       <SidebarInset>
         <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-background px-4">
           <SidebarTrigger className="-ml-1" />
@@ -49,6 +46,7 @@ export default async function DashboardLayout({
           <DashboardBreadcrumb />
 
           <div className="ml-auto flex items-center gap-2">
+            <ThemeToggle />
             <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center gap-2 rounded-lg p-1.5 text-left outline-hidden hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring">
                 <Avatar className="size-8 rounded-lg">
@@ -87,9 +85,7 @@ export default async function DashboardLayout({
             </DropdownMenu>
           </div>
         </header>
-        <div className="flex flex-1 flex-col gap-4 p-4 sm:p-6">
-          {children}
-        </div>
+        <div className="flex flex-1 flex-col gap-4 p-4 sm:p-6">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   )

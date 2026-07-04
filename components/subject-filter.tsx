@@ -6,7 +6,13 @@ import { SearchIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 type SubjectFilterProps = {
   q: string
@@ -77,27 +83,33 @@ export function SubjectFilter({ q, filter, status }: SubjectFilterProps) {
           aria-label="Cari mata pelajaran"
         />
       </div>
-      <NativeSelect
+      <Select
         value={status}
-        onChange={(event) => updateParam("status", event.target.value, "all")}
-        className="w-full"
-        aria-label="Filter status"
+        onValueChange={(value) => updateParam("status", value, "all")}
       >
-        <NativeSelectOption value="all">Semua Status</NativeSelectOption>
-        <NativeSelectOption value="aktif">Aktif</NativeSelectOption>
-        <NativeSelectOption value="nonaktif">Nonaktif</NativeSelectOption>
-      </NativeSelect>
-      <NativeSelect
+        <SelectTrigger className="w-full !h-9" aria-label="Filter status">
+          <SelectValue placeholder="Semua Status" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">Semua Status</SelectItem>
+          <SelectItem value="aktif">Aktif</SelectItem>
+          <SelectItem value="nonaktif">Nonaktif</SelectItem>
+        </SelectContent>
+      </Select>
+      <Select
         value={filter}
-        onChange={(event) => updateParam("filter", event.target.value, "natural")}
-        className="w-full"
-        aria-label="Urutkan mata pelajaran"
+        onValueChange={(value) => updateParam("filter", value, "natural")}
       >
-        <NativeSelectOption value="natural">Natural</NativeSelectOption>
-        <NativeSelectOption value="za">Nama Z-A</NativeSelectOption>
-        <NativeSelectOption value="terbaru">Terbaru</NativeSelectOption>
-        <NativeSelectOption value="terlama">Terlama</NativeSelectOption>
-      </NativeSelect>
+        <SelectTrigger className="w-full !h-9" aria-label="Urutkan mata pelajaran">
+          <SelectValue placeholder="Natural" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="natural">Natural</SelectItem>
+          <SelectItem value="za">Nama Z-A</SelectItem>
+          <SelectItem value="terbaru">Terbaru</SelectItem>
+          <SelectItem value="terlama">Terlama</SelectItem>
+        </SelectContent>
+      </Select>
       <Button
         type="button"
         variant="outline"

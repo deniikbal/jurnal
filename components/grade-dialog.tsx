@@ -53,6 +53,7 @@ type AssessmentItem = {
   date: string | null
   gradeWeightId: string
   gradeWeightName: string
+  classroomId: string
 }
 
 type StudentItem = {
@@ -74,10 +75,15 @@ type GradeDialogProps = {
   weights: GradeWeightOption[]
   assessments: AssessmentItem[]
   scoresByAssessment: Record<string, Record<string, number>>
+  allClassrooms?: { id: string; name: string }[]
+  allAssessments?: AssessmentItem[]
+  studentCountsByClassroom?: Record<string, number>
+  allScoresByAssessment?: Record<string, Record<string, number>>
 }
 
 type ViewMode =
   | { type: "list" }
+  | { type: "summary" }
   | { type: "form"; assessment?: AssessmentItem }
 
 export function GradeDialog({
@@ -88,6 +94,10 @@ export function GradeDialog({
   weights,
   assessments,
   scoresByAssessment,
+  allClassrooms,
+  allAssessments,
+  studentCountsByClassroom,
+  allScoresByAssessment,
 }: GradeDialogProps) {
   const [open, setOpen] = useState(false)
   const [view, setView] = useState<ViewMode>({ type: "list" })
@@ -110,19 +120,7 @@ export function GradeDialog({
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-3xl">
-        {view.type === "list" ? (
-          <AssessmentList
-            subjectName={subjectName}
-            classroomName={classroomName}
-            schedule={schedule}
-            weights={weights}
-            weightById={weightById}
-            assessments={assessments}
-            onAdd={() => setView({ type: "form" })}
-            onEdit={(assessment) => setView({ type: "form", assessment })}
-            onDeleted={() => setView({ type: "list" })}
-          />
-        ) : (
+        {view.type === "form" ? (
           <AssessmentForm
             schedule={schedule}
             subjectName={subjectName}
@@ -136,6 +134,53 @@ export function GradeDialog({
             onDone={() => setOpen(false)}
             onCancel={() => setView({ type: "list" })}
           />
+        ) : (
+          <>
+            <DialogHeader>
+              <DialogTitle>Penilaian {classroomName}</DialogTitle>
+              <DialogDescription>
+                {subjectName} • Jam {schedule.jamKe} • {schedule.startTime}–{schedule.endTime}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex gap-1 border-b pb-2">
+              <Button
+                type="button"
+                variant={view.type === "list" ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setView({ type: "list" })}
+              >
+                Daftar
+              </Button>
+              <Button
+                type="button"
+                variant={view.type === "summary" ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setView({ type: "summary" })}
+              >
+                Ringkasan
+              </Button>
+            </div>
+            {view.type === "list" ? (
+              <AssessmentList
+                weights={weights}
+                weightById={weightById}
+                assessments={assessments}
+                students={students}
+                scoresByAssessment={scoresByAssessment}
+                onAdd={() => setView({ type: "form" })}
+                onEdit={(a) => setView({ type: "form", assessment: a })}
+                onDeleted={() => setView({ type: "list" })}
+              />
+            ) : (
+              <AssessmentSummary
+                allClassrooms={allClassrooms ?? []}
+                allAssessments={allAssessments ?? []}
+                studentCountsByClassroom={studentCountsByClassroom ?? {}}
+                allScoresByAssessment={allScoresByAssessment ?? {}}
+                weightById={weightById}
+              />
+            )}
+          </>
         )}
       </DialogContent>
     </Dialog>
@@ -143,22 +188,20 @@ export function GradeDialog({
 }
 
 function AssessmentList({
-  subjectName,
-  classroomName,
-  schedule,
   weights,
   weightById,
   assessments,
+  students,
+  scoresByAssessment,
   onAdd,
   onEdit,
   onDeleted,
 }: {
-  subjectName: string
-  classroomName: string
-  schedule: { jamKe: number; startTime: string; endTime: string }
   weights: GradeWeightOption[]
   weightById: Map<string, GradeWeightOption>
   assessments: AssessmentItem[]
+  students: StudentItem[]
+  scoresByAssessment: Record<string, Record<string, number>>
   onAdd: () => void
   onEdit: (assessment: AssessmentItem) => void
   onDeleted: () => void
@@ -179,13 +222,6 @@ function AssessmentList({
 
   return (
     <div className="space-y-4">
-      <DialogHeader>
-        <DialogTitle>Penilaian {classroomName}</DialogTitle>
-        <DialogDescription>
-          {subjectName} • Jam {schedule.jamKe} • {schedule.startTime}–{schedule.endTime}
-        </DialogDescription>
-      </DialogHeader>
-
       {!hasWeights ? (
         <div className="rounded-lg border py-10 text-center text-sm text-muted-foreground">
           Belum ada komponen bobot nilai untuk mapel ini. Tambahkan dulu di menu
@@ -210,48 +246,63 @@ function AssessmentList({
                   <TableHead className="w-12">No</TableHead>
                   <TableHead>Nama</TableHead>
                   <TableHead>Komponen</TableHead>
-                  <TableHead>Tanggal</TableHead>
+                  <TableHead>Keterangan</TableHead>
                   <TableHead className="w-24 text-right">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {assessments.length > 0 ? (
-                  assessments.map((item, index) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="text-muted-foreground">{index + 1}</TableCell>
-                      <TableCell className="font-medium">{item.title}</TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">
-                          {weightById.get(item.gradeWeightId)?.name ?? item.gradeWeightName}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{item.date ?? "-"}</TableCell>
-                      <TableCell>
-                        <div className="flex justify-end gap-1">
-                          <Button
-                            type="button"
-                            size="icon"
-                            variant="ghost"
-                            onClick={() => onEdit(item)}
-                          >
-                            <PencilIcon />
-                          </Button>
-                          <form action={formAction}>
-                            <input type="hidden" name="id" value={item.id} />
+                  assessments.map((item, index) => {
+                    const studentScores = scoresByAssessment[item.id]
+                    const lengkap =
+                      students.length > 0 &&
+                      studentScores &&
+                      students.every(
+                        (s) =>
+                          studentScores[s.id] !== undefined && studentScores[s.id] > 0,
+                      )
+
+                    return (
+                      <TableRow key={item.id}>
+                        <TableCell className="text-muted-foreground">{index + 1}</TableCell>
+                        <TableCell className="font-medium">{item.title}</TableCell>
+                        <TableCell>
+                          <Badge variant="secondary">
+                            {weightById.get(item.gradeWeightId)?.name ?? item.gradeWeightName}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={lengkap ? "default" : "outline"}>
+                            {lengkap ? "Lengkap" : "Tidak lengkap"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex justify-end gap-1">
                             <Button
-                              type="submit"
+                              type="button"
                               size="icon"
                               variant="ghost"
-                              disabled={isPending}
-                              className="text-destructive hover:text-destructive"
+                              onClick={() => onEdit(item)}
                             >
-                              <Trash2Icon />
+                              <PencilIcon />
                             </Button>
-                          </form>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
+                            <form action={formAction}>
+                              <input type="hidden" name="id" value={item.id} />
+                              <Button
+                                type="submit"
+                                size="icon"
+                                variant="ghost"
+                                disabled={isPending}
+                                className="text-destructive hover:text-destructive"
+                              >
+                                <Trash2Icon />
+                              </Button>
+                            </form>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })
                 ) : (
                   <TableRow>
                     <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
@@ -306,6 +357,21 @@ function AssessmentForm({
       ]),
     ),
   )
+  const [statusFilter, setStatusFilter] = useState("")
+
+  function isDinilai(studentId: string) {
+    const v = scores[studentId]
+    return v !== undefined && v !== "" && Number(v) > 0
+  }
+
+  const sudahDinilai = students.filter((s) => isDinilai(s.id)).length
+  const belumDinilai = students.filter((s) => !isDinilai(s.id)).length
+
+  const filteredStudents = statusFilter
+    ? students.filter((s) =>
+        statusFilter === "sudah" ? isDinilai(s.id) : !isDinilai(s.id),
+      )
+    : students
 
   useEffect(() => {
     if (!state.message) return
@@ -338,7 +404,7 @@ function AssessmentForm({
 
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="grid gap-1.5">
-          <Label htmlFor="gradeWeight">Komponen</Label>
+          <Label htmlFor="gradeWeight">Penilaian</Label>
           <Select value={selectedWeightId} onValueChange={setSelectedWeightId}>
             <SelectTrigger id="gradeWeight" className="w-full">
               <SelectValue placeholder="Pilih komponen" />
@@ -386,41 +452,103 @@ function AssessmentForm({
         />
       </div>
 
+      {!assessment && (
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            name="applyAll"
+            id="applyAll"
+            value="1"
+            className="size-4 rounded border-gray-300"
+          />
+          <Label htmlFor="applyAll" className="text-sm font-normal cursor-pointer">
+            Terapkan juga ke semua kelas dengan mapel ini
+          </Label>
+        </div>
+      )}
+
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() => setStatusFilter(statusFilter === "sudah" ? "" : "sudah")}
+          className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs transition-colors hover:bg-muted data-active:bg-muted"
+          data-active={statusFilter === "sudah" || undefined}
+        >
+          <span className="text-muted-foreground">Sudah dinilai</span>
+          <span className="font-semibold text-primary">{sudahDinilai}</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setStatusFilter(statusFilter === "belum" ? "" : "belum")}
+          className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs transition-colors hover:bg-muted data-active:bg-muted"
+          data-active={statusFilter === "belum" || undefined}
+        >
+          <span className="text-muted-foreground">Belum dinilai</span>
+          <span className="font-semibold text-muted-foreground">{belumDinilai}</span>
+        </button>
+        {statusFilter && (
+          <button
+            type="button"
+            onClick={() => setStatusFilter("")}
+            className="flex items-center gap-1 rounded-lg border px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-muted"
+          >
+            Reset
+          </button>
+        )}
+        {sudahDinilai === students.length && students.length > 0 && (
+          <Badge variant="secondary" className="ml-auto text-xs">
+            Semua sudah dinilai
+          </Badge>
+        )}
+      </div>
+
       <div className="max-h-[45vh] overflow-auto rounded-lg border">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-12">No</TableHead>
+              <TableHead className="w-10">No</TableHead>
               <TableHead>Nama Siswa</TableHead>
               <TableHead>NIS</TableHead>
-              <TableHead className="w-32">Nilai (0–100)</TableHead>
+              <TableHead className="w-36">Nilai (0–100)</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {students.length > 0 ? (
-              students.map((student, index) => (
-                <TableRow key={student.id}>
+            {filteredStudents.length > 0 ? (
+              filteredStudents.map((student, index) => (
+                <TableRow key={student.id} className="*:py-1.5">
                   <TableCell className="text-muted-foreground">{index + 1}</TableCell>
                   <TableCell className="font-medium">{student.name}</TableCell>
                   <TableCell>{student.nis ?? "-"}</TableCell>
                   <TableCell>
-                    <Input
-                      type="number"
-                      min={0}
-                      max={100}
-                      name={`score-${student.id}`}
-                      value={scores[student.id] ?? ""}
-                      onChange={(event) => setStudentScore(student.id, event.target.value)}
-                      disabled={isPending}
-                      className="w-24"
-                    />
+                    <div className="flex items-center gap-1">
+                      <Input
+                        type="number"
+                        min={0}
+                        max={100}
+                        name={`score-${student.id}`}
+                        value={scores[student.id] ?? ""}
+                        onChange={(event) => setStudentScore(student.id, event.target.value)}
+                        disabled={isPending}
+                        className="w-16 h-7"
+                      />
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => setStudentScore(student.id, "100")}
+                        disabled={isPending}
+                        className="h-7 w-8 text-xs font-semibold text-muted-foreground hover:text-primary"
+                      >
+                        100
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
                 <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
-                  Belum ada siswa aktif di kelas ini.
+                  {statusFilter ? `Tidak ada siswa dengan status "${statusFilter === "sudah" ? "sudah dinilai" : "belum dinilai"}".` : "Belum ada siswa aktif di kelas ini."}
                 </TableCell>
               </TableRow>
             )}
@@ -437,5 +565,105 @@ function AssessmentForm({
         </Button>
       </DialogFooter>
     </form>
+  )
+}
+
+function AssessmentSummary({
+  allClassrooms,
+  allAssessments,
+  studentCountsByClassroom,
+  allScoresByAssessment,
+  weightById,
+}: {
+  allClassrooms: { id: string; name: string }[]
+  allAssessments: AssessmentItem[]
+  studentCountsByClassroom: Record<string, number>
+  allScoresByAssessment: Record<string, Record<string, number>>
+  weightById: Map<string, GradeWeightOption>
+}) {
+  const columnKeys: string[] = []
+  const columnLabels: { title: string; weightName: string }[] = []
+  const seen = new Set<string>()
+  for (const a of allAssessments) {
+    const key = `${a.title}::${a.gradeWeightId}`
+    if (!seen.has(key)) {
+      seen.add(key)
+      columnKeys.push(key)
+      columnLabels.push({
+        title: a.title,
+        weightName: weightById.get(a.gradeWeightId)?.name ?? a.gradeWeightName,
+      })
+    }
+  }
+
+  const byClassroom = new Map<string, Map<string, AssessmentItem>>()
+  for (const a of allAssessments) {
+    if (!byClassroom.has(a.classroomId)) byClassroom.set(a.classroomId, new Map())
+    byClassroom.get(a.classroomId)!.set(`${a.title}::${a.gradeWeightId}`, a)
+  }
+
+  const collator = new Intl.Collator("id-ID", { numeric: true, sensitivity: "base" })
+  const sortedClassrooms = allClassrooms.toSorted((a, b) => collator.compare(a.name, b.name))
+
+  if (!columnKeys.length) {
+    return (
+      <div className="rounded-lg border py-16 text-center text-sm text-muted-foreground">
+        Belum ada penilaian untuk mapel ini di kelas manapun.
+      </div>
+    )
+  }
+
+  return (
+    <div className="max-h-[55vh] overflow-auto rounded-lg border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-24">Kelas</TableHead>
+            {columnLabels.map((col) => (
+              <TableHead key={col.title} className="text-center">
+                <div>{col.title}</div>
+                <div className="text-xs font-normal text-muted-foreground">{col.weightName}</div>
+              </TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {sortedClassrooms.map((cls) => (
+            <TableRow key={cls.id}>
+              <TableCell className="font-medium">{cls.name}</TableCell>
+              {columnKeys.map((key) => {
+                const a = byClassroom.get(cls.id)?.get(key)
+                if (!a) {
+                  return (
+                    <TableCell key={key} className="text-center text-muted-foreground">
+                      —
+                    </TableCell>
+                  )
+                }
+                const scores = allScoresByAssessment[a.id] ?? {}
+                const filled = Object.values(scores).filter((s) => s > 0).length
+                const total = studentCountsByClassroom[cls.id] ?? 0
+                const complete = total > 0 && filled === total
+                const empty = filled === 0
+                return (
+                  <TableCell
+                    key={key}
+                    className={`text-center tabular-nums ${
+                      complete
+                        ? "text-primary font-semibold"
+                        : empty
+                          ? "text-destructive"
+                          : "text-muted-foreground"
+                    }`}
+                  >
+                    {filled}/{total}
+                  </TableCell>
+                )
+              })}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   )
 }

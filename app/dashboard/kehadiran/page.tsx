@@ -1,12 +1,18 @@
 import type { Metadata } from "next"
-import { CalendarCheckIcon, CheckCircleIcon, TableIcon, XCircleIcon } from "lucide-react"
+import { CalendarCheckIcon, CheckCircleIcon, ClipboardCheckIcon, FileTextIcon, TableIcon, XCircleIcon } from "lucide-react"
 
 import { AttendanceDialog } from "@/components/attendance-dialog"
 import { AttendanceReportFilter } from "@/components/attendance-report-filter"
+import { KehadiranFilter } from "@/components/kehadiran-filter"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import {
   Table,
   TableBody,
@@ -200,8 +206,14 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
 
       <Tabs defaultValue={selectedTab} className="gap-4">
         <TabsList>
-          <TabsTrigger value="kehadiran">Kehadiran</TabsTrigger>
-          <TabsTrigger value="laporan">Laporan Kehadiran</TabsTrigger>
+          <TabsTrigger value="kehadiran" className="data-[state=active]:shadow-sm data-[state=active]:border-primary hover:bg-muted">
+            <ClipboardCheckIcon />
+            Kehadiran
+          </TabsTrigger>
+          <TabsTrigger value="laporan" className="data-[state=active]:shadow-sm data-[state=active]:border-primary hover:bg-muted">
+            <FileTextIcon />
+            Laporan
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="kehadiran">
@@ -214,21 +226,12 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
                     Filter kelas dan mapel, lalu isi keterangan hadir, sakit, izin, atau alfa untuk hari ini.
                   </p>
                 </div>
-                <form className="flex flex-wrap gap-2">
-                  <NativeSelect name="classroomId" defaultValue={selectedClassroomId} className="w-40" aria-label="Filter kelas">
-                    <NativeSelectOption value="all">Semua Kelas</NativeSelectOption>
-                    {classrooms.map((classroom) => (
-                      <NativeSelectOption key={classroom.id} value={classroom.id}>{classroom.name}</NativeSelectOption>
-                    ))}
-                  </NativeSelect>
-                  <NativeSelect name="subjectId" defaultValue={selectedSubjectId} className="w-44" aria-label="Filter mapel">
-                    <NativeSelectOption value="all">Semua Mapel</NativeSelectOption>
-                    {subjects.map((subject) => (
-                      <NativeSelectOption key={subject.id} value={subject.id}>{subject.name}</NativeSelectOption>
-                    ))}
-                  </NativeSelect>
-                  <Button type="submit">Tampilkan</Button>
-                </form>
+                <KehadiranFilter
+                  classroomId={selectedClassroomId}
+                  subjectId={selectedSubjectId}
+                  classrooms={classrooms}
+                  subjects={subjects}
+                />
               </div>
               <div className="flex flex-wrap gap-2">
                 <Badge>{labelDay(selectedDay)}</Badge>
