@@ -37,9 +37,8 @@ export function JournalDeleteButton({ id, title }: { id: string; title: string }
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button type="button" variant="destructive" size="icon-sm">
-          <Trash2Icon />
-          <span className="sr-only">Hapus</span>
+        <Button type="button" variant="destructive" size="icon" className="size-7">
+          <Trash2Icon className="size-3.5" />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>

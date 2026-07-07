@@ -121,7 +121,6 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
   const reportRows = Array.from(reportAttendanceByDateAndSchedule.entries())
     .map(([id, items]) => {
       const first = items[0]
-
       return {
         id,
         date: first.date,
@@ -149,61 +148,56 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
   const filledSchedules = filteredSchedulesToday.filter((item) => attendanceBySchedule.has(item.id)).length
 
   return (
-    <>
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Kehadiran</h1>
-        <p className="text-sm text-muted-foreground">
-          Isi kehadiran siswa berdasarkan jadwal yang sudah dibuat.
-        </p>
+    <div className="flex flex-col gap-5">
+      {/* ===== Page Header ===== */}
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-rose-600 via-rose-600/90 to-rose-500/80 p-5 shadow-lg shadow-rose-500/20">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
+        <div className="relative flex items-center gap-4">
+          <div className="flex size-12 items-center justify-center rounded-xl bg-white/15 ring-2 ring-white/20">
+            <ClipboardCheckIcon className="size-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-lg font-semibold text-white">Kehadiran</h1>
+            <p className="text-sm text-white/70">Isi kehadiran siswa berdasarkan jadwal yang sudah dibuat.</p>
+          </div>
+        </div>
       </div>
 
+      {/* ===== Stat Cards ===== */}
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Jadwal Hari Ini
-            </CardTitle>
-            <CalendarCheckIcon className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold">{filteredSchedulesToday.length}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Sudah Diisi
-            </CardTitle>
-            <TableIcon className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold">{filledSchedules}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Hadir
-            </CardTitle>
-            <CheckCircleIcon className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold">{totalHadir}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Tidak Hadir
-            </CardTitle>
-            <XCircleIcon className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold">{totalTidakHadir}</p>
-          </CardContent>
-        </Card>
+        {[
+          { key: "jadwal", icon: CalendarCheckIcon, label: "Jadwal Hari Ini", value: filteredSchedulesToday.length },
+          { key: "diisi", icon: TableIcon, label: "Sudah Diisi", value: filledSchedules },
+          { key: "hadir", icon: CheckCircleIcon, label: "Hadir", value: totalHadir },
+          { key: "tidak", icon: XCircleIcon, label: "Tidak Hadir", value: totalTidakHadir },
+        ].map((s) => {
+          const gradients: Record<string, { gradient: string; iconBg: string; ring: string }> = {
+            jadwal: { gradient: "from-rose-500/10 via-rose-500/5 to-transparent", iconBg: "bg-rose-500/15 text-rose-500", ring: "ring-rose-500/20" },
+            diisi: { gradient: "from-blue-500/10 via-blue-500/5 to-transparent", iconBg: "bg-blue-500/15 text-blue-500", ring: "ring-blue-500/20" },
+            hadir: { gradient: "from-emerald-500/10 via-emerald-500/5 to-transparent", iconBg: "bg-emerald-500/15 text-emerald-500", ring: "ring-emerald-500/20" },
+            tidak: { gradient: "from-red-500/10 via-red-500/5 to-transparent", iconBg: "bg-red-500/15 text-red-500", ring: "ring-red-500/20" },
+          }
+          const c = gradients[s.key]
+          return (
+            <div key={s.key} className={`group relative overflow-hidden rounded-xl p-4 ring-1 ${c.gradient} ${c.ring} shadow-sm transition-all duration-200 hover:shadow-md`}>
+              <div className="flex items-start justify-between">
+                <div className="space-y-1.5">
+                  <p className="text-xs font-medium tracking-wide text-muted-foreground/80 uppercase">{s.label}</p>
+                  <p className="text-2xl font-bold tabular-nums tracking-tight">{s.value}</p>
+                </div>
+                <div className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${c.iconBg}`}>
+                  <s.icon className="size-4" />
+                </div>
+              </div>
+              <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-muted/50">
+                <div className="h-full rounded-full bg-gradient-to-r from-primary/40 to-primary/60 transition-all duration-500" style={{ width: `${Math.min((Number(s.value) / Math.max(filteredSchedulesToday.length, 1)) * 100, 100)}%` }} />
+              </div>
+            </div>
+          )
+        })}
       </section>
 
+      {/* ===== Tabs ===== */}
       <Tabs defaultValue={selectedTab} className="gap-4">
         <TabsList>
           <TabsTrigger value="kehadiran" className="data-[state=active]:shadow-sm data-[state=active]:border-primary hover:bg-muted">
@@ -218,26 +212,28 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
 
         <TabsContent value="kehadiran">
           <Card>
-            <CardHeader className="gap-4">
+            <CardHeader className="gap-4 pb-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div className="flex flex-col gap-1">
-                  <CardTitle>Daftar Jadwal Kehadiran</CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    Filter kelas dan mapel, lalu isi keterangan hadir, sakit, izin, atau alfa untuk hari ini.
-                  </p>
+                <div className="flex items-center gap-3">
+                  <div className="flex size-8 items-center justify-center rounded-lg bg-rose-500/10">
+                    <ClipboardCheckIcon className="size-4 text-rose-500" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-sm font-semibold">Daftar Jadwal Kehadiran</CardTitle>
+                    <p className="text-xs text-muted-foreground">Filter kelas dan mapel, lalu isi keterangan hadir, sakit, izin, atau alfa</p>
+                  </div>
                 </div>
-                <KehadiranFilter
-                  classroomId={selectedClassroomId}
-                  subjectId={selectedSubjectId}
-                  classrooms={classrooms}
-                  subjects={subjects}
-                />
+                <KehadiranFilter classroomId={selectedClassroomId} subjectId={selectedSubjectId} classrooms={classrooms} subjects={subjects} />
               </div>
-              <div className="flex flex-wrap gap-2">
-                <Badge>{labelDay(selectedDay)}</Badge>
-                <Badge variant="secondary">Hari ini</Badge>
-                <Badge variant="outline">{selectedClassroomId === "all" ? "Semua Kelas" : classroomById.get(selectedClassroomId)?.name ?? "Kelas tidak ditemukan"}</Badge>
-                <Badge variant="outline">{selectedSubjectId === "all" ? "Semua Mapel" : subjectById.get(selectedSubjectId)?.name ?? "Mapel tidak ditemukan"}</Badge>
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  { label: labelDay(selectedDay), variant: "default" as const },
+                  { label: "Hari ini", variant: "secondary" as const },
+                  { label: selectedClassroomId === "all" ? "Semua Kelas" : classroomById.get(selectedClassroomId)?.name ?? "Kelas tidak ditemukan", variant: "outline" as const },
+                  { label: selectedSubjectId === "all" ? "Semua Mapel" : subjectById.get(selectedSubjectId)?.name ?? "Mapel tidak ditemukan", variant: "outline" as const },
+                ].map((b) => (
+                  <Badge key={b.label} variant={b.variant} className="text-[10px]">{b.label}</Badge>
+                ))}
               </div>
             </CardHeader>
             <CardContent>
@@ -250,24 +246,27 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
                       a.name.localeCompare(b.name, "id-ID", { numeric: true, sensitivity: "base" }),
                     )
                     const scheduleAttendances = attendanceBySchedule.get(schedule.id) ?? []
-                    const statuses = Object.fromEntries(
-                      scheduleAttendances.map((item) => [item.siswaId, item.status]),
-                    )
+                    const statuses = Object.fromEntries(scheduleAttendances.map((item) => [item.siswaId, item.status]))
+                    const isFilled = scheduleAttendances.length > 0
 
                     return (
-                      <div key={schedule.id} className="rounded-lg border bg-card p-4 shadow-sm">
-                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div key={schedule.id} className="group relative overflow-hidden rounded-xl border bg-card p-4 shadow-sm transition-all duration-200 hover:shadow-md hover:border-primary/30">
+                        <div className={`absolute inset-y-0 left-0 w-1 rounded-l-xl ${isFilled ? "bg-gradient-to-b from-emerald-500 to-emerald-400" : "bg-gradient-to-b from-muted-foreground/30 to-muted-foreground/10"}`} />
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pl-3">
                           <div className="space-y-2">
                             <div className="flex flex-wrap items-center gap-2">
-                              <h3 className="text-lg font-semibold tracking-tight">
-                                {subject?.name ?? "Mapel tidak ditemukan"}
-                              </h3>
-                              <Badge>Jam {schedule.jamKe}</Badge>
-                              <Badge variant={scheduleAttendances.length ? "default" : "outline"}>
-                                {scheduleAttendances.length ? "Sudah diisi" : "Belum diisi"}
+                              <h3 className="text-sm font-semibold">{subject?.name ?? "Mapel tidak ditemukan"}</h3>
+                              <Badge variant="secondary" className="border-primary/20 bg-primary/10 text-[10px] font-medium text-primary">Jam {schedule.jamKe}</Badge>
+                              <Badge variant="secondary" className={
+                                isFilled
+                                  ? "border-emerald-500/20 bg-emerald-500/10 text-[10px] font-medium text-emerald-600 dark:text-emerald-400"
+                                  : "border-muted-foreground/20 bg-muted/50 text-[10px] font-medium text-muted-foreground"
+                              }>
+                                <span className={`mr-1 inline-block size-1.5 rounded-full ${isFilled ? "bg-emerald-500" : "bg-muted-foreground/40"}`} />
+                                {isFilled ? "Sudah diisi" : "Belum diisi"}
                               </Badge>
                             </div>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-xs text-muted-foreground">
                               {classroom?.name ?? "Kelas tidak ditemukan"} • {schedule.startTime}–{schedule.endTime} • {classStudents.length} siswa aktif
                             </p>
                           </div>
@@ -284,8 +283,9 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
                     )
                   })
                 ) : (
-                  <div className="rounded-lg border py-16 text-center text-sm text-muted-foreground">
-                    Tidak ada jadwal yang sesuai dengan filter kelas dan mapel untuk hari {labelDay(selectedDay)}.
+                  <div className="flex flex-col items-center gap-2 rounded-xl border py-12">
+                    <ClipboardCheckIcon className="size-8 text-muted-foreground/40" />
+                    <p className="text-xs text-muted-foreground">Tidak ada jadwal yang sesuai dengan filter untuk hari {labelDay(selectedDay)}.</p>
                   </div>
                 )}
               </div>
@@ -295,74 +295,75 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
 
         <TabsContent value="laporan">
           <Card>
-            <CardHeader className="gap-4">
+            <CardHeader className="gap-4 pb-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div className="flex flex-col gap-1">
-                  <CardTitle>Laporan Kehadiran</CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    Ringkasan kehadiran berdasarkan data snapshot jadwal saat absensi disimpan.
-                  </p>
+                <div className="flex items-center gap-3">
+                  <div className="flex size-8 items-center justify-center rounded-lg bg-rose-500/10">
+                    <FileTextIcon className="size-4 text-rose-500" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-sm font-semibold">Laporan Kehadiran</CardTitle>
+                    <p className="text-xs text-muted-foreground">Ringkasan kehadiran berdasarkan data snapshot jadwal saat absensi disimpan</p>
+                  </div>
                 </div>
-                <AttendanceReportFilter
-                  month={reportMonth}
-                  classroomId={selectedClassroomId}
-                  subjectId={selectedSubjectId}
-                  classrooms={classrooms}
-                  subjects={subjects}
-                />
+                <AttendanceReportFilter month={reportMonth} classroomId={selectedClassroomId} subjectId={selectedSubjectId} classrooms={classrooms} subjects={subjects} />
               </div>
-              <div className="flex flex-wrap gap-2">
-                <Badge>Laporan Bulanan</Badge>
-                <Badge variant="secondary">{labelMonth(reportMonth)}</Badge>
-                <Badge variant="outline">{selectedClassroomId === "all" ? "Semua Kelas" : classroomById.get(selectedClassroomId)?.name ?? "Kelas tidak ditemukan"}</Badge>
-                <Badge variant="outline">{selectedSubjectId === "all" ? "Semua Mapel" : subjectById.get(selectedSubjectId)?.name ?? "Mapel tidak ditemukan"}</Badge>
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  { label: "Laporan Bulanan", variant: "default" as const },
+                  { label: labelMonth(reportMonth), variant: "secondary" as const },
+                  { label: selectedClassroomId === "all" ? "Semua Kelas" : classroomById.get(selectedClassroomId)?.name ?? "Kelas tidak ditemukan", variant: "outline" as const },
+                  { label: selectedSubjectId === "all" ? "Semua Mapel" : subjectById.get(selectedSubjectId)?.name ?? "Mapel tidak ditemukan", variant: "outline" as const },
+                ].map((b) => (
+                  <Badge key={b.label} variant={b.variant} className="text-[10px]">{b.label}</Badge>
+                ))}
               </div>
             </CardHeader>
             <CardContent>
-              <div className="overflow-hidden rounded-lg border">
+              <div className="overflow-hidden rounded-xl border shadow-xs">
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-16">No</TableHead>
-                      <TableHead>Tanggal</TableHead>
-                      <TableHead>Mapel</TableHead>
-                      <TableHead>Kelas</TableHead>
-                      <TableHead>Jam</TableHead>
-                      <TableHead>Hadir</TableHead>
-                      <TableHead>Sakit</TableHead>
-                      <TableHead>Izin</TableHead>
-                      <TableHead>Alfa</TableHead>
-                      <TableHead>Total</TableHead>
+                    <TableRow className="bg-muted/30">
+                      <TableHead className="w-16 text-xs font-semibold text-muted-foreground">No</TableHead>
+                      <TableHead className="text-xs font-semibold text-muted-foreground">Tanggal</TableHead>
+                      <TableHead className="text-xs font-semibold text-muted-foreground">Mapel</TableHead>
+                      <TableHead className="text-xs font-semibold text-muted-foreground">Kelas</TableHead>
+                      <TableHead className="text-xs font-semibold text-muted-foreground">Jam</TableHead>
+                      <TableHead className="text-xs font-semibold text-muted-foreground text-center">Hadir</TableHead>
+                      <TableHead className="text-xs font-semibold text-muted-foreground text-center">Sakit</TableHead>
+                      <TableHead className="text-xs font-semibold text-muted-foreground text-center">Izin</TableHead>
+                      <TableHead className="text-xs font-semibold text-muted-foreground text-center">Alfa</TableHead>
+                      <TableHead className="text-xs font-semibold text-muted-foreground text-center">Total</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {reportRows.length > 0 ? (
                       reportRows.map((row, index) => (
-                        <TableRow key={row.id}>
-                          <TableCell className="text-muted-foreground">{index + 1}</TableCell>
+                        <TableRow key={row.id} className="group transition-colors hover:bg-muted/40">
+                          <TableCell className="text-xs text-muted-foreground">{index + 1}</TableCell>
                           <TableCell>
-                            <div className="font-medium">{row.date}</div>
-                            <div className="text-xs text-muted-foreground">{labelDay(row.day || getDayName(row.date))}</div>
+                            <div className="flex flex-col">
+                              <span className="text-xs font-medium">{row.date}</span>
+                              <span className="text-[10px] text-muted-foreground">{labelDay(row.day || getDayName(row.date))}</span>
+                            </div>
                           </TableCell>
-                          <TableCell className="font-medium">
-                            {row.subjectName}
-                            {row.subjectKode ? ` (${row.subjectKode})` : ""}
-                          </TableCell>
-                          <TableCell>{row.classroomName}</TableCell>
-                          <TableCell>
-                            Jam {row.jamKe} • {row.startTime}–{row.endTime}
-                          </TableCell>
-                          <TableCell>{row.hadir}</TableCell>
-                          <TableCell>{row.sakit}</TableCell>
-                          <TableCell>{row.izin}</TableCell>
-                          <TableCell>{row.alfa}</TableCell>
-                          <TableCell>{row.total}</TableCell>
+                          <TableCell className="text-xs font-medium">{row.subjectName}{row.subjectKode ? ` (${row.subjectKode})` : ""}</TableCell>
+                          <TableCell className="text-xs">{row.classroomName}</TableCell>
+                          <TableCell className="text-xs">Jam {row.jamKe} • {row.startTime}–{row.endTime}</TableCell>
+                          <TableCell className="text-xs text-center font-medium text-emerald-600 dark:text-emerald-400">{row.hadir}</TableCell>
+                          <TableCell className="text-xs text-center text-amber-600 dark:text-amber-400">{row.sakit}</TableCell>
+                          <TableCell className="text-xs text-center text-blue-600 dark:text-blue-400">{row.izin}</TableCell>
+                          <TableCell className="text-xs text-center text-red-600 dark:text-red-400">{row.alfa}</TableCell>
+                          <TableCell className="text-xs text-center font-semibold">{row.total}</TableCell>
                         </TableRow>
                       ))
                     ) : (
                       <TableRow>
                         <TableCell colSpan={10} className="h-32 text-center text-muted-foreground">
-                          Belum ada data kehadiran pada bulan ini.
+                          <div className="flex flex-col items-center gap-2">
+                            <FileTextIcon className="size-8 text-muted-foreground/40" />
+                            <p className="text-xs">Belum ada data kehadiran pada bulan ini.</p>
+                          </div>
                         </TableCell>
                       </TableRow>
                     )}
@@ -373,6 +374,6 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
           </Card>
         </TabsContent>
       </Tabs>
-    </>
+    </div>
   )
 }

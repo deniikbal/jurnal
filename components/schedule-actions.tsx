@@ -24,9 +24,8 @@ function ScheduleEditDialog({ item, subjects, classrooms }: { item: ScheduleItem
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button type="button" variant="ghost" size="icon-sm">
-          <PencilIcon />
-          <span className="sr-only">Edit</span>
+        <Button type="button" variant="ghost" size="icon" className="size-7">
+          <PencilIcon className="size-3.5" />
         </Button>
       </DialogTrigger>
       <DialogContent><form action={formAction} className="space-y-4"><input type="hidden" name="id" value={item.id} /><DialogHeader><DialogTitle>Edit Jadwal</DialogTitle><DialogDescription>Ubah data jadwal.</DialogDescription></DialogHeader><ScheduleFormFields subjects={subjects} classrooms={classrooms} disabled={isPending} defaultValues={item} /><DialogFooter><DialogClose asChild><Button type="button" variant="outline" disabled={isPending}>Batal</Button></DialogClose><Button type="submit" disabled={isPending}>{isPending ? "Menyimpan..." : "Simpan Perubahan"}</Button></DialogFooter></form></DialogContent>
@@ -41,9 +40,8 @@ function ScheduleDeleteDialog({ item }: { item: ScheduleItem }) {
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button type="button" variant="destructive" size="icon-sm">
-          <Trash2Icon />
-          <span className="sr-only">Hapus</span>
+        <Button type="button" variant="destructive" size="icon" className="size-7">
+          <Trash2Icon className="size-3.5" />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent><form action={formAction} className="space-y-4"><input type="hidden" name="id" value={item.id} /><AlertDialogHeader><AlertDialogTitle>Hapus jadwal?</AlertDialogTitle><AlertDialogDescription>Jadwal jam ke-{item.jamKe} akan dihapus permanen.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel type="button" disabled={isPending}>Batal</AlertDialogCancel><Button type="submit" variant="destructive" disabled={isPending}>{isPending ? "Menghapus..." : "Hapus"}</Button></AlertDialogFooter></form></AlertDialogContent>

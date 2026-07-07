@@ -86,100 +86,101 @@ export default async function JadwalPage({ searchParams }: Props) {
   const startIndex = (safePage - 1) * PAGE_SIZE
   const paginatedSchedules = filteredSchedules.slice(startIndex, startIndex + PAGE_SIZE)
 
+  const statMax = Math.max(schedules.length, 1)
+
   return (
-    <>
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Jadwal</h1>
-        <p className="text-sm text-muted-foreground">
-          Kelola jadwal pelajaran berdasarkan hari, jam, mapel, dan kelas.
-        </p>
+    <div className="flex flex-col gap-5">
+      {/* ===== Page Header ===== */}
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-cyan-600 via-cyan-600/90 to-cyan-500/80 p-5 shadow-lg shadow-cyan-500/20">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
+        <div className="relative flex items-center gap-4">
+          <div className="flex size-12 items-center justify-center rounded-xl bg-white/15 ring-2 ring-white/20">
+            <CalendarDaysIcon className="size-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-lg font-semibold text-white">Jadwal</h1>
+            <p className="text-sm text-white/70">Kelola jadwal pelajaran berdasarkan hari, jam, mapel, dan kelas.</p>
+          </div>
+        </div>
       </div>
 
+      {/* ===== Stat Cards ===== */}
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Jadwal
-            </CardTitle>
-            <CalendarDaysIcon className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold">{schedules.length}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Ditampilkan
-            </CardTitle>
-            <TableIcon className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold">{filteredSchedules.length}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Mapel
-            </CardTitle>
-            <BookOpenIcon className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold">{subjects.length}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Kelas
-            </CardTitle>
-            <SchoolIcon className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold">{classrooms.length}</p>
-          </CardContent>
-        </Card>
+        {[
+          { key: "total", icon: CalendarDaysIcon, label: "Total Jadwal", value: schedules.length },
+          { key: "tampil", icon: TableIcon, label: "Ditampilkan", value: filteredSchedules.length },
+          { key: "mapel", icon: BookOpenIcon, label: "Total Mapel", value: subjects.length },
+          { key: "kelas", icon: SchoolIcon, label: "Total Kelas", value: classrooms.length },
+        ].map((s) => {
+          const gradients: Record<string, { gradient: string; iconBg: string; ring: string }> = {
+            total: { gradient: "from-cyan-500/10 via-cyan-500/5 to-transparent", iconBg: "bg-cyan-500/15 text-cyan-500", ring: "ring-cyan-500/20" },
+            tampil: { gradient: "from-blue-500/10 via-blue-500/5 to-transparent", iconBg: "bg-blue-500/15 text-blue-500", ring: "ring-blue-500/20" },
+            mapel: { gradient: "from-purple-500/10 via-purple-500/5 to-transparent", iconBg: "bg-purple-500/15 text-purple-500", ring: "ring-purple-500/20" },
+            kelas: { gradient: "from-amber-500/10 via-amber-500/5 to-transparent", iconBg: "bg-amber-500/15 text-amber-500", ring: "ring-amber-500/20" },
+          }
+          const c = gradients[s.key]
+          return (
+            <div key={s.key} className={`group relative overflow-hidden rounded-xl p-4 ring-1 ${c.gradient} ${c.ring} shadow-sm transition-all duration-200 hover:shadow-md`}>
+              <div className="flex items-start justify-between">
+                <div className="space-y-1.5">
+                  <p className="text-xs font-medium tracking-wide text-muted-foreground/80 uppercase">{s.label}</p>
+                  <p className="text-2xl font-bold tabular-nums tracking-tight">{s.value}</p>
+                </div>
+                <div className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${c.iconBg}`}>
+                  <s.icon className="size-4" />
+                </div>
+              </div>
+              <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-muted/50">
+                <div className="h-full rounded-full bg-gradient-to-r from-primary/40 to-primary/60 transition-all duration-500" style={{ width: `${Math.min((Number(s.value) / statMax) * 100, 100)}%` }} />
+              </div>
+            </div>
+          )
+        })}
       </section>
 
+      {/* ===== Data Table ===== */}
       <Card>
-        <CardHeader className="gap-4">
+        <CardHeader className="gap-4 pb-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div className="flex flex-col gap-1">
-              <CardTitle>Daftar Jadwal</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Tampilan jadwal per hari dengan timeline jam pelajaran.
-              </p>
+            <div className="flex items-center gap-3">
+              <div className="flex size-8 items-center justify-center rounded-lg bg-cyan-500/10">
+                <CalendarDaysIcon className="size-4 text-cyan-500" />
+              </div>
+              <div>
+                <CardTitle className="text-sm font-semibold">Daftar Jadwal</CardTitle>
+                <p className="text-xs text-muted-foreground">Tampilan jadwal per hari dengan timeline jam pelajaran</p>
+              </div>
             </div>
             <ScheduleCreateDialog subjects={subjects} classrooms={classrooms} />
           </div>
-
         </CardHeader>
         <CardContent className="space-y-5">
-          <div className="grid gap-2 md:grid-cols-7">
+          {/* Day tabs */}
+          <div className="flex flex-wrap gap-1.5">
             {days.map((item) => {
               const isActive = day === item
-
               return (
                 <Link
                   key={item}
                   href={createHref({ day: item })}
-                  className={cn(
-                    "flex items-center justify-center gap-2 border-b-2 px-3 py-3 text-sm font-semibold transition-colors hover:text-primary",
+                  className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-all ${
                     isActive
-                      ? "border-primary text-primary"
-                      : "border-border text-foreground",
-                  )}
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                  }`}
                 >
                   {labelDay(item)}
-                  <Badge variant={isActive ? "default" : "secondary"}>
+                  <span className={`inline-flex size-4 items-center justify-center rounded-full text-[10px] font-semibold ${
+                    isActive ? "bg-white/20 text-white" : "bg-muted-foreground/10 text-muted-foreground"
+                  }`}>
                     {scheduleCountByDay.get(item) ?? 0}
-                  </Badge>
+                  </span>
                 </Link>
               )
             })}
           </div>
 
+          {/* Schedule cards */}
           <div className="space-y-4">
             {paginatedSchedules.length > 0 ? (
               paginatedSchedules.map((item) => {
@@ -187,60 +188,57 @@ export default async function JadwalPage({ searchParams }: Props) {
                 const classroom = classroomById.get(item.classroomId)
 
                 return (
-                  <div key={item.id} className="grid gap-3 md:grid-cols-[96px_1fr]">
+                  <div key={item.id} className="grid gap-3 md:grid-cols-[80px_1fr]">
                     <div className="flex md:flex-col md:items-center">
-                      <div className="min-w-24 rounded-md border bg-card px-3 py-2 text-center text-sm font-semibold text-primary shadow-sm">
+                      <div className="min-w-20 rounded-lg border bg-card px-3 py-2 text-center text-sm font-bold text-primary shadow-xs">
                         {item.startTime}
                       </div>
-                      <div className="hidden h-10 w-px bg-border md:block" />
-                      <div className="hidden text-xs text-muted-foreground md:block">
+                      <div className="hidden h-8 w-px bg-border md:block" />
+                      <div className="hidden text-[10px] text-muted-foreground md:block">
                         {item.endTime}
                       </div>
                     </div>
 
-                    <div className="group relative overflow-hidden rounded-lg border bg-card p-4 shadow-sm transition-colors hover:border-primary/40">
-                      <div className="absolute inset-y-0 left-0 w-1 bg-primary" />
-                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div className="space-y-3 pl-2">
+                    <div className="group relative overflow-hidden rounded-xl border bg-card p-4 shadow-sm transition-all duration-200 hover:shadow-md hover:border-primary/30">
+                      <div className="absolute inset-y-0 left-0 w-1 rounded-l-xl bg-gradient-to-b from-primary to-primary/60" />
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="space-y-2 pl-3">
                           <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="text-lg font-semibold tracking-tight">
-                              {subject?.name ?? "Mapel tidak ditemukan"}
-                            </h3>
-                            <Badge>Jam {item.jamKe}</Badge>
+                            <h3 className="text-sm font-semibold">{subject?.name ?? "Mapel tidak ditemukan"}</h3>
+                            <Badge variant="secondary" className="border-primary/20 bg-primary/10 text-[10px] font-medium text-primary">
+                              Jam {item.jamKe}
+                            </Badge>
                             {subject?.kode ? (
-                              <Badge variant="secondary">{subject.kode}</Badge>
+                              <Badge variant="outline" className="text-[10px]">{subject.kode}</Badge>
                             ) : null}
                           </div>
-                          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                            <span className="inline-flex items-center gap-1.5">
-                              <GraduationCapIcon className="size-4" />
+                          <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                            <span className="inline-flex items-center gap-1">
+                              <GraduationCapIcon className="size-3.5" />
                               {classroom?.name ?? "Kelas tidak ditemukan"}
                             </span>
-                            <span className="inline-flex items-center gap-1.5 font-mono text-primary">
-                              <ClockIcon className="size-4" />
+                            <span className="inline-flex items-center gap-1 font-mono text-primary">
+                              <ClockIcon className="size-3.5" />
                               {item.startTime} — {item.endTime}
                             </span>
                           </div>
                         </div>
-                        <ScheduleActions
-                          item={item}
-                          subjects={subjects}
-                          classrooms={classrooms}
-                        />
+                        <ScheduleActions item={item} subjects={subjects} classrooms={classrooms} />
                       </div>
                     </div>
                   </div>
                 )
               })
             ) : (
-              <div className="rounded-lg border py-16 text-center text-sm text-muted-foreground">
-                Tidak ada jadwal yang cocok.
+              <div className="flex flex-col items-center gap-2 rounded-xl border py-12">
+                <CalendarDaysIcon className="size-8 text-muted-foreground/40" />
+                <p className="text-xs text-muted-foreground">Tidak ada jadwal yang cocok.</p>
               </div>
             )}
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               Menampilkan {paginatedSchedules.length ? startIndex + 1 : 0}-
               {Math.min(startIndex + paginatedSchedules.length, filteredSchedules.length)} dari {filteredSchedules.length} data
             </p>
@@ -255,18 +253,10 @@ export default async function JadwalPage({ searchParams }: Props) {
                   />
                 </PaginationItem>
                 {Array.from({ length: totalPages }, (_, index) => index + 1)
-                  .filter(
-                    (page) =>
-                      page === 1 || page === totalPages || Math.abs(page - safePage) <= 1,
-                  )
+                  .filter((page) => page === 1 || page === totalPages || Math.abs(page - safePage) <= 1)
                   .map((page) => (
                     <PaginationItem key={page}>
-                      <PaginationLink
-                        href={createHref({ day, page })}
-                        isActive={page === safePage}
-                      >
-                        {page}
-                      </PaginationLink>
+                      <PaginationLink href={createHref({ day, page })} isActive={page === safePage}>{page}</PaginationLink>
                     </PaginationItem>
                   ))}
                 <PaginationItem>
@@ -282,6 +272,6 @@ export default async function JadwalPage({ searchParams }: Props) {
           </div>
         </CardContent>
       </Card>
-    </>
+    </div>
   )
 }

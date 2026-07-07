@@ -1,7 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import {
-  ArrowRightIcon,
   BookOpenIcon,
   BookOpenTextIcon,
   CalendarDaysIcon,
@@ -15,8 +14,7 @@ import {
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   getCurrentUser,
   getJournalsForCurrentUser,
@@ -39,13 +37,27 @@ function getInitials(name?: string | null, email?: string | null) {
     .toUpperCase()
 }
 
-function formatDateIndonesian(date: Date) {
-  return date.toLocaleDateString("id-ID", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  })
+const statGradients: Record<string, { bg: string; iconBg: string; ring: string }> = {
+  siswa: {
+    bg: "bg-gradient-to-br from-primary/10 via-primary/5 to-transparent",
+    iconBg: "bg-primary/15 text-primary",
+    ring: "ring-primary/20",
+  },
+  kelas: {
+    bg: "bg-gradient-to-br from-blue-500/10 via-blue-500/5 to-transparent",
+    iconBg: "bg-blue-500/15 text-blue-500",
+    ring: "ring-blue-500/20",
+  },
+  mapel: {
+    bg: "bg-gradient-to-br from-purple-500/10 via-purple-500/5 to-transparent",
+    iconBg: "bg-purple-500/15 text-purple-500",
+    ring: "ring-purple-500/20",
+  },
+  jurnal: {
+    bg: "bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent",
+    iconBg: "bg-amber-500/15 text-amber-500",
+    ring: "ring-amber-500/20",
+  },
 }
 
 export default async function DashboardPage() {
@@ -59,6 +71,12 @@ export default async function DashboardPage() {
     ])
 
   const today = new Date()
+  const tanggal = today.toLocaleDateString("id-ID", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  })
 
   // Hitung siswa per kelas
   const siswaPerKelas = daftarKelas
@@ -78,246 +96,176 @@ export default async function DashboardPage() {
     )
     .slice(0, 5)
 
-  // Mata pelajaran aktif
   const mapelAktif = daftarMapel.filter((m) => m.status === "aktif").length
 
+  const stats = [
+    { key: "siswa", icon: UsersIcon, label: "Total Siswa", value: daftarSiswa.length, sub: undefined as string | undefined },
+    { key: "kelas", icon: SchoolIcon, label: "Total Kelas", value: daftarKelas.length, sub: undefined as string | undefined },
+    { key: "mapel", icon: BookOpenIcon, label: "Mata Pelajaran", value: daftarMapel.length, sub: `${mapelAktif} aktif` },
+    { key: "jurnal", icon: BookOpenTextIcon, label: "Total Jurnal", value: daftarJurnal.length, sub: undefined as string | undefined },
+  ] as const
+
   return (
-    <>
-      {/* ===== Welcome Banner ===== */}
-      <Card className="overflow-hidden border-0 bg-primary/5 shadow-none">
-        <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
-            <Avatar className="size-14 rounded-xl ring-2 ring-primary/20">
-              <AvatarImage
-                src={user?.image ?? undefined}
-                alt={user?.name ?? "User"}
-              />
-              <AvatarFallback className="rounded-xl bg-primary/10 text-lg font-semibold text-primary">
-                {getInitials(user?.name, user?.email)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="space-y-0.5">
-              <div className="flex items-center gap-2">
-                <h2 className="text-xl font-semibold tracking-tight">
-                  Selamat datang, {user?.name?.split(" ")[0] ?? "User"}
-                </h2>
-                <Badge variant="secondary" className="capitalize">
-                  {user?.role === "admin" ? "Admin" : "Guru"}
-                </Badge>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {user?.email}
-              </p>
-            </div>
+    <div className="flex flex-col gap-5">
+      {/* ===== Welcome Header ===== */}
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary via-primary/90 to-primary/70 p-5 shadow-lg shadow-primary/20">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
+        <div className="relative flex flex-wrap items-center gap-4">
+          <Avatar className="size-12 rounded-xl ring-2 ring-white/20 ring-offset-2 ring-offset-primary/50">
+            <AvatarImage src={user?.image ?? undefined} alt={user?.name ?? "User"} />
+            <AvatarFallback className="rounded-xl bg-white/20 text-sm font-semibold text-white">
+              {getInitials(user?.name, user?.email)}
+            </AvatarFallback>
+          </Avatar>
+          <div className="min-w-0 flex-1">
+            <h1 className="text-lg font-semibold text-white">
+              Selamat datang, {user?.name?.split(" ")[0] ?? "User"}
+            </h1>
+            <p className="truncate text-sm text-white/70">{user?.email}</p>
           </div>
-          <div className="flex items-center gap-2 rounded-lg bg-background/60 px-4 py-2 text-sm text-muted-foreground shadow-xs">
-            <CalendarDaysIcon className="size-4" />
-            <span>{formatDateIndonesian(today)}</span>
+          <Badge variant="secondary" className="border-white/10 bg-white/15 text-xs font-medium text-white backdrop-blur-sm">
+            {user?.role === "admin" ? "Administrator" : "Guru"}
+          </Badge>
+          <div className="hidden items-center gap-2 rounded-lg border border-white/10 bg-white/10 px-3 py-1.5 text-xs text-white/80 backdrop-blur-sm sm:flex">
+            <CalendarDaysIcon className="size-3.5" />
+            {tanggal}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* ===== Stat Cards ===== */}
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Total Siswa */}
-        <Card className="relative overflow-hidden">
-          <CardContent className="flex items-center gap-4 p-6">
-            <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-              <UsersIcon className="size-5 text-primary" />
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {stats.map((s) => {
+          const g = statGradients[s.key]
+          return (
+            <div
+              key={s.key}
+              className={`group relative overflow-hidden rounded-xl p-4 ring-1 ${g.bg} ${g.ring} shadow-sm transition-all duration-200 hover:shadow-md`}
+            >
+              <div className="flex items-start justify-between">
+                <div className="space-y-1.5">
+                  <p className="text-xs font-medium tracking-wide text-muted-foreground/80 uppercase">
+                    {s.label}
+                  </p>
+                  <p className="text-2xl font-bold tabular-nums tracking-tight">
+                    {s.value}
+                  </p>
+                  {s.sub && (
+                    <p className="text-xs text-muted-foreground">{s.sub}</p>
+                  )}
+                </div>
+                <div className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${g.iconBg}`}>
+                  <s.icon className="size-4" />
+                </div>
+              </div>
+              <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-muted/50">
+                <div
+                  className="h-full rounded-full bg-primary/40 transition-all duration-500"
+                  style={{ width: `${Math.min((s.value / 100) * 100, 100)}%` }}
+                />
+              </div>
             </div>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-muted-foreground">
-                Total Siswa
-              </p>
-              <p className="text-2xl font-bold tracking-tight">
-                {daftarSiswa.length}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {daftarSiswa.filter((s) => s.status === "aktif").length} aktif
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Total Kelas */}
-        <Card className="relative overflow-hidden">
-          <CardContent className="flex items-center gap-4 p-6">
-            <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-blue-500/10">
-              <SchoolIcon className="size-5 text-blue-500" />
-            </div>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-muted-foreground">
-                Total Kelas
-              </p>
-              <p className="text-2xl font-bold tracking-tight">
-                {daftarKelas.length}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {siswaPerKelas.length > 0
-                  ? `Rata-rata ${Math.round(daftarSiswa.length / daftarKelas.length)} siswa/kelas`
-                  : "Belum ada kelas"}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Mata Pelajaran */}
-        <Card className="relative overflow-hidden">
-          <CardContent className="flex items-center gap-4 p-6">
-            <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-purple-500/10">
-              <BookOpenIcon className="size-5 text-purple-500" />
-            </div>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-muted-foreground">
-                Mata Pelajaran
-              </p>
-              <p className="text-2xl font-bold tracking-tight">
-                {daftarMapel.length}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {mapelAktif} aktif
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Total Jurnal */}
-        <Card className="relative overflow-hidden">
-          <CardContent className="flex items-center gap-4 p-6">
-            <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-amber-500/10">
-              <BookOpenTextIcon className="size-5 text-amber-500" />
-            </div>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-muted-foreground">
-                Total Jurnal
-              </p>
-              <p className="text-2xl font-bold tracking-tight">
-                {daftarJurnal.length}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {jurnalTerbaru.length > 0
-                  ? `Terakhir ${new Date(jurnalTerbaru[0].date).toLocaleDateString("id-ID", { day: "numeric", month: "short" })}`
-                  : "Belum ada jurnal"}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
+          )
+        })}
+      </div>
 
       {/* ===== Quick Actions ===== */}
-      <section>
-        <div className="mb-3 flex items-center gap-2">
-          <h2 className="text-sm font-semibold tracking-tight text-muted-foreground uppercase">
-            Aksi Cepat
-          </h2>
-          <Separator className="flex-1" />
+      <div>
+        <h2 className="mb-3 text-sm font-semibold text-muted-foreground/80 uppercase tracking-wider">
+          Aksi Cepat
+        </h2>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {[
+            {
+              href: "/dashboard/siswa",
+              icon: UserPlusIcon,
+              gradient: "from-primary/20 to-primary/5",
+              iconBg: "bg-primary text-white",
+              label: "Kelola Siswa",
+              desc: "Tambah & edit data siswa",
+            },
+            {
+              href: "/dashboard/jurnal",
+              icon: PenLineIcon,
+              gradient: "from-amber-500/20 to-amber-500/5",
+              iconBg: "bg-amber-500 text-white",
+              label: "Buat Jurnal",
+              desc: "Catat pembelajaran hari ini",
+            },
+            {
+              href: "/dashboard/kehadiran",
+              icon: ClipboardCheckIcon,
+              gradient: "from-blue-500/20 to-blue-500/5",
+              iconBg: "bg-blue-500 text-white",
+              label: "Presensi",
+              desc: "Catat kehadiran siswa",
+            },
+            {
+              href: "/dashboard/jadwal",
+              icon: CalendarDaysIcon,
+              gradient: "from-purple-500/20 to-purple-500/5",
+              iconBg: "bg-purple-500 text-white",
+              label: "Jadwal",
+              desc: "Atur jadwal mengajar",
+            },
+          ].map((a) => (
+            <Link
+              key={a.href}
+              href={a.href}
+              className="group relative overflow-hidden rounded-xl border bg-card p-4 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
+            >
+              <div className={`absolute inset-0 bg-gradient-to-br ${a.gradient} opacity-0 transition-opacity duration-200 group-hover:opacity-100`} />
+              <div className="relative flex items-start gap-3">
+                <div className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${a.iconBg} shadow-sm`}>
+                  <a.icon className="size-4" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium">{a.label}</p>
+                  <p className="text-xs text-muted-foreground">{a.desc}</p>
+                </div>
+              </div>
+            </Link>
+          ))}
         </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <Link
-            href="/dashboard/siswa"
-            className="group flex items-center gap-4 rounded-xl border bg-card p-4 transition-all hover:border-primary/30 hover:bg-primary/5 hover:shadow-sm"
-          >
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 transition-colors group-hover:bg-primary/20">
-              <UserPlusIcon className="size-4 text-primary" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium">Kelola Siswa</p>
-              <p className="text-xs text-muted-foreground">
-                Tambah, edit, atau lihat data siswa
-              </p>
-            </div>
-            <ArrowRightIcon className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
-          </Link>
+      </div>
 
-          <Link
-            href="/dashboard/jurnal"
-            className="group flex items-center gap-4 rounded-xl border bg-card p-4 transition-all hover:border-amber-500/30 hover:bg-amber-500/5 hover:shadow-sm"
-          >
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 transition-colors group-hover:bg-amber-500/20">
-              <PenLineIcon className="size-4 text-amber-500" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium">Tulis Jurnal</p>
-              <p className="text-xs text-muted-foreground">
-                Catat materi & kegiatan mengajar
-              </p>
-            </div>
-            <ArrowRightIcon className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
-          </Link>
-
-          <Link
-            href="/dashboard/kehadiran"
-            className="group flex items-center gap-4 rounded-xl border bg-card p-4 transition-all hover:border-blue-500/30 hover:bg-blue-500/5 hover:shadow-sm"
-          >
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 transition-colors group-hover:bg-blue-500/20">
-              <ClipboardCheckIcon className="size-4 text-blue-500" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium">Catat Kehadiran</p>
-              <p className="text-xs text-muted-foreground">
-                Input presensi siswa hari ini
-              </p>
-            </div>
-            <ArrowRightIcon className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
-          </Link>
-
-          <Link
-            href="/dashboard/jadwal"
-            className="group flex items-center gap-4 rounded-xl border bg-card p-4 transition-all hover:border-purple-500/30 hover:bg-purple-500/5 hover:shadow-sm"
-          >
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-purple-500/10 transition-colors group-hover:bg-purple-500/20">
-              <CalendarDaysIcon className="size-4 text-purple-500" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium">Atur Jadwal</p>
-              <p className="text-xs text-muted-foreground">
-                Kelola jadwal pelajaran
-              </p>
-            </div>
-            <ArrowRightIcon className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
-          </Link>
-        </div>
-      </section>
-
-      {/* ===== Two-Column Overview ===== */}
-      <section className="grid gap-4 lg:grid-cols-2">
+      {/* ===== Two-Column ===== */}
+      <div className="grid gap-5 lg:grid-cols-2">
         {/* Distribusi Siswa per Kelas */}
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
+          <CardHeader className="flex-row items-center gap-3 space-y-0 pb-3">
+            <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10">
               <GraduationCapIcon className="size-4 text-primary" />
-              Distribusi Siswa per Kelas
-            </CardTitle>
-            <CardDescription>
-              Sebaran jumlah siswa di setiap kelas
-            </CardDescription>
+            </div>
+            <div>
+              <CardTitle className="text-sm font-semibold">Distribusi Siswa</CardTitle>
+              <p className="text-xs text-muted-foreground">Per kelas</p>
+            </div>
           </CardHeader>
           <CardContent>
             {siswaPerKelas.length > 0 ? (
               <div className="space-y-3">
                 {siswaPerKelas.map((item) => (
-                  <div key={item.name} className="space-y-1.5">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="font-medium truncate">{item.name}</span>
-                      <span className="ml-2 shrink-0 text-muted-foreground tabular-nums">
-                        {item.count} siswa
-                      </span>
-                    </div>
-                    <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                  <div key={item.name} className="flex items-center gap-3 text-sm">
+                    <span className="w-22 truncate text-xs font-medium">{item.name}</span>
+                    <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
                       <div
-                        className="h-full rounded-full bg-primary transition-all"
+                        className="h-full rounded-full bg-gradient-to-r from-primary/60 to-primary transition-all duration-500"
                         style={{
                           width: `${Math.round((item.count / maxSiswa) * 100)}%`,
                         }}
                       />
                     </div>
+                    <span className="flex size-6 items-center justify-center rounded-md bg-primary/10 text-xs font-semibold tabular-nums text-primary">
+                      {item.count}
+                    </span>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="flex flex-col items-center gap-2 py-8 text-center text-sm text-muted-foreground">
-                <SchoolIcon className="size-8 opacity-40" />
-                <p>Belum ada data kelas</p>
+              <div className="flex flex-col items-center gap-2 py-8">
+                <UsersIcon className="size-8 text-muted-foreground/40" />
+                <p className="text-xs text-muted-foreground">Belum ada data kelas</p>
               </div>
             )}
           </CardContent>
@@ -325,67 +273,56 @@ export default async function DashboardPage() {
 
         {/* Jurnal Terbaru */}
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
+          <CardHeader className="flex-row items-center gap-3 space-y-0 pb-3">
+            <div className="flex size-8 items-center justify-center rounded-lg bg-amber-500/10">
               <BookOpenTextIcon className="size-4 text-amber-500" />
-              Jurnal Terbaru
-            </CardTitle>
-            <CardDescription>
-              5 aktivitas mengajar terakhir
-            </CardDescription>
+            </div>
+            <div>
+              <CardTitle className="text-sm font-semibold">Jurnal Terbaru</CardTitle>
+              <p className="text-xs text-muted-foreground">5 catatan terakhir</p>
+            </div>
+            {jurnalTerbaru.length > 0 && (
+              <Link
+                href="/dashboard/jurnal"
+                className="ml-auto text-xs font-medium text-primary hover:underline"
+              >
+                Lihat semua
+              </Link>
+            )}
           </CardHeader>
           <CardContent>
             {jurnalTerbaru.length > 0 ? (
-              <div className="space-y-1">
-                {jurnalTerbaru.map((jurnal, i) => (
-                  <div key={jurnal.id}>
-                    {i > 0 && <Separator className="my-1" />}
-                    <div className="flex items-start gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-muted/50">
-                      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-500/10">
-                        <BookOpenTextIcon className="size-4 text-amber-500" />
-                      </div>
-                      <div className="min-w-0 flex-1 space-y-0.5">
-                        <div className="flex items-center gap-2">
-                          <p className="truncate text-sm font-medium">
-                            {jurnal.subjectName}
-                          </p>
-                          <Badge
-                            variant="secondary"
-                            className="shrink-0 text-[10px]"
-                          >
-                            {jurnal.classroomName}
-                          </Badge>
-                        </div>
-                        <p className="truncate text-xs text-muted-foreground">
-                          {jurnal.materi}
-                        </p>
-                        <p className="text-xs text-muted-foreground/70">
-                          {new Date(jurnal.date).toLocaleDateString("id-ID", {
-                            day: "numeric",
-                            month: "long",
-                            year: "numeric",
-                          })}
-                        </p>
-                      </div>
+              <div className="divide-y divide-border">
+                {jurnalTerbaru.map((j) => (
+                  <div
+                    key={j.id}
+                    className="flex items-center gap-3 py-2.5 text-sm first:pt-0 last:pb-0"
+                  >
+                    <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-amber-500/10">
+                      <BookOpenTextIcon className="size-3.5 text-amber-500" />
                     </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-xs font-medium">{j.subjectName}</p>
+                      <p className="truncate text-[11px] text-muted-foreground">{j.classroomName}</p>
+                    </div>
+                    <Badge variant="outline" className="shrink-0 border-amber-500/20 bg-amber-500/5 text-[10px] font-medium text-amber-600 dark:text-amber-400">
+                      {new Date(j.date).toLocaleDateString("id-ID", {
+                        day: "numeric",
+                        month: "short",
+                      })}
+                    </Badge>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="flex flex-col items-center gap-2 py-8 text-center text-sm text-muted-foreground">
-                <PenLineIcon className="size-8 opacity-40" />
-                <p>Belum ada jurnal</p>
-                <Link
-                  href="/dashboard/jurnal"
-                  className="text-xs text-primary hover:underline"
-                >
-                  Mulai tulis jurnal pertama →
-                </Link>
+              <div className="flex flex-col items-center gap-2 py-8">
+                <BookOpenTextIcon className="size-8 text-muted-foreground/40" />
+                <p className="text-xs text-muted-foreground">Belum ada jurnal</p>
               </div>
             )}
           </CardContent>
         </Card>
-      </section>
-    </>
+      </div>
+    </div>
   )
 }

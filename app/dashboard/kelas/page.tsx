@@ -1,5 +1,11 @@
 import type { Metadata } from "next"
-import { CalculatorIcon, SchoolIcon, SparklesIcon, UsersIcon } from "lucide-react"
+import {
+  CalendarDaysIcon,
+  GraduationCapIcon,
+  SchoolIcon,
+  SparklesIcon,
+  UsersIcon,
+} from "lucide-react"
 
 import { KelasActions } from "@/components/kelas-actions"
 import { KelasCreateDialog } from "@/components/kelas-create-dialog"
@@ -56,6 +62,29 @@ function createPageHref(params: { q: string; filter: string; page: number }) {
   return query ? `/dashboard/kelas?${query}` : "/dashboard/kelas"
 }
 
+const statConfig = {
+  total: {
+    gradient: "from-primary/10 via-primary/5 to-transparent",
+    iconBg: "bg-primary/15 text-primary",
+    ring: "ring-primary/20",
+  },
+  siswa: {
+    gradient: "from-blue-500/10 via-blue-500/5 to-transparent",
+    iconBg: "bg-blue-500/15 text-blue-500",
+    ring: "ring-blue-500/20",
+  },
+  rata: {
+    gradient: "from-purple-500/10 via-purple-500/5 to-transparent",
+    iconBg: "bg-purple-500/15 text-purple-500",
+    ring: "ring-purple-500/20",
+  },
+  baru: {
+    gradient: "from-amber-500/10 via-amber-500/5 to-transparent",
+    iconBg: "bg-amber-500/15 text-amber-500",
+    ring: "ring-amber-500/20",
+  },
+}
+
 export default async function KelasPage({ searchParams }: KelasPageProps) {
   const params = await searchParams
   const q = params.q?.trim() ?? ""
@@ -90,85 +119,105 @@ export default async function KelasPage({ searchParams }: KelasPageProps) {
     totalKelas > 0 ? Math.round((totalSiswa / totalKelas) * 10) / 10 : 0
 
   return (
-    <>
+    <div className="flex flex-col gap-5">
       {/* ===== Page Header ===== */}
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Kelas</h1>
-        <p className="text-sm text-muted-foreground">
-          Kelola data kelas, wali kelas, dan lihat daftar siswa per kelas.
-        </p>
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-600 via-blue-600/90 to-blue-500/80 p-5 shadow-lg shadow-blue-500/20">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
+        <div className="relative flex items-center gap-4">
+          <div className="flex size-12 items-center justify-center rounded-xl bg-white/15 ring-2 ring-white/20">
+            <SchoolIcon className="size-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-lg font-semibold text-white">Kelas</h1>
+            <p className="text-sm text-white/70">
+              Kelola data kelas, wali kelas, dan lihat daftar siswa per kelas.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* ===== Stat Cards ===== */}
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Kelas
-            </CardTitle>
-            <SchoolIcon className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold">{totalKelas}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Siswa
-            </CardTitle>
-            <UsersIcon className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold">{totalSiswa}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Rata-rata
-            </CardTitle>
-            <CalculatorIcon className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold">
-              {totalKelas > 0 ? avgSiswaPerKelas : "-"}
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Kelas Terbaru
-            </CardTitle>
-            <SparklesIcon className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-xl font-semibold truncate">
-              {newestKelas?.name ?? "—"}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {newestKelas
-                ? newestKelas.createdAt.toLocaleDateString("id-ID", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                  })
-                : "Belum ada kelas"}
-            </p>
-          </CardContent>
-        </Card>
+        {[
+          {
+            key: "total",
+            icon: SchoolIcon,
+            label: "Total Kelas",
+            value: totalKelas,
+          },
+          {
+            key: "siswa",
+            icon: UsersIcon,
+            label: "Total Siswa",
+            value: totalSiswa,
+          },
+          {
+            key: "rata",
+            icon: GraduationCapIcon,
+            label: "Rata-rata Siswa",
+            value: totalKelas > 0 ? avgSiswaPerKelas : "-",
+          },
+          {
+            key: "baru",
+            icon: SparklesIcon,
+            label: "Kelas Terbaru",
+            value: newestKelas?.name ?? "—",
+            sub: newestKelas
+              ? newestKelas.createdAt.toLocaleDateString("id-ID", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                })
+              : "Belum ada kelas",
+          },
+        ].map((s) => {
+          const c = statConfig[s.key as keyof typeof statConfig]
+          return (
+            <div
+              key={s.key}
+              className={`group relative overflow-hidden rounded-xl p-4 ring-1 ${c.gradient} ${c.ring} shadow-sm transition-all duration-200 hover:shadow-md`}
+            >
+              <div className="flex items-start justify-between">
+                <div className="space-y-1.5">
+                  <p className="text-xs font-medium tracking-wide text-muted-foreground/80 uppercase">
+                    {s.label}
+                  </p>
+                  <p className="text-2xl font-bold tabular-nums tracking-tight truncate max-w-32">
+                    {s.value}
+                  </p>
+                  {"sub" in s && s.sub && (
+                    <p className="text-xs text-muted-foreground">{s.sub}</p>
+                  )}
+                </div>
+                <div className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${c.iconBg}`}>
+                  <s.icon className="size-4" />
+                </div>
+              </div>
+              <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-muted/50">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-primary/40 to-primary/60 transition-all duration-500"
+                  style={{ width: `${Math.min((Number(s.value) / Math.max(totalKelas, totalSiswa, 1)) * 100, 100)}%` }}
+                />
+              </div>
+            </div>
+          )
+        })}
       </section>
 
       {/* ===== Data Table ===== */}
       <Card>
-        <CardHeader className="gap-4">
+        <CardHeader className="gap-4 pb-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div className="flex flex-col gap-1">
-              <CardTitle>Daftar Kelas</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Cari, urutkan, dan lihat data kelas dengan pagination.
-              </p>
+            <div className="flex items-center gap-3">
+              <div className="flex size-8 items-center justify-center rounded-lg bg-blue-500/10">
+                <SchoolIcon className="size-4 text-blue-500" />
+              </div>
+              <div>
+                <CardTitle className="text-sm font-semibold">Daftar Kelas</CardTitle>
+                <p className="text-xs text-muted-foreground">
+                  Cari, urutkan, dan lihat data kelas
+                </p>
+              </div>
             </div>
             <div className="flex gap-2">
               <KelasImportDialog />
@@ -178,29 +227,48 @@ export default async function KelasPage({ searchParams }: KelasPageProps) {
           <KelasFilter q={q} filter={filter} />
         </CardHeader>
         <CardContent>
-          <div className="overflow-hidden rounded-lg border">
+          <div className="overflow-hidden rounded-xl border shadow-xs">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead className="w-16">No</TableHead>
-                  <TableHead>Nama Kelas</TableHead>
-                  <TableHead>Wali Kelas</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Total Siswa</TableHead>
-                  <TableHead className="w-40 text-right">Aksi</TableHead>
+                <TableRow className="bg-muted/30">
+                  <TableHead className="w-16 text-xs font-semibold text-muted-foreground">No</TableHead>
+                  <TableHead className="text-xs font-semibold text-muted-foreground">Nama Kelas</TableHead>
+                  <TableHead className="text-xs font-semibold text-muted-foreground">Wali Kelas</TableHead>
+                  <TableHead className="text-xs font-semibold text-muted-foreground">Status</TableHead>
+                  <TableHead className="text-xs font-semibold text-muted-foreground">Total Siswa</TableHead>
+                  <TableHead className="w-40 text-right text-xs font-semibold text-muted-foreground">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {paginatedKelas.length > 0 ? (
                   paginatedKelas.map((item, index) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="text-muted-foreground">
+                    <TableRow key={item.id} className="group transition-colors hover:bg-muted/40">
+                      <TableCell className="text-xs text-muted-foreground">
                         {startIndex + index + 1}
                       </TableCell>
-                      <TableCell className="font-medium">{item.name}</TableCell>
-                      <TableCell>{item.waliKelas ?? "-"}</TableCell>
                       <TableCell>
-                        <Badge variant="secondary">Aktif</Badge>
+                        <div className="flex items-center gap-2.5">
+                          <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 text-[10px] font-semibold text-primary">
+                            {item.name.charAt(0)}
+                          </div>
+                          <span className="text-sm font-medium">{item.name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-xs">
+                        {item.waliKelas ? (
+                          <span>{item.waliKelas}</span>
+                        ) : (
+                          <span className="text-muted-foreground/60">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="secondary"
+                          className="border-emerald-500/20 bg-emerald-500/10 text-[10px] font-medium text-emerald-600 dark:text-emerald-400"
+                        >
+                          <span className="mr-1 inline-block size-1.5 rounded-full bg-emerald-500" />
+                          Aktif
+                        </Badge>
                       </TableCell>
                       <TableCell>
                         <KelasSiswaDialog
@@ -223,7 +291,10 @@ export default async function KelasPage({ searchParams }: KelasPageProps) {
                       colSpan={6}
                       className="h-32 text-center text-muted-foreground"
                     >
-                      Tidak ada data kelas yang cocok.
+                      <div className="flex flex-col items-center gap-2">
+                        <SchoolIcon className="size-8 text-muted-foreground/40" />
+                        <p className="text-xs">Tidak ada data kelas yang cocok.</p>
+                      </div>
                     </TableCell>
                   </TableRow>
                 )}
@@ -232,7 +303,7 @@ export default async function KelasPage({ searchParams }: KelasPageProps) {
           </div>
 
           <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               Menampilkan {paginatedKelas.length ? startIndex + 1 : 0}-
               {Math.min(startIndex + paginatedKelas.length, totalFiltered)} dari{" "}
               {totalFiltered} data
@@ -293,6 +364,6 @@ export default async function KelasPage({ searchParams }: KelasPageProps) {
           </div>
         </CardContent>
       </Card>
-    </>
+    </div>
   )
 }

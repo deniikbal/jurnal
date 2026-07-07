@@ -73,9 +73,8 @@ function KelasEditDialog({ kelas }: KelasActionsProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button type="button" variant="outline" size="sm">
-          <PencilIcon />
-          Edit
+        <Button type="button" variant="outline" size="icon" className="size-7">
+          <PencilIcon className="size-3.5" />
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -144,9 +143,8 @@ function KelasDeleteDialog({ kelas }: KelasActionsProps) {
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button type="button" variant="destructive" size="sm">
-          <Trash2Icon />
-          Hapus
+        <Button type="button" variant="destructive" size="icon" className="size-7">
+          <Trash2Icon className="size-3.5" />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
