@@ -1,7 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { and, eq, inArray } from "drizzle-orm"
+import { and, eq, ilike, inArray } from "drizzle-orm"
 
 import { db } from "@/lib/db"
 import { biodataSiswa, siswa } from "@/lib/db/schema"
