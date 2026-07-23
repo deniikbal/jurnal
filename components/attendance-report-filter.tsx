@@ -46,19 +46,19 @@ export function AttendanceReportFilter({
   }
 
   return (
-    <div className="flex flex-wrap gap-2 opacity-100 data-[pending=true]:opacity-70" data-pending={isPending}>
+    <div className="flex flex-col sm:flex-row flex-wrap gap-2 w-full sm:w-auto opacity-100 data-[pending=true]:opacity-70" data-pending={isPending}>
       <Input
         type="month"
         defaultValue={month}
         onChange={(event) => updateParam("month", event.target.value, "")}
-        className="w-auto"
+        className="w-full sm:w-auto !h-9 text-xs sm:text-sm"
         aria-label="Filter bulan laporan"
       />
       <Select
         value={classroomId}
         onValueChange={(value) => updateParam("classroomId", value)}
       >
-        <SelectTrigger className="w-40 !h-9" aria-label="Filter kelas laporan">
+        <SelectTrigger className="w-full sm:w-40 !h-9 text-xs sm:text-sm" aria-label="Filter kelas laporan">
           <SelectValue placeholder="Semua Kelas" />
         </SelectTrigger>
         <SelectContent>
@@ -72,7 +72,7 @@ export function AttendanceReportFilter({
         value={subjectId}
         onValueChange={(value) => updateParam("subjectId", value)}
       >
-        <SelectTrigger className="w-44 !h-9" aria-label="Filter mapel laporan">
+        <SelectTrigger className="w-full sm:w-44 !h-9 text-xs sm:text-sm" aria-label="Filter mapel laporan">
           <SelectValue placeholder="Semua Mapel" />
         </SelectTrigger>
         <SelectContent>

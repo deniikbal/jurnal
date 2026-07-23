@@ -41,16 +41,16 @@ export function KelasImportDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">
-          <UploadIcon />
+        <Button variant="outline" className="w-full sm:w-auto text-xs sm:text-sm">
+          <UploadIcon className="size-4" />
           Import Excel
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-[calc(100vw-1.5rem)] sm:max-w-md p-4 sm:p-6">
         <form ref={formRef} action={formAction} className="space-y-4">
           <DialogHeader>
-            <DialogTitle>Import Kelas dari Excel</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-base sm:text-lg">Import Kelas dari Excel</DialogTitle>
+            <DialogDescription className="text-xs sm:text-sm">
               Unggah file .xls atau .xlsx dengan kolom: Nama Kelas, Wali Kelas
               (opsional).
             </DialogDescription>
@@ -58,7 +58,7 @@ export function KelasImportDialog() {
 
           <div className="grid gap-1.5">
             <div className="flex items-center justify-between">
-              <Label htmlFor="file">File Excel</Label>
+              <Label htmlFor="file" className="text-xs sm:text-sm">File Excel</Label>
               <a
                 href="/api/kelas/template"
                 className="text-xs text-primary underline-offset-2 hover:underline"
@@ -74,11 +74,12 @@ export function KelasImportDialog() {
               accept=".xls,.xlsx"
               required
               disabled={isPending}
+              className="text-xs sm:text-sm"
             />
           </div>
 
           {state.errors && state.errors.length > 0 ? (
-            <div className="max-h-40 overflow-y-auto rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+            <div className="max-h-40 overflow-y-auto rounded-md border border-destructive/30 bg-destructive/5 p-3 text-xs text-destructive">
               <p className="mb-1 font-medium">Baris yang dilewati:</p>
               <ul className="list-inside list-disc space-y-0.5">
                 {state.errors.map((error, index) => (
@@ -88,13 +89,13 @@ export function KelasImportDialog() {
             </div>
           ) : null}
 
-          <DialogFooter>
+          <DialogFooter className="flex-col-reverse sm:flex-row gap-2 pt-2">
             <DialogClose asChild>
-              <Button type="button" variant="outline" disabled={isPending}>
+              <Button type="button" variant="outline" disabled={isPending} className="w-full sm:w-auto text-xs">
                 Batal
               </Button>
             </DialogClose>
-            <Button type="submit" disabled={isPending}>
+            <Button type="submit" disabled={isPending} className="w-full sm:w-auto text-xs">
               {isPending ? "Mengimpor..." : "Import"}
             </Button>
           </DialogFooter>

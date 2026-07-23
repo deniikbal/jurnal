@@ -73,49 +73,51 @@ function KelasEditDialog({ kelas }: KelasActionsProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button type="button" variant="outline" size="icon" className="size-7">
-          <PencilIcon className="size-3.5" />
+        <Button type="button" variant="outline" size="icon" className="size-8 sm:size-7">
+          <PencilIcon className="size-4 sm:size-3.5" />
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-[calc(100vw-1.5rem)] sm:max-w-md p-4 sm:p-6">
         <form action={formAction} className="space-y-4">
           <input type="hidden" name="id" value={kelas.id} />
           <DialogHeader>
-            <DialogTitle>Edit Kelas</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-base sm:text-lg">Edit Kelas</DialogTitle>
+            <DialogDescription className="text-xs sm:text-sm">
               Ubah nama kelas atau wali kelas.
             </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-3">
             <div className="grid gap-1.5">
-              <Label htmlFor={`name-${kelas.id}`}>Nama Kelas</Label>
+              <Label htmlFor={`name-${kelas.id}`} className="text-xs sm:text-sm">Nama Kelas</Label>
               <Input
                 id={`name-${kelas.id}`}
                 name="name"
                 defaultValue={kelas.name}
                 required
                 disabled={isPending}
+                className="text-xs sm:text-sm"
               />
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor={`waliKelas-${kelas.id}`}>Wali Kelas</Label>
+              <Label htmlFor={`waliKelas-${kelas.id}`} className="text-xs sm:text-sm">Wali Kelas</Label>
               <Input
                 id={`waliKelas-${kelas.id}`}
                 name="waliKelas"
                 defaultValue={kelas.waliKelas ?? ""}
                 disabled={isPending}
+                className="text-xs sm:text-sm"
               />
             </div>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="flex-col-reverse sm:flex-row gap-2 pt-2">
             <DialogClose asChild>
-              <Button type="button" variant="outline" disabled={isPending}>
+              <Button type="button" variant="outline" disabled={isPending} className="w-full sm:w-auto text-xs">
                 Batal
               </Button>
             </DialogClose>
-            <Button type="submit" disabled={isPending}>
+            <Button type="submit" disabled={isPending} className="w-full sm:w-auto text-xs">
               {isPending ? "Menyimpan..." : "Simpan Perubahan"}
             </Button>
           </DialogFooter>
@@ -143,24 +145,24 @@ function KelasDeleteDialog({ kelas }: KelasActionsProps) {
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button type="button" variant="destructive" size="icon" className="size-7">
-          <Trash2Icon className="size-3.5" />
+        <Button type="button" variant="destructive" size="icon" className="size-8 sm:size-7">
+          <Trash2Icon className="size-4 sm:size-3.5" />
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent>
+      <AlertDialogContent className="max-w-[calc(100vw-1.5rem)] sm:max-w-md p-4 sm:p-6">
         <form action={formAction} className="space-y-4">
           <input type="hidden" name="id" value={kelas.id} />
           <AlertDialogHeader>
-            <AlertDialogTitle>Hapus kelas?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-base sm:text-lg">Hapus kelas?</AlertDialogTitle>
+            <AlertDialogDescription className="text-xs sm:text-sm">
               Data kelas <span className="font-medium text-foreground">{kelas.name}</span> akan dihapus permanen.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel type="button" disabled={isPending}>
+          <AlertDialogFooter className="flex-col-reverse sm:flex-row gap-2 pt-2">
+            <AlertDialogCancel type="button" disabled={isPending} className="w-full sm:w-auto text-xs">
               Batal
             </AlertDialogCancel>
-            <Button type="submit" variant="destructive" disabled={isPending}>
+            <Button type="submit" variant="destructive" disabled={isPending} className="w-full sm:w-auto text-xs">
               {isPending ? "Menghapus..." : "Hapus"}
             </Button>
           </AlertDialogFooter>

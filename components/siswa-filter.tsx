@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useTransition } from "react"
+import { useEffect, useRef, useState, useTransition } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { SearchIcon } from "lucide-react"
 
@@ -29,8 +29,12 @@ export function SiswaFilter({ q, filter, classroomId, status, classrooms }: Sisw
   const currentQuery = searchParams.toString()
   const [search, setSearch] = useState(q)
   const [isPending, startTransition] = useTransition()
+  const prevSearchRef = useRef(q)
 
   useEffect(() => {
+    const searchChanged = search !== prevSearchRef.current
+    prevSearchRef.current = search
+
     const timeout = window.setTimeout(() => {
       const params = new URLSearchParams(currentQuery)
       const trimmedSearch = search.trim()
@@ -38,7 +42,9 @@ export function SiswaFilter({ q, filter, classroomId, status, classrooms }: Sisw
       if (trimmedSearch) params.set("q", trimmedSearch)
       else params.delete("q")
 
-      params.delete("page")
+      if (searchChanged) {
+        params.delete("page")
+      }
 
       const nextQuery = params.toString()
 
@@ -50,7 +56,7 @@ export function SiswaFilter({ q, filter, classroomId, status, classrooms }: Sisw
     }, 350)
 
     return () => window.clearTimeout(timeout)
-  }, [currentQuery, pathname, router, search])
+  }, [currentQuery, pathname, router, search, q])
 
   function updateParam(key: string, value: string, defaultValue: string) {
     const params = new URLSearchParams(searchParams)
@@ -74,51 +80,53 @@ export function SiswaFilter({ q, filter, classroomId, status, classrooms }: Sisw
   }
 
   return (
-    <div className="grid gap-2 lg:grid-cols-[1fr_180px_180px_160px_auto]">
-      <div className="relative">
+    <div className="flex flex-col sm:flex-row flex-wrap gap-2 w-full">
+      <div className="relative flex-1 min-w-0">
         <SearchIcon className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Cari nama atau NIS..."
-          className="pl-8"
+          className="pl-8 text-xs sm:text-sm"
           aria-label="Cari siswa"
         />
       </div>
-      <Select
-        value={classroomId}
-        onValueChange={(value) => updateParam("classroomId", value, "all")}
-      >
-        <SelectTrigger className="w-full !h-9" aria-label="Filter kelas">
-          <SelectValue placeholder="Semua Kelas" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">Semua Kelas</SelectItem>
-          {classrooms.map((classroom) => (
-            <SelectItem key={classroom.id} value={classroom.id}>
-              {classroom.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <Select
-        value={status}
-        onValueChange={(value) => updateParam("status", value, "all")}
-      >
-        <SelectTrigger className="w-full !h-9" aria-label="Filter status">
-          <SelectValue placeholder="Semua Status" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">Semua Status</SelectItem>
-          <SelectItem value="aktif">Aktif</SelectItem>
-          <SelectItem value="keluar">Keluar</SelectItem>
-        </SelectContent>
-      </Select>
+      <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 w-full sm:w-auto">
+        <Select
+          value={classroomId}
+          onValueChange={(value) => updateParam("classroomId", value, "all")}
+        >
+          <SelectTrigger className="w-full sm:w-40 !h-9 text-xs sm:text-sm" aria-label="Filter kelas">
+            <SelectValue placeholder="Semua Kelas" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Semua Kelas</SelectItem>
+            {classrooms.map((classroom) => (
+              <SelectItem key={classroom.id} value={classroom.id}>
+                {classroom.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select
+          value={status}
+          onValueChange={(value) => updateParam("status", value, "all")}
+        >
+          <SelectTrigger className="w-full sm:w-36 !h-9 text-xs sm:text-sm" aria-label="Filter status">
+            <SelectValue placeholder="Semua Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Semua Status</SelectItem>
+            <SelectItem value="aktif">Aktif</SelectItem>
+            <SelectItem value="keluar">Keluar</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
       <Select
         value={filter}
         onValueChange={(value) => updateParam("filter", value, "natural")}
       >
-        <SelectTrigger className="w-full !h-9" aria-label="Urutkan siswa">
+        <SelectTrigger className="w-full sm:w-36 !h-9 text-xs sm:text-sm" aria-label="Urutkan siswa">
           <SelectValue placeholder="Natural" />
         </SelectTrigger>
         <SelectContent>
@@ -133,6 +141,7 @@ export function SiswaFilter({ q, filter, classroomId, status, classrooms }: Sisw
         variant="outline"
         onClick={handleReset}
         disabled={isPending || (!search && filter === "natural" && classroomId === "all" && status === "all")}
+        className="w-full sm:w-auto text-xs sm:text-sm"
       >
         Reset
       </Button>

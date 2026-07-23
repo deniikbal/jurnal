@@ -14,12 +14,12 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-type KelasFilterProps = {
+type BiodataSiswaFilterProps = {
   q: string
   filter: string
 }
 
-export function KelasFilter({ q, filter }: KelasFilterProps) {
+export function BiodataSiswaFilter({ q, filter }: BiodataSiswaFilterProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -36,11 +36,8 @@ export function KelasFilter({ q, filter }: KelasFilterProps) {
       const params = new URLSearchParams(currentQuery)
       const trimmedSearch = search.trim()
 
-      if (trimmedSearch) {
-        params.set("q", trimmedSearch)
-      } else {
-        params.delete("q")
-      }
+      if (trimmedSearch) params.set("q", trimmedSearch)
+      else params.delete("q")
 
       if (searchChanged) {
         params.delete("page")
@@ -48,9 +45,7 @@ export function KelasFilter({ q, filter }: KelasFilterProps) {
 
       const nextQuery = params.toString()
 
-      if (nextQuery === currentQuery) {
-        return
-      }
+      if (nextQuery === currentQuery) return
 
       startTransition(() => {
         router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname)
@@ -60,19 +55,17 @@ export function KelasFilter({ q, filter }: KelasFilterProps) {
     return () => window.clearTimeout(timeout)
   }, [currentQuery, pathname, router, search, q])
 
-  function handleFilterChange(value: string) {
+  function updateParam(key: string, value: string, defaultValue: string) {
     const params = new URLSearchParams(searchParams)
 
-    if (value !== "natural") {
-      params.set("filter", value)
-    } else {
-      params.delete("filter")
-    }
+    if (value !== defaultValue) params.set(key, value)
+    else params.delete(key)
 
     params.delete("page")
 
     startTransition(() => {
-      router.replace(params.toString() ? `${pathname}?${params}` : pathname)
+      const query = params.toString()
+      router.replace(query ? `${pathname}?${query}` : pathname)
     })
   }
 
@@ -90,22 +83,20 @@ export function KelasFilter({ q, filter }: KelasFilterProps) {
         <Input
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          placeholder="Cari nama kelas..."
+          placeholder="Cari nama siswa..."
           className="pl-8 text-xs sm:text-sm"
-          aria-label="Cari nama kelas"
+          aria-label="Cari biodata siswa"
         />
       </div>
       <Select
         value={filter}
-        onValueChange={handleFilterChange}
-        aria-label="Urutkan kelas"
+        onValueChange={(value) => updateParam("filter", value, "natural")}
       >
-        <SelectTrigger className="w-full sm:w-44 !h-9 text-xs sm:text-sm">
-          <SelectValue placeholder="Urutkan" />
+        <SelectTrigger className="w-full sm:w-40 !h-9 text-xs sm:text-sm" aria-label="Urutkan">
+          <SelectValue placeholder="Natural" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="natural">Natural</SelectItem>
-          <SelectItem value="az">Nama A-Z</SelectItem>
           <SelectItem value="za">Nama Z-A</SelectItem>
           <SelectItem value="terbaru">Terbaru</SelectItem>
           <SelectItem value="terlama">Terlama</SelectItem>

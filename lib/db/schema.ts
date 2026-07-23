@@ -296,3 +296,24 @@ export const jurnal = pgTable("jurnal", {
   createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
 })
+
+export const biodataSiswa = pgTable("biodata_siswa", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  nama: text("nama").notNull(),
+  alamat: text("alamat"),
+  nohpOrtu: text("nohp_ortu"),
+  namaAyah: text("nama_ayah"),
+  namaIbu: text("nama_ibu"),
+  statusPernikahan: text("status_pernikahan", {
+    enum: ["Menikah", "Cerai Hidup", "Cerai Meninggal"],
+  }),
+  kondisiKeluarga: text("kondisi_keluarga", {
+    enum: ["Anak Yatim", "Anak Piatu", "Anak Yatim Piatu"],
+  }),
+  fotoRumah: text("foto_rumah"),
+  siswaId: text("siswa_id").references(() => siswa.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
+})

@@ -2,11 +2,11 @@ import "server-only"
 
 import { cache } from "react"
 import { redirect } from "next/navigation"
-import { eq } from "drizzle-orm"
+import { eq, inArray } from "drizzle-orm"
 
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
-import { assessment, attendance, classroom, grade, gradeWeight, journal, schedule, siswa, subject, users } from "@/lib/db/schema"
+import { assessment, attendance, biodataSiswa, classroom, grade, gradeWeight, journal, schedule, siswa, subject, users } from "@/lib/db/schema"
 
 export const verifySession = cache(async () => {
   const session = await auth()
@@ -94,4 +94,16 @@ export async function getAssessmentsForCurrentUser() {
   const session = await verifySession()
 
   return db.select().from(assessment).where(eq(assessment.userId, session.userId))
+}
+
+export async function getBiodataSiswaForCurrentUser() {
+  await verifySession()
+
+  try {
+    return await db.select().from(biodataSiswa)
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error)
+    console.warn("Warning: Could not fetch biodata_siswa:", msg)
+    return []
+  }
 }

@@ -119,17 +119,17 @@ export default async function KelasPage({ searchParams }: KelasPageProps) {
     totalKelas > 0 ? Math.round((totalSiswa / totalKelas) * 10) / 10 : 0
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4 sm:gap-5">
       {/* ===== Page Header ===== */}
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-600 via-blue-600/90 to-blue-500/80 p-5 shadow-lg shadow-blue-500/20">
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-600 via-blue-600/90 to-blue-500/80 p-4 sm:p-5 shadow-lg shadow-blue-500/20">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
-        <div className="relative flex items-center gap-4">
-          <div className="flex size-12 items-center justify-center rounded-xl bg-white/15 ring-2 ring-white/20">
-            <SchoolIcon className="size-6 text-white" />
+        <div className="relative flex items-center gap-3 sm:gap-4">
+          <div className="flex size-10 sm:size-12 shrink-0 items-center justify-center rounded-xl bg-white/15 ring-2 ring-white/20">
+            <SchoolIcon className="size-5 sm:size-6 text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-semibold text-white">Kelas</h1>
-            <p className="text-sm text-white/70">
+            <h1 className="text-base sm:text-lg font-semibold text-white">Kelas</h1>
+            <p className="text-xs sm:text-sm text-white/70">
               Kelola data kelas, wali kelas, dan lihat daftar siswa per kelas.
             </p>
           </div>
@@ -137,7 +137,7 @@ export default async function KelasPage({ searchParams }: KelasPageProps) {
       </div>
 
       {/* ===== Stat Cards ===== */}
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
         {[
           {
             key: "total",
@@ -175,25 +175,25 @@ export default async function KelasPage({ searchParams }: KelasPageProps) {
           return (
             <div
               key={s.key}
-              className={`group relative overflow-hidden rounded-xl p-4 ring-1 ${c.gradient} ${c.ring} shadow-sm transition-all duration-200 hover:shadow-md`}
+              className={`group relative overflow-hidden rounded-xl p-3 sm:p-4 ring-1 ${c.gradient} ${c.ring} shadow-xs transition-all duration-200 hover:shadow-md`}
             >
-              <div className="flex items-start justify-between">
-                <div className="space-y-1.5">
-                  <p className="text-xs font-medium tracking-wide text-muted-foreground/80 uppercase">
+              <div className="flex items-start justify-between gap-2">
+                <div className="space-y-1 min-w-0">
+                  <p className="text-[10px] sm:text-xs font-medium tracking-wide text-muted-foreground/80 uppercase">
                     {s.label}
                   </p>
-                  <p className="text-2xl font-bold tabular-nums tracking-tight truncate max-w-32">
+                  <p className="text-xl sm:text-2xl font-bold tabular-nums tracking-tight truncate max-w-full">
                     {s.value}
                   </p>
                   {"sub" in s && s.sub && (
-                    <p className="text-xs text-muted-foreground">{s.sub}</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{s.sub}</p>
                   )}
                 </div>
-                <div className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${c.iconBg}`}>
-                  <s.icon className="size-4" />
+                <div className={`flex size-8 sm:size-10 shrink-0 items-center justify-center rounded-lg ${c.iconBg}`}>
+                  <s.icon className="size-3.5 sm:size-4" />
                 </div>
               </div>
-              <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-muted/50">
+              <div className="mt-2.5 sm:mt-3 h-1 w-full overflow-hidden rounded-full bg-muted/50">
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-primary/40 to-primary/60 transition-all duration-500"
                   style={{ width: `${Math.min((Number(s.value) / Math.max(totalKelas, totalSiswa, 1)) * 100, 100)}%` }}
@@ -206,10 +206,10 @@ export default async function KelasPage({ searchParams }: KelasPageProps) {
 
       {/* ===== Data Table ===== */}
       <Card>
-        <CardHeader className="gap-4 pb-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <CardHeader className="gap-3 sm:gap-4 p-4 sm:p-6 pb-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex size-8 items-center justify-center rounded-lg bg-blue-500/10">
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-blue-500/10">
                 <SchoolIcon className="size-4 text-blue-500" />
               </div>
               <div>
@@ -219,15 +219,16 @@ export default async function KelasPage({ searchParams }: KelasPageProps) {
                 </p>
               </div>
             </div>
-            <div className="flex gap-2">
-              <KelasImportDialog />
-              <KelasCreateDialog />
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <div className="flex-1 sm:flex-none"><KelasImportDialog /></div>
+              <div className="flex-1 sm:flex-none"><KelasCreateDialog /></div>
             </div>
           </div>
           <KelasFilter q={q} filter={filter} />
         </CardHeader>
-        <CardContent>
-          <div className="overflow-hidden rounded-xl border shadow-xs">
+        <CardContent className="p-4 sm:p-6 pt-0 space-y-4">
+          {/* Desktop Table View */}
+          <div className="hidden sm:block overflow-x-auto rounded-xl border shadow-2xs">
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/30">
@@ -302,14 +303,63 @@ export default async function KelasPage({ searchParams }: KelasPageProps) {
             </Table>
           </div>
 
-          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs text-muted-foreground">
+          {/* Mobile Card List View */}
+          <div className="block sm:hidden space-y-3">
+            {paginatedKelas.length > 0 ? (
+              paginatedKelas.map((item, index) => {
+                const siswaKelas = daftarSiswa.filter((siswa) => siswa.classroomId === item.id)
+                return (
+                  <div key={item.id} className="rounded-xl border bg-card p-3.5 shadow-2xs space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2.5">
+                        <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-xs font-bold text-primary">
+                          {item.name.charAt(0)}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-sm font-bold">{item.name}</h3>
+                            <span className="text-[10px] text-muted-foreground font-medium">#{startIndex + index + 1}</span>
+                          </div>
+                          <p className="text-[11px] text-muted-foreground mt-0.5">
+                            Wali Kelas: <span className="font-medium text-foreground">{item.waliKelas ?? "—"}</span>
+                          </p>
+                        </div>
+                      </div>
+                      <Badge
+                        variant="secondary"
+                        className="border-emerald-500/20 bg-emerald-500/10 text-[10px] font-medium text-emerald-600 dark:text-emerald-400 shrink-0"
+                      >
+                        <span className="mr-1 inline-block size-1.5 rounded-full bg-emerald-500" />
+                        Aktif
+                      </Badge>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-2 border-t border-border/40 text-xs">
+                      <KelasSiswaDialog
+                        kelasName={item.name}
+                        siswa={siswaKelas}
+                      />
+                      <KelasActions kelas={item} />
+                    </div>
+                  </div>
+                )
+              })
+            ) : (
+              <div className="flex flex-col items-center gap-2 rounded-xl border py-12 text-center p-4">
+                <SchoolIcon className="size-8 text-muted-foreground/40" />
+                <p className="text-xs text-muted-foreground">Tidak ada data kelas yang cocok.</p>
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pt-2">
+            <p className="text-xs text-muted-foreground text-center sm:text-left">
               Menampilkan {paginatedKelas.length ? startIndex + 1 : 0}-
               {Math.min(startIndex + paginatedKelas.length, totalFiltered)} dari{" "}
               {totalFiltered} data
             </p>
-            <Pagination className="sm:mx-0 sm:w-auto">
-              <PaginationContent>
+            <Pagination className="justify-center sm:justify-end sm:mx-0 sm:w-auto">
+              <PaginationContent className="gap-1">
                 <PaginationItem>
                   <PaginationPrevious
                     text="Sebelumnya"
@@ -321,8 +371,8 @@ export default async function KelasPage({ searchParams }: KelasPageProps) {
                     aria-disabled={safePage === 1}
                     className={
                       safePage === 1
-                        ? "pointer-events-none opacity-50"
-                        : undefined
+                        ? "pointer-events-none opacity-50 text-xs"
+                        : "text-xs"
                     }
                   />
                 </PaginationItem>
@@ -354,8 +404,8 @@ export default async function KelasPage({ searchParams }: KelasPageProps) {
                     aria-disabled={safePage === totalPages}
                     className={
                       safePage === totalPages
-                        ? "pointer-events-none opacity-50"
-                        : undefined
+                        ? "pointer-events-none opacity-50 text-xs"
+                        : "text-xs"
                     }
                   />
                 </PaginationItem>

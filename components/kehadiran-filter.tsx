@@ -43,12 +43,12 @@ export function KehadiranFilter({
   }
 
   return (
-    <div className="flex flex-wrap gap-2 opacity-100 data-[pending=true]:opacity-70" data-pending={isPending}>
+    <div className="flex flex-col sm:flex-row flex-wrap gap-2 w-full sm:w-auto opacity-100 data-[pending=true]:opacity-70" data-pending={isPending}>
       <Select
         value={classroomId}
         onValueChange={(value) => updateParam("classroomId", value)}
       >
-        <SelectTrigger className="w-40 !h-9" aria-label="Filter kelas">
+        <SelectTrigger className="w-full sm:w-40 !h-9 text-xs sm:text-sm" aria-label="Filter kelas">
           <SelectValue placeholder="Semua Kelas" />
         </SelectTrigger>
         <SelectContent>
@@ -64,7 +64,7 @@ export function KehadiranFilter({
         value={subjectId}
         onValueChange={(value) => updateParam("subjectId", value)}
       >
-        <SelectTrigger className="w-44 !h-9" aria-label="Filter mapel">
+        <SelectTrigger className="w-full sm:w-44 !h-9 text-xs sm:text-sm" aria-label="Filter mapel">
           <SelectValue placeholder="Semua Mapel" />
         </SelectTrigger>
         <SelectContent>

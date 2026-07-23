@@ -80,16 +80,16 @@ function SiswaEditDialog({ siswa, classrooms }: SiswaActionsProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button type="button" variant="outline" size="icon" className="size-7">
-          <PencilIcon className="size-3.5" />
+        <Button type="button" variant="outline" size="icon" className="size-8 sm:size-7">
+          <PencilIcon className="size-4 sm:size-3.5" />
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-[calc(100vw-1.5rem)] sm:max-w-md p-4 sm:p-6">
         <form action={formAction} className="space-y-4">
           <input type="hidden" name="id" value={siswa.id} />
           <DialogHeader>
-            <DialogTitle>Edit Siswa</DialogTitle>
-            <DialogDescription>Ubah data siswa.</DialogDescription>
+            <DialogTitle className="text-base sm:text-lg">Edit Siswa</DialogTitle>
+            <DialogDescription className="text-xs sm:text-sm">Ubah data siswa.</DialogDescription>
           </DialogHeader>
 
           <SiswaFormFields
@@ -98,13 +98,13 @@ function SiswaEditDialog({ siswa, classrooms }: SiswaActionsProps) {
             defaultValues={siswa}
           />
 
-          <DialogFooter>
+          <DialogFooter className="flex-col-reverse sm:flex-row gap-2 pt-2">
             <DialogClose asChild>
-              <Button type="button" variant="outline" disabled={isPending}>
+              <Button type="button" variant="outline" disabled={isPending} className="w-full sm:w-auto text-xs">
                 Batal
               </Button>
             </DialogClose>
-            <Button type="submit" disabled={isPending}>
+            <Button type="submit" disabled={isPending} className="w-full sm:w-auto text-xs">
               {isPending ? "Menyimpan..." : "Simpan Perubahan"}
             </Button>
           </DialogFooter>
@@ -132,24 +132,24 @@ function SiswaDeleteDialog({ siswa }: { siswa: SiswaItem }) {
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button type="button" variant="destructive" size="icon" className="size-7">
-          <Trash2Icon className="size-3.5" />
+        <Button type="button" variant="destructive" size="icon" className="size-8 sm:size-7">
+          <Trash2Icon className="size-4 sm:size-3.5" />
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent>
+      <AlertDialogContent className="max-w-[calc(100vw-1.5rem)] sm:max-w-md p-4 sm:p-6">
         <form action={formAction} className="space-y-4">
           <input type="hidden" name="id" value={siswa.id} />
           <AlertDialogHeader>
-            <AlertDialogTitle>Hapus siswa?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-base sm:text-lg">Hapus siswa?</AlertDialogTitle>
+            <AlertDialogDescription className="text-xs sm:text-sm">
               Data siswa <span className="font-medium text-foreground">{siswa.name}</span> akan dihapus permanen.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel type="button" disabled={isPending}>
+          <AlertDialogFooter className="flex-col-reverse sm:flex-row gap-2 pt-2">
+            <AlertDialogCancel type="button" disabled={isPending} className="w-full sm:w-auto text-xs">
               Batal
             </AlertDialogCancel>
-            <Button type="submit" variant="destructive" disabled={isPending}>
+            <Button type="submit" variant="destructive" disabled={isPending} className="w-full sm:w-auto text-xs">
               {isPending ? "Menghapus..." : "Hapus"}
             </Button>
           </AlertDialogFooter>

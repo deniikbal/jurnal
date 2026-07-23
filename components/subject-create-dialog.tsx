@@ -47,26 +47,26 @@ export function SubjectCreateDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Tambah Mapel</Button>
+        <Button className="w-full sm:w-auto text-xs sm:text-sm">Tambah Mapel</Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-[calc(100vw-1.5rem)] sm:max-w-md p-4 sm:p-6">
         <form ref={formRef} action={formAction} className="space-y-4">
           <DialogHeader>
-            <DialogTitle>Tambah Mata Pelajaran</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-base sm:text-lg">Tambah Mata Pelajaran</DialogTitle>
+            <DialogDescription className="text-xs sm:text-sm">
               Masukkan nama, kode, dan status mata pelajaran.
             </DialogDescription>
           </DialogHeader>
 
           <SubjectFormFields disabled={isPending} />
 
-          <DialogFooter>
+          <DialogFooter className="flex-col-reverse sm:flex-row gap-2 pt-2">
             <DialogClose asChild>
-              <Button type="button" variant="outline" disabled={isPending}>
+              <Button type="button" variant="outline" disabled={isPending} className="w-full sm:w-auto text-xs">
                 Batal
               </Button>
             </DialogClose>
-            <Button type="submit" disabled={isPending}>
+            <Button type="submit" disabled={isPending} className="w-full sm:w-auto text-xs">
               {isPending ? "Menyimpan..." : "Simpan"}
             </Button>
           </DialogFooter>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useTransition } from "react"
+import { useEffect, useRef, useState, useTransition } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { SearchIcon } from "lucide-react"
 
@@ -29,20 +29,26 @@ export function GradeWeightFilter({ q, filter, subjectId, status, subjects }: Gr
   const currentQuery = searchParams.toString()
   const [search, setSearch] = useState(q)
   const [isPending, startTransition] = useTransition()
+  const prevSearchRef = useRef(q)
 
   useEffect(() => {
+    const searchChanged = search !== prevSearchRef.current
+    prevSearchRef.current = search
+
     const timeout = window.setTimeout(() => {
       const params = new URLSearchParams(currentQuery)
       const trimmedSearch = search.trim()
       if (trimmedSearch) params.set("q", trimmedSearch)
       else params.delete("q")
-      params.delete("page")
+      if (searchChanged) {
+        params.delete("page")
+      }
       const nextQuery = params.toString()
       if (nextQuery === currentQuery) return
       startTransition(() => router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname))
     }, 350)
     return () => window.clearTimeout(timeout)
-  }, [currentQuery, pathname, router, search])
+  }, [currentQuery, pathname, router, search, q])
 
   function updateParam(key: string, value: string, defaultValue: string) {
     const params = new URLSearchParams(searchParams)

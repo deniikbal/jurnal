@@ -1,21 +1,20 @@
 import { cookies } from "next/headers"
-import { ChevronDownIcon, LogOutIcon } from "lucide-react"
+import { ChevronDownIcon } from "lucide-react"
 
 import { AppSidebar } from "@/components/app-sidebar"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { DashboardBreadcrumb } from "@/components/dashboard-breadcrumb"
+import { LogoutButton } from "@/components/logout-button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Separator } from "@/components/ui/separator"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
-import { logout } from "@/lib/auth-actions"
 import { getCurrentUser } from "@/lib/dal"
 
 function getInitials(name?: string | null, email?: string | null) {
@@ -73,14 +72,7 @@ export default async function DashboardLayout({
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <form action={logout}>
-                  <DropdownMenuItem asChild variant="destructive">
-                    <button type="submit" className="w-full">
-                      <LogOutIcon />
-                      Logout
-                    </button>
-                  </DropdownMenuItem>
-                </form>
+                <LogoutButton />
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

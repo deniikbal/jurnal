@@ -20,6 +20,7 @@ const routeTitles: Record<string, string> = {
   "/dashboard/jadwal": "Jadwal",
   "/dashboard/kehadiran": "Kehadiran",
   "/dashboard/jurnal": "Jurnal",
+  "/dashboard/walikelas/biodata-siswa": "Biodata Siswa",
   "/dashboard/settings": "Pengaturan",
 }
 

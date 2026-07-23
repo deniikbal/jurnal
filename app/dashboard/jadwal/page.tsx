@@ -34,8 +34,8 @@ type Props = {
 }
 
 const PAGE_SIZE = 10
-const days = ["senin", "selasa", "rabu", "kamis", "jumat", "sabtu", "minggu"]
-const dayOrder = days
+const days = ["senin", "selasa", "rabu", "kamis", "jumat"]
+const dayOrder = ["senin", "selasa", "rabu", "kamis", "jumat", "sabtu", "minggu"]
 
 function labelDay(day: string) {
   return day[0].toUpperCase() + day.slice(1)
@@ -89,23 +89,23 @@ export default async function JadwalPage({ searchParams }: Props) {
   const statMax = Math.max(schedules.length, 1)
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4 sm:gap-5">
       {/* ===== Page Header ===== */}
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-cyan-600 via-cyan-600/90 to-cyan-500/80 p-5 shadow-lg shadow-cyan-500/20">
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-cyan-600 via-cyan-600/90 to-cyan-500/80 p-4 sm:p-5 shadow-lg shadow-cyan-500/20">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
-        <div className="relative flex items-center gap-4">
-          <div className="flex size-12 items-center justify-center rounded-xl bg-white/15 ring-2 ring-white/20">
-            <CalendarDaysIcon className="size-6 text-white" />
+        <div className="relative flex items-center gap-3 sm:gap-4">
+          <div className="flex size-10 sm:size-12 shrink-0 items-center justify-center rounded-xl bg-white/15 ring-2 ring-white/20">
+            <CalendarDaysIcon className="size-5 sm:size-6 text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-semibold text-white">Jadwal</h1>
-            <p className="text-sm text-white/70">Kelola jadwal pelajaran berdasarkan hari, jam, mapel, dan kelas.</p>
+            <h1 className="text-base sm:text-lg font-semibold text-white">Jadwal</h1>
+            <p className="text-xs sm:text-sm text-white/70">Kelola jadwal pelajaran berdasarkan hari, jam, mapel, dan kelas.</p>
           </div>
         </div>
       </div>
 
       {/* ===== Stat Cards ===== */}
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
         {[
           { key: "total", icon: CalendarDaysIcon, label: "Total Jadwal", value: schedules.length },
           { key: "tampil", icon: TableIcon, label: "Ditampilkan", value: filteredSchedules.length },
@@ -120,17 +120,17 @@ export default async function JadwalPage({ searchParams }: Props) {
           }
           const c = gradients[s.key]
           return (
-            <div key={s.key} className={`group relative overflow-hidden rounded-xl p-4 ring-1 ${c.gradient} ${c.ring} shadow-sm transition-all duration-200 hover:shadow-md`}>
-              <div className="flex items-start justify-between">
-                <div className="space-y-1.5">
-                  <p className="text-xs font-medium tracking-wide text-muted-foreground/80 uppercase">{s.label}</p>
-                  <p className="text-2xl font-bold tabular-nums tracking-tight">{s.value}</p>
+            <div key={s.key} className={`group relative overflow-hidden rounded-xl p-3 sm:p-4 ring-1 ${c.gradient} ${c.ring} shadow-xs transition-all duration-200 hover:shadow-md`}>
+              <div className="flex items-start justify-between gap-2">
+                <div className="space-y-1">
+                  <p className="text-[10px] sm:text-xs font-medium tracking-wide text-muted-foreground/80 uppercase">{s.label}</p>
+                  <p className="text-xl sm:text-2xl font-bold tabular-nums tracking-tight">{s.value}</p>
                 </div>
-                <div className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${c.iconBg}`}>
-                  <s.icon className="size-4" />
+                <div className={`flex size-8 sm:size-10 shrink-0 items-center justify-center rounded-lg ${c.iconBg}`}>
+                  <s.icon className="size-3.5 sm:size-4" />
                 </div>
               </div>
-              <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-muted/50">
+              <div className="mt-2.5 sm:mt-3 h-1 w-full overflow-hidden rounded-full bg-muted/50">
                 <div className="h-full rounded-full bg-gradient-to-r from-primary/40 to-primary/60 transition-all duration-500" style={{ width: `${Math.min((Number(s.value) / statMax) * 100, 100)}%` }} />
               </div>
             </div>
@@ -140,10 +140,10 @@ export default async function JadwalPage({ searchParams }: Props) {
 
       {/* ===== Data Table ===== */}
       <Card>
-        <CardHeader className="gap-4 pb-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <CardHeader className="gap-3 sm:gap-4 p-4 sm:p-6 pb-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex size-8 items-center justify-center rounded-lg bg-cyan-500/10">
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-cyan-500/10">
                 <CalendarDaysIcon className="size-4 text-cyan-500" />
               </div>
               <div>
@@ -151,21 +151,23 @@ export default async function JadwalPage({ searchParams }: Props) {
                 <p className="text-xs text-muted-foreground">Tampilan jadwal per hari dengan timeline jam pelajaran</p>
               </div>
             </div>
-            <ScheduleCreateDialog subjects={subjects} classrooms={classrooms} />
+            <div className="w-full sm:w-auto flex justify-end">
+              <ScheduleCreateDialog subjects={subjects} classrooms={classrooms} />
+            </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-5">
+        <CardContent className="p-4 sm:p-6 pt-0 space-y-4 sm:space-y-5">
           {/* Day tabs */}
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 pt-0.5 max-w-full">
             {days.map((item) => {
               const isActive = day === item
               return (
                 <Link
                   key={item}
                   href={createHref({ day: item })}
-                  className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition-all ${
+                  className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 sm:py-2 text-xs font-medium transition-all ${
                     isActive
-                      ? "bg-primary text-primary-foreground shadow-sm"
+                      ? "bg-primary text-primary-foreground shadow-xs"
                       : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
                   }`}
                 >
@@ -181,17 +183,17 @@ export default async function JadwalPage({ searchParams }: Props) {
           </div>
 
           {/* Schedule cards */}
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {paginatedSchedules.length > 0 ? (
               paginatedSchedules.map((item) => {
                 const subject = subjectById.get(item.subjectId)
                 const classroom = classroomById.get(item.classroomId)
 
                 return (
-                  <div key={item.id} className="grid gap-3 md:grid-cols-[80px_1fr]">
-                    <div className="flex md:flex-col md:items-center">
-                      <div className="min-w-20 rounded-lg border bg-card px-3 py-2 text-center text-sm font-bold text-primary shadow-xs">
-                        {item.startTime}
+                  <div key={item.id} className="grid gap-2 sm:gap-3 md:grid-cols-[80px_1fr]">
+                    <div className="flex md:flex-col md:items-center justify-between md:justify-start">
+                      <div className="min-w-20 rounded-lg border bg-card px-2.5 py-1.5 sm:px-3 sm:py-2 text-center text-xs sm:text-sm font-bold text-primary shadow-2xs">
+                        {item.startTime} {item.endTime ? `— ${item.endTime}` : ""}
                       </div>
                       <div className="hidden h-8 w-px bg-border md:block" />
                       <div className="hidden text-[10px] text-muted-foreground md:block">
@@ -199,11 +201,11 @@ export default async function JadwalPage({ searchParams }: Props) {
                       </div>
                     </div>
 
-                    <div className="group relative overflow-hidden rounded-xl border bg-card p-4 shadow-sm transition-all duration-200 hover:shadow-md hover:border-primary/30">
+                    <div className="group relative overflow-hidden rounded-xl border bg-card p-3.5 sm:p-4 shadow-2xs transition-all duration-200 hover:shadow-md hover:border-primary/30">
                       <div className="absolute inset-y-0 left-0 w-1 rounded-l-xl bg-gradient-to-b from-primary to-primary/60" />
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <div className="space-y-2 pl-3">
-                          <div className="flex flex-wrap items-center gap-2">
+                        <div className="space-y-1.5 pl-2.5 sm:pl-3">
+                          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                             <h3 className="text-sm font-semibold">{subject?.name ?? "Mapel tidak ditemukan"}</h3>
                             <Badge variant="secondary" className="border-primary/20 bg-primary/10 text-[10px] font-medium text-primary">
                               Jam {item.jamKe}
@@ -212,38 +214,40 @@ export default async function JadwalPage({ searchParams }: Props) {
                               <Badge variant="outline" className="text-[10px]">{subject.kode}</Badge>
                             ) : null}
                           </div>
-                          <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                            <span className="inline-flex items-center gap-1">
+                          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 text-xs text-muted-foreground">
+                            <span className="inline-flex items-center gap-1 font-medium">
                               <GraduationCapIcon className="size-3.5" />
                               {classroom?.name ?? "Kelas tidak ditemukan"}
                             </span>
-                            <span className="inline-flex items-center gap-1 font-mono text-primary">
+                            <span className="inline-flex items-center gap-1 font-mono text-primary text-xs">
                               <ClockIcon className="size-3.5" />
                               {item.startTime} — {item.endTime}
                             </span>
                           </div>
                         </div>
-                        <ScheduleActions item={item} subjects={subjects} classrooms={classrooms} />
+                        <div className="flex items-center justify-end pt-2 sm:pt-0 border-t sm:border-0 border-border/40">
+                          <ScheduleActions item={item} subjects={subjects} classrooms={classrooms} />
+                        </div>
                       </div>
                     </div>
                   </div>
                 )
               })
             ) : (
-              <div className="flex flex-col items-center gap-2 rounded-xl border py-12">
+              <div className="flex flex-col items-center gap-2 rounded-xl border py-12 text-center p-4">
                 <CalendarDaysIcon className="size-8 text-muted-foreground/40" />
                 <p className="text-xs text-muted-foreground">Tidak ada jadwal yang cocok.</p>
               </div>
             )}
           </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs text-muted-foreground">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pt-2">
+            <p className="text-xs text-muted-foreground text-center sm:text-left">
               Menampilkan {paginatedSchedules.length ? startIndex + 1 : 0}-
               {Math.min(startIndex + paginatedSchedules.length, filteredSchedules.length)} dari {filteredSchedules.length} data
             </p>
-            <Pagination className="sm:mx-0 sm:w-auto">
-              <PaginationContent>
+            <Pagination className="justify-center sm:justify-end sm:mx-0 sm:w-auto">
+              <PaginationContent className="gap-1">
                 <PaginationItem>
                   <PaginationPrevious
                     text="Sebelumnya"
@@ -264,7 +268,7 @@ export default async function JadwalPage({ searchParams }: Props) {
                     text="Berikutnya"
                     href={createHref({ day, page: Math.min(safePage + 1, totalPages) })}
                     aria-disabled={safePage === totalPages}
-                    className={safePage === totalPages ? "pointer-events-none opacity-50" : undefined}
+                    className={safePage === totalPages ? "pointer-events-none opacity-50 text-xs" : "text-xs"}
                   />
                 </PaginationItem>
               </PaginationContent>

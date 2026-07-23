@@ -148,23 +148,23 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
   const filledSchedules = filteredSchedulesToday.filter((item) => attendanceBySchedule.has(item.id)).length
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4 sm:gap-5">
       {/* ===== Page Header ===== */}
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-rose-600 via-rose-600/90 to-rose-500/80 p-5 shadow-lg shadow-rose-500/20">
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-rose-600 via-rose-600/90 to-rose-500/80 p-4 sm:p-5 shadow-lg shadow-rose-500/20">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
-        <div className="relative flex items-center gap-4">
-          <div className="flex size-12 items-center justify-center rounded-xl bg-white/15 ring-2 ring-white/20">
-            <ClipboardCheckIcon className="size-6 text-white" />
+        <div className="relative flex items-center gap-3 sm:gap-4">
+          <div className="flex size-10 sm:size-12 shrink-0 items-center justify-center rounded-xl bg-white/15 ring-2 ring-white/20">
+            <ClipboardCheckIcon className="size-5 sm:size-6 text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-semibold text-white">Kehadiran</h1>
-            <p className="text-sm text-white/70">Isi kehadiran siswa berdasarkan jadwal yang sudah dibuat.</p>
+            <h1 className="text-base sm:text-lg font-semibold text-white">Kehadiran</h1>
+            <p className="text-xs sm:text-sm text-white/70">Isi kehadiran siswa berdasarkan jadwal yang sudah dibuat.</p>
           </div>
         </div>
       </div>
 
       {/* ===== Stat Cards ===== */}
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
         {[
           { key: "jadwal", icon: CalendarCheckIcon, label: "Jadwal Hari Ini", value: filteredSchedulesToday.length },
           { key: "diisi", icon: TableIcon, label: "Sudah Diisi", value: filledSchedules },
@@ -179,17 +179,17 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
           }
           const c = gradients[s.key]
           return (
-            <div key={s.key} className={`group relative overflow-hidden rounded-xl p-4 ring-1 ${c.gradient} ${c.ring} shadow-sm transition-all duration-200 hover:shadow-md`}>
-              <div className="flex items-start justify-between">
-                <div className="space-y-1.5">
-                  <p className="text-xs font-medium tracking-wide text-muted-foreground/80 uppercase">{s.label}</p>
-                  <p className="text-2xl font-bold tabular-nums tracking-tight">{s.value}</p>
+            <div key={s.key} className={`group relative overflow-hidden rounded-xl p-3 sm:p-4 ring-1 ${c.gradient} ${c.ring} shadow-xs transition-all duration-200 hover:shadow-md`}>
+              <div className="flex items-start justify-between gap-2">
+                <div className="space-y-1">
+                  <p className="text-[10px] sm:text-xs font-medium tracking-wide text-muted-foreground/80 uppercase">{s.label}</p>
+                  <p className="text-xl sm:text-2xl font-bold tabular-nums tracking-tight">{s.value}</p>
                 </div>
-                <div className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${c.iconBg}`}>
-                  <s.icon className="size-4" />
+                <div className={`flex size-8 sm:size-10 shrink-0 items-center justify-center rounded-lg ${c.iconBg}`}>
+                  <s.icon className="size-3.5 sm:size-4" />
                 </div>
               </div>
-              <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-muted/50">
+              <div className="mt-2.5 sm:mt-3 h-1 w-full overflow-hidden rounded-full bg-muted/50">
                 <div className="h-full rounded-full bg-gradient-to-r from-primary/40 to-primary/60 transition-all duration-500" style={{ width: `${Math.min((Number(s.value) / Math.max(filteredSchedulesToday.length, 1)) * 100, 100)}%` }} />
               </div>
             </div>
@@ -199,23 +199,23 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
 
       {/* ===== Tabs ===== */}
       <Tabs defaultValue={selectedTab} className="gap-4">
-        <TabsList>
-          <TabsTrigger value="kehadiran" className="data-[state=active]:shadow-sm data-[state=active]:border-primary hover:bg-muted">
-            <ClipboardCheckIcon />
+        <TabsList className="w-full sm:w-auto grid grid-cols-2 sm:inline-flex h-auto p-1">
+          <TabsTrigger value="kehadiran" className="py-2 text-xs sm:text-sm data-[state=active]:shadow-sm data-[state=active]:border-primary hover:bg-muted">
+            <ClipboardCheckIcon className="size-4" />
             Kehadiran
           </TabsTrigger>
-          <TabsTrigger value="laporan" className="data-[state=active]:shadow-sm data-[state=active]:border-primary hover:bg-muted">
-            <FileTextIcon />
+          <TabsTrigger value="laporan" className="py-2 text-xs sm:text-sm data-[state=active]:shadow-sm data-[state=active]:border-primary hover:bg-muted">
+            <FileTextIcon className="size-4" />
             Laporan
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="kehadiran">
           <Card>
-            <CardHeader className="gap-4 pb-4">
+            <CardHeader className="gap-3 sm:gap-4 p-4 sm:p-6 pb-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex size-8 items-center justify-center rounded-lg bg-rose-500/10">
+                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-rose-500/10">
                     <ClipboardCheckIcon className="size-4 text-rose-500" />
                   </div>
                   <div>
@@ -225,7 +225,7 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
                 </div>
                 <KehadiranFilter classroomId={selectedClassroomId} subjectId={selectedSubjectId} classrooms={classrooms} subjects={subjects} />
               </div>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-1.5 pt-1 sm:pt-0">
                 {[
                   { label: labelDay(selectedDay), variant: "default" as const },
                   { label: "Hari ini", variant: "secondary" as const },
@@ -236,8 +236,8 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
                 ))}
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
+            <CardContent className="p-4 sm:p-6 pt-0">
+              <div className="space-y-3 sm:space-y-4">
                 {filteredSchedulesToday.length > 0 ? (
                   filteredSchedulesToday.map((schedule) => {
                     const subject = subjectById.get(schedule.subjectId)
@@ -250,11 +250,11 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
                     const isFilled = scheduleAttendances.length > 0
 
                     return (
-                      <div key={schedule.id} className="group relative overflow-hidden rounded-xl border bg-card p-4 shadow-sm transition-all duration-200 hover:shadow-md hover:border-primary/30">
+                      <div key={schedule.id} className="group relative overflow-hidden rounded-xl border bg-card p-3.5 sm:p-4 shadow-2xs transition-all duration-200 hover:shadow-md hover:border-primary/30">
                         <div className={`absolute inset-y-0 left-0 w-1 rounded-l-xl ${isFilled ? "bg-gradient-to-b from-emerald-500 to-emerald-400" : "bg-gradient-to-b from-muted-foreground/30 to-muted-foreground/10"}`} />
-                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pl-3">
-                          <div className="space-y-2">
-                            <div className="flex flex-wrap items-center gap-2">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pl-2.5 sm:pl-3">
+                          <div className="space-y-1.5">
+                            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                               <h3 className="text-sm font-semibold">{subject?.name ?? "Mapel tidak ditemukan"}</h3>
                               <Badge variant="secondary" className="border-primary/20 bg-primary/10 text-[10px] font-medium text-primary">Jam {schedule.jamKe}</Badge>
                               <Badge variant="secondary" className={
@@ -270,20 +270,22 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
                               {classroom?.name ?? "Kelas tidak ditemukan"} • {schedule.startTime}–{schedule.endTime} • {classStudents.length} siswa aktif
                             </p>
                           </div>
-                          <AttendanceDialog
-                            date={date}
-                            schedule={schedule}
-                            subjectName={subject?.name ?? "Mapel tidak ditemukan"}
-                            classroomName={classroom?.name ?? "Kelas tidak ditemukan"}
-                            students={classStudents}
-                            statuses={statuses}
-                          />
+                          <div className="w-full sm:w-auto flex justify-end pt-2 sm:pt-0 border-t sm:border-0 border-border/40">
+                            <AttendanceDialog
+                              date={date}
+                              schedule={schedule}
+                              subjectName={subject?.name ?? "Mapel tidak ditemukan"}
+                              classroomName={classroom?.name ?? "Kelas tidak ditemukan"}
+                              students={classStudents}
+                              statuses={statuses}
+                            />
+                          </div>
                         </div>
                       </div>
                     )
                   })
                 ) : (
-                  <div className="flex flex-col items-center gap-2 rounded-xl border py-12">
+                  <div className="flex flex-col items-center gap-2 rounded-xl border py-12 text-center p-4">
                     <ClipboardCheckIcon className="size-8 text-muted-foreground/40" />
                     <p className="text-xs text-muted-foreground">Tidak ada jadwal yang sesuai dengan filter untuk hari {labelDay(selectedDay)}.</p>
                   </div>
@@ -295,10 +297,10 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
 
         <TabsContent value="laporan">
           <Card>
-            <CardHeader className="gap-4 pb-4">
+            <CardHeader className="gap-3 sm:gap-4 p-4 sm:p-6 pb-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex size-8 items-center justify-center rounded-lg bg-rose-500/10">
+                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-rose-500/10">
                     <FileTextIcon className="size-4 text-rose-500" />
                   </div>
                   <div>
@@ -308,7 +310,7 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
                 </div>
                 <AttendanceReportFilter month={reportMonth} classroomId={selectedClassroomId} subjectId={selectedSubjectId} classrooms={classrooms} subjects={subjects} />
               </div>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-1.5 pt-1 sm:pt-0">
                 {[
                   { label: "Laporan Bulanan", variant: "default" as const },
                   { label: labelMonth(reportMonth), variant: "secondary" as const },
@@ -319,8 +321,9 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
                 ))}
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="overflow-hidden rounded-xl border shadow-xs">
+            <CardContent className="p-4 sm:p-6 pt-0">
+              {/* Desktop Table View */}
+              <div className="hidden sm:block overflow-x-auto rounded-xl border shadow-2xs">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-muted/30">
@@ -369,6 +372,58 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
                     )}
                   </TableBody>
                 </Table>
+              </div>
+
+              {/* Mobile Card List View */}
+              <div className="block sm:hidden space-y-3">
+                {reportRows.length > 0 ? (
+                  reportRows.map((row) => (
+                    <div key={row.id} className="rounded-xl border bg-card p-3.5 shadow-2xs space-y-2.5">
+                      <div className="flex items-start justify-between gap-2 border-b pb-2">
+                        <div>
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="text-xs font-semibold">{row.subjectName}</span>
+                            {row.subjectKode && <Badge variant="outline" className="text-[9px] px-1 py-0">{row.subjectKode}</Badge>}
+                          </div>
+                          <p className="text-[11px] text-muted-foreground mt-0.5">
+                            {row.classroomName} • Jam {row.jamKe} ({row.startTime}–{row.endTime})
+                          </p>
+                        </div>
+                        <Badge variant="secondary" className="text-[10px] shrink-0">
+                          {row.date}
+                        </Badge>
+                      </div>
+
+                      <div className="grid grid-cols-5 gap-1.5 text-center">
+                        <div className="rounded-md bg-emerald-500/10 p-1.5 dark:bg-emerald-500/20">
+                          <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">Hadir</p>
+                          <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400">{row.hadir}</p>
+                        </div>
+                        <div className="rounded-md bg-amber-500/10 p-1.5 dark:bg-amber-500/20">
+                          <p className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">Sakit</p>
+                          <p className="text-xs font-bold text-amber-600 dark:text-amber-400">{row.sakit}</p>
+                        </div>
+                        <div className="rounded-md bg-blue-500/10 p-1.5 dark:bg-blue-500/20">
+                          <p className="text-[10px] text-blue-600 dark:text-blue-400 font-medium">Izin</p>
+                          <p className="text-xs font-bold text-blue-600 dark:text-blue-400">{row.izin}</p>
+                        </div>
+                        <div className="rounded-md bg-red-500/10 p-1.5 dark:bg-red-500/20">
+                          <p className="text-[10px] text-red-600 dark:text-red-400 font-medium">Alfa</p>
+                          <p className="text-xs font-bold text-red-600 dark:text-red-400">{row.alfa}</p>
+                        </div>
+                        <div className="rounded-md bg-muted p-1.5">
+                          <p className="text-[10px] text-muted-foreground font-medium">Total</p>
+                          <p className="text-xs font-bold">{row.total}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex flex-col items-center gap-2 rounded-xl border py-12 text-center p-4">
+                    <FileTextIcon className="size-8 text-muted-foreground/40" />
+                    <p className="text-xs text-muted-foreground">Belum ada data kehadiran pada bulan ini.</p>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

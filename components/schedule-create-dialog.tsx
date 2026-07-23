@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const initialState: ScheduleActionState = { success: false, message: "" }
 export type ScheduleOption = { id: string; name: string; kode?: string }
-const days = ["senin", "selasa", "rabu", "kamis", "jumat", "sabtu", "minggu"]
+const days = ["senin", "selasa", "rabu", "kamis", "jumat"]
 
 export function ScheduleCreateDialog({ subjects, classrooms }: { subjects: ScheduleOption[]; classrooms: ScheduleOption[] }) {
   const [open, setOpen] = useState(false)
@@ -25,12 +25,12 @@ export function ScheduleCreateDialog({ subjects, classrooms }: { subjects: Sched
   }, [state])
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild><Button>Tambah Jadwal</Button></DialogTrigger>
-      <DialogContent>
+      <DialogTrigger asChild><Button className="w-full sm:w-auto text-xs sm:text-sm">Tambah Jadwal</Button></DialogTrigger>
+      <DialogContent className="max-w-[calc(100vw-1.5rem)] sm:max-w-lg p-4 sm:p-6">
         <form ref={formRef} action={formAction} className="space-y-4">
-          <DialogHeader><DialogTitle>Tambah Jadwal</DialogTitle><DialogDescription>Masukkan hari, jam, mapel, dan kelas.</DialogDescription></DialogHeader>
+          <DialogHeader><DialogTitle className="text-base sm:text-lg">Tambah Jadwal</DialogTitle><DialogDescription className="text-xs sm:text-sm">Masukkan hari, jam, mapel, dan kelas.</DialogDescription></DialogHeader>
           <ScheduleFormFields subjects={subjects} classrooms={classrooms} disabled={isPending} />
-          <DialogFooter><DialogClose asChild><Button type="button" variant="outline" disabled={isPending}>Batal</Button></DialogClose><Button type="submit" disabled={isPending || !subjects.length || !classrooms.length}>{isPending ? "Menyimpan..." : "Simpan"}</Button></DialogFooter>
+          <DialogFooter className="flex-col-reverse sm:flex-row gap-2 pt-2"><DialogClose asChild><Button type="button" variant="outline" disabled={isPending} className="w-full sm:w-auto text-xs">Batal</Button></DialogClose><Button type="submit" disabled={isPending || !subjects.length || !classrooms.length} className="w-full sm:w-auto text-xs">{isPending ? "Menyimpan..." : "Simpan"}</Button></DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

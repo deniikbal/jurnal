@@ -49,10 +49,10 @@ export function KelasSiswaDialog({ kelasName, siswa }: KelasSiswaDialogProps) {
           {siswa.length} siswa
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Siswa Kelas {kelasName}</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="max-w-[calc(100vw-1.5rem)] sm:max-w-2xl p-4 sm:p-6">
+        <DialogHeader className="text-left">
+          <DialogTitle className="text-base sm:text-lg">Siswa Kelas {kelasName}</DialogTitle>
+          <DialogDescription className="text-xs sm:text-sm">
             Total siswa di kelas ini: {siswa.length}.
           </DialogDescription>
         </DialogHeader>

@@ -113,17 +113,17 @@ export default async function SiswaPage({ searchParams }: SiswaPageProps) {
   const paginatedSiswa = filteredSiswa.slice(startIndex, startIndex + PAGE_SIZE)
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4 sm:gap-5">
       {/* ===== Page Header ===== */}
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-emerald-600 via-emerald-600/90 to-emerald-500/80 p-5 shadow-lg shadow-emerald-500/20">
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-emerald-600 via-emerald-600/90 to-emerald-500/80 p-4 sm:p-5 shadow-lg shadow-emerald-500/20">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
-        <div className="relative flex items-center gap-4">
-          <div className="flex size-12 items-center justify-center rounded-xl bg-white/15 ring-2 ring-white/20">
-            <GraduationCapIcon className="size-6 text-white" />
+        <div className="relative flex items-center gap-3 sm:gap-4">
+          <div className="flex size-10 sm:size-12 shrink-0 items-center justify-center rounded-xl bg-white/15 ring-2 ring-white/20">
+            <GraduationCapIcon className="size-5 sm:size-6 text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-semibold text-white">Siswa</h1>
-            <p className="text-sm text-white/70">
+            <h1 className="text-base sm:text-lg font-semibold text-white">Siswa</h1>
+            <p className="text-xs sm:text-sm text-white/70">
               Kelola data siswa, kelas, jenis kelamin, dan status aktif/keluar.
             </p>
           </div>
@@ -131,7 +131,7 @@ export default async function SiswaPage({ searchParams }: SiswaPageProps) {
       </div>
 
       {/* ===== Stat Cards ===== */}
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
         {[
           { key: "total", icon: GraduationCapIcon, label: "Total Siswa", value: totalSiswa },
           { key: "tampil", icon: LayoutListIcon, label: "Ditampilkan", value: totalFiltered },
@@ -164,18 +164,18 @@ export default async function SiswaPage({ searchParams }: SiswaPageProps) {
           return (
             <div
               key={s.key}
-              className={`group relative overflow-hidden rounded-xl p-4 ring-1 ${c.gradient} ${c.ring} shadow-sm transition-all duration-200 hover:shadow-md`}
+              className={`group relative overflow-hidden rounded-xl p-3 sm:p-4 ring-1 ${c.gradient} ${c.ring} shadow-xs transition-all duration-200 hover:shadow-md`}
             >
-              <div className="flex items-start justify-between">
-                <div className="space-y-1.5">
-                  <p className="text-xs font-medium tracking-wide text-muted-foreground/80 uppercase">{s.label}</p>
-                  <p className="text-2xl font-bold tabular-nums tracking-tight">{s.value}</p>
+              <div className="flex items-start justify-between gap-2">
+                <div className="space-y-1 min-w-0">
+                  <p className="text-[10px] sm:text-xs font-medium tracking-wide text-muted-foreground/80 uppercase">{s.label}</p>
+                  <p className="text-xl sm:text-2xl font-bold tabular-nums tracking-tight">{s.value}</p>
                 </div>
-                <div className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${c.iconBg}`}>
-                  <s.icon className="size-4" />
+                <div className={`flex size-8 sm:size-10 shrink-0 items-center justify-center rounded-lg ${c.iconBg}`}>
+                  <s.icon className="size-3.5 sm:size-4" />
                 </div>
               </div>
-              <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-muted/50">
+              <div className="mt-2.5 sm:mt-3 h-1 w-full overflow-hidden rounded-full bg-muted/50">
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-primary/40 to-primary/60 transition-all duration-500"
                   style={{ width: `${Math.min((Number(s.value) / Math.max(totalSiswa, 1)) * 100, 100)}%` }}
@@ -188,10 +188,10 @@ export default async function SiswaPage({ searchParams }: SiswaPageProps) {
 
       {/* ===== Data Table ===== */}
       <Card>
-        <CardHeader className="gap-4 pb-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <CardHeader className="gap-3 sm:gap-4 p-4 sm:p-6 pb-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex size-8 items-center justify-center rounded-lg bg-emerald-500/10">
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10">
                 <GraduationCapIcon className="size-4 text-emerald-500" />
               </div>
               <div>
@@ -199,9 +199,9 @@ export default async function SiswaPage({ searchParams }: SiswaPageProps) {
                 <p className="text-xs text-muted-foreground">Cari, urutkan, dan lihat data siswa</p>
               </div>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <SiswaImportDialog />
-              <SiswaCreateDialog classrooms={daftarKelas} />
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <div className="flex-1 sm:flex-none"><SiswaImportDialog /></div>
+              <div className="flex-1 sm:flex-none"><SiswaCreateDialog classrooms={daftarKelas} /></div>
             </div>
           </div>
           <SiswaFilter
@@ -212,8 +212,9 @@ export default async function SiswaPage({ searchParams }: SiswaPageProps) {
             classrooms={daftarKelas}
           />
         </CardHeader>
-        <CardContent>
-          <div className="overflow-hidden rounded-xl border shadow-xs">
+        <CardContent className="p-4 sm:p-6 pt-0 space-y-4">
+          {/* Desktop Table View */}
+          <div className="hidden sm:block overflow-x-auto rounded-xl border shadow-2xs">
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/30">
@@ -278,19 +279,69 @@ export default async function SiswaPage({ searchParams }: SiswaPageProps) {
             </Table>
           </div>
 
-          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs text-muted-foreground">
+          {/* Mobile Card List View */}
+          <div className="block sm:hidden space-y-3">
+            {paginatedSiswa.length > 0 ? (
+              paginatedSiswa.map((item, index) => (
+                <div key={item.id} className="rounded-xl border bg-card p-3.5 shadow-2xs space-y-2.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2.5">
+                      <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-xs font-bold text-emerald-500">
+                        {item.name.charAt(0)}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-sm font-bold">{item.name}</h3>
+                          <span className="text-[10px] text-muted-foreground font-medium">#{startIndex + index + 1}</span>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">
+                          NIS: <span className="font-mono text-foreground font-medium">{item.nis ?? "—"}</span> • <span className="capitalize">{item.jenisKelamin}</span>
+                        </p>
+                      </div>
+                    </div>
+                    <Badge
+                      variant="secondary"
+                      className={
+                        item.status === "aktif"
+                          ? "border-emerald-500/20 bg-emerald-500/10 text-[10px] font-medium text-emerald-600 dark:text-emerald-400 shrink-0"
+                          : "border-red-500/20 bg-red-500/10 text-[10px] font-medium text-red-600 dark:text-red-400 shrink-0"
+                      }
+                    >
+                      <span className={`mr-1 inline-block size-1.5 rounded-full ${item.status === "aktif" ? "bg-emerald-500" : "bg-red-500"}`} />
+                      {item.status === "aktif" ? "Aktif" : "Keluar"}
+                    </Badge>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2 border-t border-border/40 text-xs">
+                    <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
+                      <GraduationCapIcon className="size-3.5 text-primary" />
+                      <span className="font-medium text-foreground">{kelasById.get(item.classroomId)?.name ?? "Tanpa Kelas"}</span>
+                    </div>
+                    <SiswaActions siswa={item} classrooms={daftarKelas} />
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="flex flex-col items-center gap-2 rounded-xl border py-12 text-center p-4">
+                <GraduationCapIcon className="size-8 text-muted-foreground/40" />
+                <p className="text-xs text-muted-foreground">Tidak ada data siswa yang cocok.</p>
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pt-2">
+            <p className="text-xs text-muted-foreground text-center sm:text-left">
               Menampilkan {paginatedSiswa.length ? startIndex + 1 : 0}-
               {Math.min(startIndex + paginatedSiswa.length, totalFiltered)} dari {totalFiltered} data
             </p>
-            <Pagination className="sm:mx-0 sm:w-auto">
-              <PaginationContent>
+            <Pagination className="justify-center sm:justify-end sm:mx-0 sm:w-auto">
+              <PaginationContent className="gap-1">
                 <PaginationItem>
                   <PaginationPrevious
                     text="Sebelumnya"
                     href={createPageHref({ q, filter, classroomId, status, page: Math.max(safePage - 1, 1) })}
                     aria-disabled={safePage === 1}
-                    className={safePage === 1 ? "pointer-events-none opacity-50" : undefined}
+                    className={safePage === 1 ? "pointer-events-none opacity-50 text-xs" : "text-xs"}
                   />
                 </PaginationItem>
                 {Array.from({ length: totalPages }, (_, index) => index + 1)
@@ -314,7 +365,7 @@ export default async function SiswaPage({ searchParams }: SiswaPageProps) {
                     text="Berikutnya"
                     href={createPageHref({ q, filter, classroomId, status, page: Math.min(safePage + 1, totalPages) })}
                     aria-disabled={safePage === totalPages}
-                    className={safePage === totalPages ? "pointer-events-none opacity-50" : undefined}
+                    className={safePage === totalPages ? "pointer-events-none opacity-50 text-xs" : "text-xs"}
                   />
                 </PaginationItem>
               </PaginationContent>
