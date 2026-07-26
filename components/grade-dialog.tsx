@@ -223,7 +223,7 @@ function AssessmentList({
   return (
     <div className="space-y-4">
       {!hasWeights ? (
-        <div className="rounded-lg border py-10 text-center text-sm text-muted-foreground">
+        <div className="rounded-sm border py-10 text-center text-sm text-muted-foreground">
           Belum ada komponen bobot nilai untuk mapel ini. Tambahkan dulu di menu
           Bobot Nilai.
         </div>
@@ -239,7 +239,7 @@ function AssessmentList({
             </Button>
           </div>
 
-          <div className="max-h-[55vh] overflow-auto rounded-lg border">
+          <div className="max-h-[55vh] overflow-auto rounded-sm border">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -459,7 +459,7 @@ function AssessmentForm({
             name="applyAll"
             id="applyAll"
             value="1"
-            className="size-4 rounded border-gray-300"
+            className="size-4 rounded-sm border-gray-300"
           />
           <Label htmlFor="applyAll" className="text-sm font-normal cursor-pointer">
             Terapkan juga ke semua kelas dengan mapel ini
@@ -471,7 +471,7 @@ function AssessmentForm({
         <button
           type="button"
           onClick={() => setStatusFilter(statusFilter === "sudah" ? "" : "sudah")}
-          className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs transition-colors hover:bg-muted data-active:bg-muted"
+          className="flex items-center gap-1.5 rounded-sm border px-3 py-1.5 text-xs transition-colors hover:bg-muted data-active:bg-muted"
           data-active={statusFilter === "sudah" || undefined}
         >
           <span className="text-muted-foreground">Sudah dinilai</span>
@@ -480,7 +480,7 @@ function AssessmentForm({
         <button
           type="button"
           onClick={() => setStatusFilter(statusFilter === "belum" ? "" : "belum")}
-          className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs transition-colors hover:bg-muted data-active:bg-muted"
+          className="flex items-center gap-1.5 rounded-sm border px-3 py-1.5 text-xs transition-colors hover:bg-muted data-active:bg-muted"
           data-active={statusFilter === "belum" || undefined}
         >
           <span className="text-muted-foreground">Belum dinilai</span>
@@ -490,7 +490,7 @@ function AssessmentForm({
           <button
             type="button"
             onClick={() => setStatusFilter("")}
-            className="flex items-center gap-1 rounded-lg border px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-muted"
+            className="flex items-center gap-1 rounded-sm border px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-muted"
           >
             Reset
           </button>
@@ -502,7 +502,7 @@ function AssessmentForm({
         )}
       </div>
 
-      <div className="max-h-[45vh] overflow-auto rounded-lg border">
+      <div className="max-h-[45vh] overflow-auto rounded-sm border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -607,14 +607,14 @@ function AssessmentSummary({
 
   if (!columnKeys.length) {
     return (
-      <div className="rounded-lg border py-16 text-center text-sm text-muted-foreground">
+      <div className="rounded-sm border py-16 text-center text-sm text-muted-foreground">
         Belum ada penilaian untuk mapel ini di kelas manapun.
       </div>
     )
   }
 
   return (
-    <div className="max-h-[55vh] overflow-auto rounded-lg border">
+    <div className="max-h-[55vh] overflow-auto rounded-sm border">
       <Table>
         <TableHeader>
           <TableRow>

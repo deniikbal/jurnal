@@ -186,7 +186,7 @@ export function BiodataSiswaFormFields({
         {defaultValues?.fotoRumah && (
           <>
             <input type="hidden" name="existing_foto" value={defaultValues.fotoRumah} />
-            <div className="mt-1 overflow-hidden rounded-lg border">
+            <div className="mt-1 overflow-hidden rounded-sm border">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={getDriveImageUrl(defaultValues.fotoRumah) ?? ""}

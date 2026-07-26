@@ -70,7 +70,7 @@ export function SiswaImportDialog() {
           </div>
 
           {state.errors && state.errors.length > 0 ? (
-            <div className="max-h-40 overflow-y-auto rounded-md border border-destructive/30 bg-destructive/5 p-3 text-xs text-destructive">
+            <div className="max-h-40 overflow-y-auto rounded-sm border border-destructive/30 bg-destructive/5 p-3 text-xs text-destructive">
               <p className="mb-1 font-medium">Baris yang dilewati:</p>
               <ul className="list-inside list-disc space-y-0.5">
                 {state.errors.map((error, index) => (

@@ -1,8 +1,7 @@
 "use client"
 
-import { useEffect, useRef, useState, useTransition } from "react"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { SearchIcon } from "lucide-react"
+import { useEffect, useState } from "react"
+import { RotateCcwIcon, SearchIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -20,89 +19,106 @@ type GradeWeightFilterProps = {
   subjectId: string
   status: string
   subjects: { id: string; name: string; kode: string }[]
+  onSearchChange?: (value: string) => void
+  onFilterChange?: (value: string) => void
+  onSubjectChange?: (value: string) => void
+  onStatusChange?: (value: string) => void
 }
 
-export function GradeWeightFilter({ q, filter, subjectId, status, subjects }: GradeWeightFilterProps) {
-  const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const currentQuery = searchParams.toString()
+export function GradeWeightFilter({
+  q,
+  filter,
+  subjectId,
+  status,
+  subjects,
+  onSearchChange,
+  onFilterChange,
+  onSubjectChange,
+  onStatusChange,
+}: GradeWeightFilterProps) {
   const [search, setSearch] = useState(q)
-  const [isPending, startTransition] = useTransition()
-  const prevSearchRef = useRef(q)
 
   useEffect(() => {
-    const searchChanged = search !== prevSearchRef.current
-    prevSearchRef.current = search
-
     const timeout = window.setTimeout(() => {
-      const params = new URLSearchParams(currentQuery)
-      const trimmedSearch = search.trim()
-      if (trimmedSearch) params.set("q", trimmedSearch)
-      else params.delete("q")
-      if (searchChanged) {
-        params.delete("page")
-      }
-      const nextQuery = params.toString()
-      if (nextQuery === currentQuery) return
-      startTransition(() => router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname))
+      onSearchChange?.(search.trim())
     }, 350)
-    return () => window.clearTimeout(timeout)
-  }, [currentQuery, pathname, router, search, q])
 
-  function updateParam(key: string, value: string, defaultValue: string) {
-    const params = new URLSearchParams(searchParams)
-    if (value !== defaultValue) params.set(key, value)
-    else params.delete(key)
-    params.delete("page")
-    startTransition(() => {
-      const query = params.toString()
-      router.replace(query ? `${pathname}?${query}` : pathname)
-    })
-  }
+    return () => window.clearTimeout(timeout)
+  }, [search, onSearchChange])
+
+  const isDefault =
+    !search && filter === "natural" && subjectId === "all" && status === "all"
 
   function handleReset() {
     setSearch("")
-    startTransition(() => router.replace(pathname))
+    onSearchChange?.("")
+    onFilterChange?.("natural")
+    onSubjectChange?.("all")
+    onStatusChange?.("all")
   }
 
   return (
-    <div className="grid gap-2 lg:grid-cols-[1fr_190px_160px_160px_auto]">
-      <div className="relative">
-        <SearchIcon className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
-        <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Cari nama bobot..." className="pl-8" aria-label="Cari bobot nilai" />
+    <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
+      <div className="relative min-w-0 flex-1">
+        <SearchIcon className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder="Cari nama bobot…"
+          className="h-9 border-border/80 bg-background pl-8 text-sm shadow-none"
+          aria-label="Cari bobot nilai"
+        />
       </div>
-      <Select value={subjectId} onValueChange={(value) => updateParam("subjectId", value, "all")}>
-        <SelectTrigger className="w-full !h-9" aria-label="Filter mapel">
-          <SelectValue placeholder="Semua Mapel" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">Semua Mapel</SelectItem>
-          {subjects.map((subject) => <SelectItem key={subject.id} value={subject.id}>{subject.name}</SelectItem>)}
-        </SelectContent>
-      </Select>
-      <Select value={status} onValueChange={(value) => updateParam("status", value, "all")}>
-        <SelectTrigger className="w-full !h-9" aria-label="Filter status">
-          <SelectValue placeholder="Semua Status" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">Semua Status</SelectItem>
-          <SelectItem value="aktif">Aktif</SelectItem>
-          <SelectItem value="nonaktif">Nonaktif</SelectItem>
-        </SelectContent>
-      </Select>
-      <Select value={filter} onValueChange={(value) => updateParam("filter", value, "natural")}>
-        <SelectTrigger className="w-full !h-9" aria-label="Urutkan bobot">
-          <SelectValue placeholder="Natural" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="natural">Natural</SelectItem>
-          <SelectItem value="za">Nama Z-A</SelectItem>
-          <SelectItem value="terbesar">Bobot Terbesar</SelectItem>
-          <SelectItem value="terkecil">Bobot Terkecil</SelectItem>
-        </SelectContent>
-      </Select>
-      <Button type="button" variant="outline" onClick={handleReset} disabled={isPending || (!search && filter === "natural" && subjectId === "all" && status === "all")}>Reset</Button>
+
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:flex sm:shrink-0">
+        <Select value={subjectId} onValueChange={(value) => onSubjectChange?.(value)}>
+          <SelectTrigger className="h-9 w-full text-sm lg:w-[10rem]" aria-label="Filter mapel">
+            <SelectValue placeholder="Mapel" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Semua mapel</SelectItem>
+            {subjects.map((subject) => (
+              <SelectItem key={subject.id} value={subject.id}>
+                {subject.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={status} onValueChange={(value) => onStatusChange?.(value)}>
+          <SelectTrigger className="h-9 w-full text-sm lg:w-[8.5rem]" aria-label="Filter status">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Semua status</SelectItem>
+            <SelectItem value="aktif">Aktif</SelectItem>
+            <SelectItem value="nonaktif">Nonaktif</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select value={filter} onValueChange={(value) => onFilterChange?.(value)}>
+          <SelectTrigger className="h-9 w-full text-sm lg:w-[9.5rem]" aria-label="Urutkan bobot">
+            <SelectValue placeholder="Urutan" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="natural">Nama A–Z</SelectItem>
+            <SelectItem value="za">Nama Z–A</SelectItem>
+            <SelectItem value="terbesar">Bobot terbesar</SelectItem>
+            <SelectItem value="terkecil">Bobot terkecil</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleReset}
+          disabled={isDefault}
+          className="h-9 gap-1.5 text-sm shadow-none"
+        >
+          <RotateCcwIcon className="size-3.5" />
+          Reset
+        </Button>
+      </div>
     </div>
   )
 }

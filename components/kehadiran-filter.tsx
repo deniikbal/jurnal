@@ -43,16 +43,16 @@ export function KehadiranFilter({
   }
 
   return (
-    <div className="flex flex-col sm:flex-row flex-wrap gap-2 w-full sm:w-auto opacity-100 data-[pending=true]:opacity-70" data-pending={isPending}>
-      <Select
-        value={classroomId}
-        onValueChange={(value) => updateParam("classroomId", value)}
-      >
-        <SelectTrigger className="w-full sm:w-40 !h-9 text-xs sm:text-sm" aria-label="Filter kelas">
-          <SelectValue placeholder="Semua Kelas" />
+    <div
+      className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row data-[pending=true]:opacity-70"
+      data-pending={isPending}
+    >
+      <Select value={classroomId} onValueChange={(value) => updateParam("classroomId", value)}>
+        <SelectTrigger className="h-9 w-full text-sm shadow-none sm:w-40" aria-label="Filter kelas">
+          <SelectValue placeholder="Semua kelas" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">Semua Kelas</SelectItem>
+          <SelectItem value="all">Semua kelas</SelectItem>
           {classrooms.map((classroom) => (
             <SelectItem key={classroom.id} value={classroom.id}>
               {classroom.name}
@@ -60,15 +60,12 @@ export function KehadiranFilter({
           ))}
         </SelectContent>
       </Select>
-      <Select
-        value={subjectId}
-        onValueChange={(value) => updateParam("subjectId", value)}
-      >
-        <SelectTrigger className="w-full sm:w-44 !h-9 text-xs sm:text-sm" aria-label="Filter mapel">
-          <SelectValue placeholder="Semua Mapel" />
+      <Select value={subjectId} onValueChange={(value) => updateParam("subjectId", value)}>
+        <SelectTrigger className="h-9 w-full text-sm shadow-none sm:w-44" aria-label="Filter mapel">
+          <SelectValue placeholder="Semua mapel" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">Semua Mapel</SelectItem>
+          <SelectItem value="all">Semua mapel</SelectItem>
           {subjects.map((subject) => (
             <SelectItem key={subject.id} value={subject.id}>
               {subject.name}

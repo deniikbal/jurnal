@@ -1,18 +1,9 @@
 import type { Metadata } from "next"
-import { CalendarCheckIcon, CheckCircleIcon, ClipboardCheckIcon, FileTextIcon, TableIcon, XCircleIcon } from "lucide-react"
+import Link from "next/link"
 
 import { AttendanceDialog } from "@/components/attendance-dialog"
 import { AttendanceReportFilter } from "@/components/attendance-report-filter"
 import { KehadiranFilter } from "@/components/kehadiran-filter"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import {
   Table,
   TableBody,
@@ -21,8 +12,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { getAttendancesForCurrentUser, getKelasForCurrentUser, getSchedulesForCurrentUser, getSiswaForCurrentUser, getSubjectsForCurrentUser } from "@/lib/dal"
+import {
+  getAttendancesForCurrentUser,
+  getKelasForCurrentUser,
+  getSchedulesForCurrentUser,
+  getSiswaForCurrentUser,
+  getSubjectsForCurrentUser,
+} from "@/lib/dal"
 
 export const metadata: Metadata = { title: "Kehadiran" }
 
@@ -57,6 +53,25 @@ function getDayName(date: string) {
 
 function labelDay(day: string) {
   return day[0].toUpperCase() + day.slice(1)
+}
+
+function buildHref(params: {
+  tab?: string
+  classroomId?: string
+  subjectId?: string
+  month?: string
+}) {
+  const search = new URLSearchParams()
+  if (params.tab && params.tab !== "kehadiran") search.set("tab", params.tab)
+  if (params.classroomId && params.classroomId !== "all") {
+    search.set("classroomId", params.classroomId)
+  }
+  if (params.subjectId && params.subjectId !== "all") {
+    search.set("subjectId", params.subjectId)
+  }
+  if (params.month) search.set("month", params.month)
+  const query = search.toString()
+  return query ? `/dashboard/kehadiran?${query}` : "/dashboard/kehadiran"
 }
 
 export default async function KehadiranPage({ searchParams }: KehadiranPageProps) {
@@ -145,290 +160,350 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
 
   const totalHadir = attendancesToday.filter((item) => item.status === "hadir").length
   const totalTidakHadir = attendancesToday.filter((item) => item.status !== "hadir").length
-  const filledSchedules = filteredSchedulesToday.filter((item) => attendanceBySchedule.has(item.id)).length
+  const filledSchedules = filteredSchedulesToday.filter((item) =>
+    attendanceBySchedule.has(item.id),
+  ).length
+
+  const kehadiranHref = buildHref({
+    tab: "kehadiran",
+    classroomId: selectedClassroomId,
+    subjectId: selectedSubjectId,
+  })
+  const laporanHref = buildHref({
+    tab: "laporan",
+    classroomId: selectedClassroomId,
+    subjectId: selectedSubjectId,
+    month: reportMonth,
+  })
 
   return (
-    <div className="flex flex-col gap-4 sm:gap-5">
-      {/* ===== Page Header ===== */}
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-rose-600 via-rose-600/90 to-rose-500/80 p-4 sm:p-5 shadow-lg shadow-rose-500/20">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
-        <div className="relative flex items-center gap-3 sm:gap-4">
-          <div className="flex size-10 sm:size-12 shrink-0 items-center justify-center rounded-xl bg-white/15 ring-2 ring-white/20">
-            <ClipboardCheckIcon className="size-5 sm:size-6 text-white" />
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-end sm:justify-between">
+        <div className="space-y-1">
+          <p className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">
+            Absensi harian
+          </p>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Kehadiran</h1>
+          <p className="max-w-xl text-sm text-muted-foreground">
+            Isi absensi dari jadwal hari ini, atau lihat rekap bulanan per kelas dan mapel.
+          </p>
+        </div>
+
+        <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-4 sm:gap-x-8">
+          <div>
+            <dt className="text-[11px] text-muted-foreground">Jadwal hari ini</dt>
+            <dd className="font-semibold tabular-nums text-foreground">
+              {filteredSchedulesToday.length}
+            </dd>
           </div>
           <div>
-            <h1 className="text-base sm:text-lg font-semibold text-white">Kehadiran</h1>
-            <p className="text-xs sm:text-sm text-white/70">Isi kehadiran siswa berdasarkan jadwal yang sudah dibuat.</p>
+            <dt className="text-[11px] text-muted-foreground">Sudah diisi</dt>
+            <dd className="font-semibold tabular-nums text-foreground">{filledSchedules}</dd>
           </div>
-        </div>
+          <div>
+            <dt className="text-[11px] text-muted-foreground">Hadir</dt>
+            <dd className="font-semibold tabular-nums text-foreground">{totalHadir}</dd>
+          </div>
+          <div>
+            <dt className="text-[11px] text-muted-foreground">Tidak hadir</dt>
+            <dd className="font-semibold tabular-nums text-foreground">{totalTidakHadir}</dd>
+          </div>
+        </dl>
       </div>
 
-      {/* ===== Stat Cards ===== */}
-      <section className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
-        {[
-          { key: "jadwal", icon: CalendarCheckIcon, label: "Jadwal Hari Ini", value: filteredSchedulesToday.length },
-          { key: "diisi", icon: TableIcon, label: "Sudah Diisi", value: filledSchedules },
-          { key: "hadir", icon: CheckCircleIcon, label: "Hadir", value: totalHadir },
-          { key: "tidak", icon: XCircleIcon, label: "Tidak Hadir", value: totalTidakHadir },
-        ].map((s) => {
-          const gradients: Record<string, { gradient: string; iconBg: string; ring: string }> = {
-            jadwal: { gradient: "from-rose-500/10 via-rose-500/5 to-transparent", iconBg: "bg-rose-500/15 text-rose-500", ring: "ring-rose-500/20" },
-            diisi: { gradient: "from-blue-500/10 via-blue-500/5 to-transparent", iconBg: "bg-blue-500/15 text-blue-500", ring: "ring-blue-500/20" },
-            hadir: { gradient: "from-emerald-500/10 via-emerald-500/5 to-transparent", iconBg: "bg-emerald-500/15 text-emerald-500", ring: "ring-emerald-500/20" },
-            tidak: { gradient: "from-red-500/10 via-red-500/5 to-transparent", iconBg: "bg-red-500/15 text-red-500", ring: "ring-red-500/20" },
-          }
-          const c = gradients[s.key]
-          return (
-            <div key={s.key} className={`group relative overflow-hidden rounded-xl p-3 sm:p-4 ring-1 ${c.gradient} ${c.ring} shadow-xs transition-all duration-200 hover:shadow-md`}>
-              <div className="flex items-start justify-between gap-2">
-                <div className="space-y-1">
-                  <p className="text-[10px] sm:text-xs font-medium tracking-wide text-muted-foreground/80 uppercase">{s.label}</p>
-                  <p className="text-xl sm:text-2xl font-bold tabular-nums tracking-tight">{s.value}</p>
-                </div>
-                <div className={`flex size-8 sm:size-10 shrink-0 items-center justify-center rounded-lg ${c.iconBg}`}>
-                  <s.icon className="size-3.5 sm:size-4" />
-                </div>
-              </div>
-              <div className="mt-2.5 sm:mt-3 h-1 w-full overflow-hidden rounded-full bg-muted/50">
-                <div className="h-full rounded-full bg-gradient-to-r from-primary/40 to-primary/60 transition-all duration-500" style={{ width: `${Math.min((Number(s.value) / Math.max(filteredSchedulesToday.length, 1)) * 100, 100)}%` }} />
-              </div>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-border">
+        <Link
+          href={kehadiranHref}
+          className={`-mb-px border-b-2 pb-2.5 text-sm transition-colors ${
+            selectedTab === "kehadiran"
+              ? "border-foreground font-medium text-foreground"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          Kehadiran
+        </Link>
+        <Link
+          href={laporanHref}
+          className={`-mb-px border-b-2 pb-2.5 text-sm transition-colors ${
+            selectedTab === "laporan"
+              ? "border-foreground font-medium text-foreground"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          Laporan
+        </Link>
+      </div>
+
+      {selectedTab === "kehadiran" ? (
+        <section className="overflow-hidden rounded-md border border-border bg-card">
+          <div className="flex flex-col gap-3 border-b border-border px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+            <div>
+              <h2 className="text-sm font-semibold text-foreground">Jadwal hari ini</h2>
+              <p className="text-xs text-muted-foreground">
+                {labelDay(selectedDay)} · {date}
+                {selectedClassroomId !== "all" &&
+                  ` · ${classroomById.get(selectedClassroomId)?.name ?? "Kelas"}`}
+                {selectedSubjectId !== "all" &&
+                  ` · ${subjectById.get(selectedSubjectId)?.name ?? "Mapel"}`}
+              </p>
             </div>
-          )
-        })}
-      </section>
+            <KehadiranFilter
+              classroomId={selectedClassroomId}
+              subjectId={selectedSubjectId}
+              classrooms={classrooms}
+              subjects={subjects}
+            />
+          </div>
 
-      {/* ===== Tabs ===== */}
-      <Tabs defaultValue={selectedTab} className="gap-4">
-        <TabsList className="w-full sm:w-auto grid grid-cols-2 sm:inline-flex h-auto p-1">
-          <TabsTrigger value="kehadiran" className="py-2 text-xs sm:text-sm data-[state=active]:shadow-sm data-[state=active]:border-primary hover:bg-muted">
-            <ClipboardCheckIcon className="size-4" />
-            Kehadiran
-          </TabsTrigger>
-          <TabsTrigger value="laporan" className="py-2 text-xs sm:text-sm data-[state=active]:shadow-sm data-[state=active]:border-primary hover:bg-muted">
-            <FileTextIcon className="size-4" />
-            Laporan
-          </TabsTrigger>
-        </TabsList>
+          <div className="divide-y divide-border">
+            {filteredSchedulesToday.length > 0 ? (
+              filteredSchedulesToday.map((schedule) => {
+                const subject = subjectById.get(schedule.subjectId)
+                const classroom = classroomById.get(schedule.classroomId)
+                const classStudents = (studentsByClassroom.get(schedule.classroomId) ?? []).toSorted(
+                  (a, b) =>
+                    a.name.localeCompare(b.name, "id-ID", {
+                      numeric: true,
+                      sensitivity: "base",
+                    }),
+                )
+                const scheduleAttendances = attendanceBySchedule.get(schedule.id) ?? []
+                const statuses = Object.fromEntries(
+                  scheduleAttendances.map((item) => [item.siswaId, item.status]),
+                )
+                const isFilled = scheduleAttendances.length > 0
 
-        <TabsContent value="kehadiran">
-          <Card>
-            <CardHeader className="gap-3 sm:gap-4 p-4 sm:p-6 pb-4">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-rose-500/10">
-                    <ClipboardCheckIcon className="size-4 text-rose-500" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-sm font-semibold">Daftar Jadwal Kehadiran</CardTitle>
-                    <p className="text-xs text-muted-foreground">Filter kelas dan mapel, lalu isi keterangan hadir, sakit, izin, atau alfa</p>
-                  </div>
-                </div>
-                <KehadiranFilter classroomId={selectedClassroomId} subjectId={selectedSubjectId} classrooms={classrooms} subjects={subjects} />
-              </div>
-              <div className="flex flex-wrap gap-1.5 pt-1 sm:pt-0">
-                {[
-                  { label: labelDay(selectedDay), variant: "default" as const },
-                  { label: "Hari ini", variant: "secondary" as const },
-                  { label: selectedClassroomId === "all" ? "Semua Kelas" : classroomById.get(selectedClassroomId)?.name ?? "Kelas tidak ditemukan", variant: "outline" as const },
-                  { label: selectedSubjectId === "all" ? "Semua Mapel" : subjectById.get(selectedSubjectId)?.name ?? "Mapel tidak ditemukan", variant: "outline" as const },
-                ].map((b) => (
-                  <Badge key={b.label} variant={b.variant} className="text-[10px]">{b.label}</Badge>
-                ))}
-              </div>
-            </CardHeader>
-            <CardContent className="p-4 sm:p-6 pt-0">
-              <div className="space-y-3 sm:space-y-4">
-                {filteredSchedulesToday.length > 0 ? (
-                  filteredSchedulesToday.map((schedule) => {
-                    const subject = subjectById.get(schedule.subjectId)
-                    const classroom = classroomById.get(schedule.classroomId)
-                    const classStudents = (studentsByClassroom.get(schedule.classroomId) ?? []).toSorted((a, b) =>
-                      a.name.localeCompare(b.name, "id-ID", { numeric: true, sensitivity: "base" }),
-                    )
-                    const scheduleAttendances = attendanceBySchedule.get(schedule.id) ?? []
-                    const statuses = Object.fromEntries(scheduleAttendances.map((item) => [item.siswaId, item.status]))
-                    const isFilled = scheduleAttendances.length > 0
-
-                    return (
-                      <div key={schedule.id} className="group relative overflow-hidden rounded-xl border bg-card p-3.5 sm:p-4 shadow-2xs transition-all duration-200 hover:shadow-md hover:border-primary/30">
-                        <div className={`absolute inset-y-0 left-0 w-1 rounded-l-xl ${isFilled ? "bg-gradient-to-b from-emerald-500 to-emerald-400" : "bg-gradient-to-b from-muted-foreground/30 to-muted-foreground/10"}`} />
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pl-2.5 sm:pl-3">
-                          <div className="space-y-1.5">
-                            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                              <h3 className="text-sm font-semibold">{subject?.name ?? "Mapel tidak ditemukan"}</h3>
-                              <Badge variant="secondary" className="border-primary/20 bg-primary/10 text-[10px] font-medium text-primary">Jam {schedule.jamKe}</Badge>
-                              <Badge variant="secondary" className={
-                                isFilled
-                                  ? "border-emerald-500/20 bg-emerald-500/10 text-[10px] font-medium text-emerald-600 dark:text-emerald-400"
-                                  : "border-muted-foreground/20 bg-muted/50 text-[10px] font-medium text-muted-foreground"
-                              }>
-                                <span className={`mr-1 inline-block size-1.5 rounded-full ${isFilled ? "bg-emerald-500" : "bg-muted-foreground/40"}`} />
-                                {isFilled ? "Sudah diisi" : "Belum diisi"}
-                              </Badge>
-                            </div>
-                            <p className="text-xs text-muted-foreground">
-                              {classroom?.name ?? "Kelas tidak ditemukan"} • {schedule.startTime}–{schedule.endTime} • {classStudents.length} siswa aktif
-                            </p>
-                          </div>
-                          <div className="w-full sm:w-auto flex justify-end pt-2 sm:pt-0 border-t sm:border-0 border-border/40">
-                            <AttendanceDialog
-                              date={date}
-                              schedule={schedule}
-                              subjectName={subject?.name ?? "Mapel tidak ditemukan"}
-                              classroomName={classroom?.name ?? "Kelas tidak ditemukan"}
-                              students={classStudents}
-                              statuses={statuses}
-                            />
-                          </div>
-                        </div>
+                return (
+                  <div
+                    key={schedule.id}
+                    className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5"
+                  >
+                    <div className="min-w-0 space-y-1">
+                      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                        <h3 className="text-sm font-medium text-foreground">
+                          {subject?.name ?? "Mapel tidak ditemukan"}
+                        </h3>
+                        <span className="text-xs tabular-nums text-muted-foreground">
+                          Jam ke-{schedule.jamKe}
+                        </span>
+                        <span className="inline-flex items-center gap-1.5 text-xs">
+                          <span
+                            className={`size-1.5 shrink-0 rounded-full ${
+                              isFilled
+                                ? "bg-emerald-600 dark:bg-emerald-400"
+                                : "bg-stone-400"
+                            }`}
+                            aria-hidden
+                          />
+                          <span
+                            className={
+                              isFilled ? "text-foreground" : "text-muted-foreground"
+                            }
+                          >
+                            {isFilled ? "Sudah diisi" : "Belum diisi"}
+                          </span>
+                        </span>
                       </div>
-                    )
-                  })
-                ) : (
-                  <div className="flex flex-col items-center gap-2 rounded-xl border py-12 text-center p-4">
-                    <ClipboardCheckIcon className="size-8 text-muted-foreground/40" />
-                    <p className="text-xs text-muted-foreground">Tidak ada jadwal yang sesuai dengan filter untuk hari {labelDay(selectedDay)}.</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="laporan">
-          <Card>
-            <CardHeader className="gap-3 sm:gap-4 p-4 sm:p-6 pb-4">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-rose-500/10">
-                    <FileTextIcon className="size-4 text-rose-500" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-sm font-semibold">Laporan Kehadiran</CardTitle>
-                    <p className="text-xs text-muted-foreground">Ringkasan kehadiran berdasarkan data snapshot jadwal saat absensi disimpan</p>
-                  </div>
-                </div>
-                <AttendanceReportFilter month={reportMonth} classroomId={selectedClassroomId} subjectId={selectedSubjectId} classrooms={classrooms} subjects={subjects} />
-              </div>
-              <div className="flex flex-wrap gap-1.5 pt-1 sm:pt-0">
-                {[
-                  { label: "Laporan Bulanan", variant: "default" as const },
-                  { label: labelMonth(reportMonth), variant: "secondary" as const },
-                  { label: selectedClassroomId === "all" ? "Semua Kelas" : classroomById.get(selectedClassroomId)?.name ?? "Kelas tidak ditemukan", variant: "outline" as const },
-                  { label: selectedSubjectId === "all" ? "Semua Mapel" : subjectById.get(selectedSubjectId)?.name ?? "Mapel tidak ditemukan", variant: "outline" as const },
-                ].map((b) => (
-                  <Badge key={b.label} variant={b.variant} className="text-[10px]">{b.label}</Badge>
-                ))}
-              </div>
-            </CardHeader>
-            <CardContent className="p-4 sm:p-6 pt-0">
-              {/* Desktop Table View */}
-              <div className="hidden sm:block overflow-x-auto rounded-xl border shadow-2xs">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-muted/30">
-                      <TableHead className="w-16 text-xs font-semibold text-muted-foreground">No</TableHead>
-                      <TableHead className="text-xs font-semibold text-muted-foreground">Tanggal</TableHead>
-                      <TableHead className="text-xs font-semibold text-muted-foreground">Mapel</TableHead>
-                      <TableHead className="text-xs font-semibold text-muted-foreground">Kelas</TableHead>
-                      <TableHead className="text-xs font-semibold text-muted-foreground">Jam</TableHead>
-                      <TableHead className="text-xs font-semibold text-muted-foreground text-center">Hadir</TableHead>
-                      <TableHead className="text-xs font-semibold text-muted-foreground text-center">Sakit</TableHead>
-                      <TableHead className="text-xs font-semibold text-muted-foreground text-center">Izin</TableHead>
-                      <TableHead className="text-xs font-semibold text-muted-foreground text-center">Alfa</TableHead>
-                      <TableHead className="text-xs font-semibold text-muted-foreground text-center">Total</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {reportRows.length > 0 ? (
-                      reportRows.map((row, index) => (
-                        <TableRow key={row.id} className="group transition-colors hover:bg-muted/40">
-                          <TableCell className="text-xs text-muted-foreground">{index + 1}</TableCell>
-                          <TableCell>
-                            <div className="flex flex-col">
-                              <span className="text-xs font-medium">{row.date}</span>
-                              <span className="text-[10px] text-muted-foreground">{labelDay(row.day || getDayName(row.date))}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-xs font-medium">{row.subjectName}{row.subjectKode ? ` (${row.subjectKode})` : ""}</TableCell>
-                          <TableCell className="text-xs">{row.classroomName}</TableCell>
-                          <TableCell className="text-xs">Jam {row.jamKe} • {row.startTime}–{row.endTime}</TableCell>
-                          <TableCell className="text-xs text-center font-medium text-emerald-600 dark:text-emerald-400">{row.hadir}</TableCell>
-                          <TableCell className="text-xs text-center text-amber-600 dark:text-amber-400">{row.sakit}</TableCell>
-                          <TableCell className="text-xs text-center text-blue-600 dark:text-blue-400">{row.izin}</TableCell>
-                          <TableCell className="text-xs text-center text-red-600 dark:text-red-400">{row.alfa}</TableCell>
-                          <TableCell className="text-xs text-center font-semibold">{row.total}</TableCell>
-                        </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={10} className="h-32 text-center text-muted-foreground">
-                          <div className="flex flex-col items-center gap-2">
-                            <FileTextIcon className="size-8 text-muted-foreground/40" />
-                            <p className="text-xs">Belum ada data kehadiran pada bulan ini.</p>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-
-              {/* Mobile Card List View */}
-              <div className="block sm:hidden space-y-3">
-                {reportRows.length > 0 ? (
-                  reportRows.map((row) => (
-                    <div key={row.id} className="rounded-xl border bg-card p-3.5 shadow-2xs space-y-2.5">
-                      <div className="flex items-start justify-between gap-2 border-b pb-2">
-                        <div>
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="text-xs font-semibold">{row.subjectName}</span>
-                            {row.subjectKode && <Badge variant="outline" className="text-[9px] px-1 py-0">{row.subjectKode}</Badge>}
-                          </div>
-                          <p className="text-[11px] text-muted-foreground mt-0.5">
-                            {row.classroomName} • Jam {row.jamKe} ({row.startTime}–{row.endTime})
-                          </p>
-                        </div>
-                        <Badge variant="secondary" className="text-[10px] shrink-0">
-                          {row.date}
-                        </Badge>
-                      </div>
-
-                      <div className="grid grid-cols-5 gap-1.5 text-center">
-                        <div className="rounded-md bg-emerald-500/10 p-1.5 dark:bg-emerald-500/20">
-                          <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">Hadir</p>
-                          <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400">{row.hadir}</p>
-                        </div>
-                        <div className="rounded-md bg-amber-500/10 p-1.5 dark:bg-amber-500/20">
-                          <p className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">Sakit</p>
-                          <p className="text-xs font-bold text-amber-600 dark:text-amber-400">{row.sakit}</p>
-                        </div>
-                        <div className="rounded-md bg-blue-500/10 p-1.5 dark:bg-blue-500/20">
-                          <p className="text-[10px] text-blue-600 dark:text-blue-400 font-medium">Izin</p>
-                          <p className="text-xs font-bold text-blue-600 dark:text-blue-400">{row.izin}</p>
-                        </div>
-                        <div className="rounded-md bg-red-500/10 p-1.5 dark:bg-red-500/20">
-                          <p className="text-[10px] text-red-600 dark:text-red-400 font-medium">Alfa</p>
-                          <p className="text-xs font-bold text-red-600 dark:text-red-400">{row.alfa}</p>
-                        </div>
-                        <div className="rounded-md bg-muted p-1.5">
-                          <p className="text-[10px] text-muted-foreground font-medium">Total</p>
-                          <p className="text-xs font-bold">{row.total}</p>
-                        </div>
-                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {classroom?.name ?? "Kelas tidak ditemukan"}
+                        <span className="mx-1.5 text-border">·</span>
+                        {schedule.startTime}–{schedule.endTime}
+                        <span className="mx-1.5 text-border">·</span>
+                        {classStudents.length} siswa aktif
+                      </p>
                     </div>
+                    <div className="shrink-0 self-end sm:self-center">
+                      <AttendanceDialog
+                        date={date}
+                        schedule={schedule}
+                        subjectName={subject?.name ?? "Mapel tidak ditemukan"}
+                        classroomName={classroom?.name ?? "Kelas tidak ditemukan"}
+                        students={classStudents}
+                        statuses={statuses}
+                      />
+                    </div>
+                  </div>
+                )
+              })
+            ) : (
+              <div className="px-4 py-14 text-center sm:px-5">
+                <p className="text-sm text-muted-foreground">
+                  Tidak ada jadwal untuk {labelDay(selectedDay)}
+                  {selectedClassroomId !== "all" || selectedSubjectId !== "all"
+                    ? " dengan filter ini"
+                    : ""}
+                  .
+                </p>
+              </div>
+            )}
+          </div>
+        </section>
+      ) : (
+        <section className="overflow-hidden rounded-md border border-border bg-card">
+          <div className="flex flex-col gap-3 border-b border-border px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+            <div>
+              <h2 className="text-sm font-semibold text-foreground">Laporan bulanan</h2>
+              <p className="text-xs text-muted-foreground">
+                {labelMonth(reportMonth)} · {reportRows.length} sesi tercatat
+              </p>
+            </div>
+            <AttendanceReportFilter
+              month={reportMonth}
+              classroomId={selectedClassroomId}
+              subjectId={selectedSubjectId}
+              classrooms={classrooms}
+              subjects={subjects}
+            />
+          </div>
+
+          <div className="hidden sm:block">
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="w-12 pl-5 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+                    No
+                  </TableHead>
+                  <TableHead className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+                    Tanggal
+                  </TableHead>
+                  <TableHead className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+                    Mapel
+                  </TableHead>
+                  <TableHead className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+                    Kelas
+                  </TableHead>
+                  <TableHead className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+                    Jam
+                  </TableHead>
+                  <TableHead className="text-center text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+                    H
+                  </TableHead>
+                  <TableHead className="text-center text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+                    S
+                  </TableHead>
+                  <TableHead className="text-center text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+                    I
+                  </TableHead>
+                  <TableHead className="text-center text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+                    A
+                  </TableHead>
+                  <TableHead className="pr-5 text-center text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+                    Total
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {reportRows.length > 0 ? (
+                  reportRows.map((row, index) => (
+                    <TableRow key={row.id} className="group">
+                      <TableCell className="pl-5 text-xs tabular-nums text-muted-foreground">
+                        {index + 1}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col">
+                          <span className="font-mono text-xs tabular-nums text-foreground">
+                            {row.date}
+                          </span>
+                          <span className="text-[11px] text-muted-foreground">
+                            {labelDay(row.day || getDayName(row.date))}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-sm text-foreground">
+                        {row.subjectName}
+                        {row.subjectKode ? (
+                          <span className="ml-1 text-xs text-muted-foreground">
+                            ({row.subjectKode})
+                          </span>
+                        ) : null}
+                      </TableCell>
+                      <TableCell className="text-sm text-foreground">
+                        {row.classroomName}
+                      </TableCell>
+                      <TableCell className="text-xs tabular-nums text-muted-foreground">
+                        {row.jamKe} · {row.startTime}–{row.endTime}
+                      </TableCell>
+                      <TableCell className="text-center text-xs tabular-nums text-foreground">
+                        {row.hadir}
+                      </TableCell>
+                      <TableCell className="text-center text-xs tabular-nums text-muted-foreground">
+                        {row.sakit}
+                      </TableCell>
+                      <TableCell className="text-center text-xs tabular-nums text-muted-foreground">
+                        {row.izin}
+                      </TableCell>
+                      <TableCell className="text-center text-xs tabular-nums text-muted-foreground">
+                        {row.alfa}
+                      </TableCell>
+                      <TableCell className="pr-5 text-center text-xs font-medium tabular-nums text-foreground">
+                        {row.total}
+                      </TableCell>
+                    </TableRow>
                   ))
                 ) : (
-                  <div className="flex flex-col items-center gap-2 rounded-xl border py-12 text-center p-4">
-                    <FileTextIcon className="size-8 text-muted-foreground/40" />
-                    <p className="text-xs text-muted-foreground">Belum ada data kehadiran pada bulan ini.</p>
-                  </div>
+                  <TableRow className="hover:bg-transparent">
+                    <TableCell colSpan={10} className="h-40 text-center">
+                      <p className="text-sm text-muted-foreground">
+                        Belum ada data kehadiran pada bulan ini.
+                      </p>
+                    </TableCell>
+                  </TableRow>
                 )}
+              </TableBody>
+            </Table>
+          </div>
+
+          <div className="divide-y divide-border sm:hidden">
+            {reportRows.length > 0 ? (
+              reportRows.map((row) => (
+                <div key={row.id} className="space-y-3 px-4 py-3.5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 space-y-0.5">
+                      <p className="text-sm font-medium text-foreground">{row.subjectName}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {row.classroomName}
+                        <span className="mx-1.5 text-border">·</span>
+                        Jam {row.jamKe} ({row.startTime}–{row.endTime})
+                      </p>
+                    </div>
+                    <span className="shrink-0 font-mono text-[11px] tabular-nums text-muted-foreground">
+                      {row.date}
+                    </span>
+                  </div>
+                  <dl className="grid grid-cols-5 gap-2 text-center text-xs">
+                    <div>
+                      <dt className="text-[10px] text-muted-foreground">H</dt>
+                      <dd className="font-medium tabular-nums text-foreground">{row.hadir}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-[10px] text-muted-foreground">S</dt>
+                      <dd className="tabular-nums text-muted-foreground">{row.sakit}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-[10px] text-muted-foreground">I</dt>
+                      <dd className="tabular-nums text-muted-foreground">{row.izin}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-[10px] text-muted-foreground">A</dt>
+                      <dd className="tabular-nums text-muted-foreground">{row.alfa}</dd>
+                    </div>
+                    <div>
+                      <dt className="text-[10px] text-muted-foreground">Tot</dt>
+                      <dd className="font-medium tabular-nums text-foreground">{row.total}</dd>
+                    </div>
+                  </dl>
+                </div>
+              ))
+            ) : (
+              <div className="px-4 py-14 text-center">
+                <p className="text-sm text-muted-foreground">
+                  Belum ada data kehadiran pada bulan ini.
+                </p>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            )}
+          </div>
+        </section>
+      )}
     </div>
   )
 }

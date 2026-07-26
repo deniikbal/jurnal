@@ -144,21 +144,21 @@ export function AttendanceDialog({
           </DialogHeader>
 
           {/* Live Summary Chips & Quick Action */}
-          <div className="flex flex-col gap-2 shrink-0 bg-muted/40 p-2.5 sm:p-3 rounded-xl border">
+          <div className="flex flex-col gap-2 shrink-0 bg-muted/40 p-2.5 sm:p-3 rounded-sm border">
             <div className="grid grid-cols-4 gap-1.5 text-center">
-              <div className="rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20 p-1.5">
+              <div className="rounded-sm bg-emerald-500/10 dark:bg-emerald-500/20 p-1.5">
                 <span className="block text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">Hadir</span>
                 <span className="block text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400">{countHadir}</span>
               </div>
-              <div className="rounded-lg bg-amber-500/10 dark:bg-amber-500/20 p-1.5">
+              <div className="rounded-sm bg-amber-500/10 dark:bg-amber-500/20 p-1.5">
                 <span className="block text-[10px] text-amber-600 dark:text-amber-400 font-medium">Sakit</span>
                 <span className="block text-xs sm:text-sm font-bold text-amber-600 dark:text-amber-400">{countSakit}</span>
               </div>
-              <div className="rounded-lg bg-blue-500/10 dark:bg-blue-500/20 p-1.5">
+              <div className="rounded-sm bg-blue-500/10 dark:bg-blue-500/20 p-1.5">
                 <span className="block text-[10px] text-blue-600 dark:text-blue-400 font-medium">Izin</span>
                 <span className="block text-xs sm:text-sm font-bold text-blue-600 dark:text-blue-400">{countIzin}</span>
               </div>
-              <div className="rounded-lg bg-rose-500/10 dark:bg-rose-500/20 p-1.5">
+              <div className="rounded-sm bg-rose-500/10 dark:bg-rose-500/20 p-1.5">
                 <span className="block text-[10px] text-rose-600 dark:text-rose-400 font-medium">Alfa</span>
                 <span className="block text-xs sm:text-sm font-bold text-rose-600 dark:text-rose-400">{countAlfa}</span>
               </div>
@@ -190,7 +190,7 @@ export function AttendanceDialog({
           </div>
 
           {/* Student List (Scrollable Area) */}
-          <div className="flex-1 overflow-y-auto min-h-0 rounded-xl border bg-background">
+          <div className="flex-1 overflow-y-auto min-h-0 rounded-sm border bg-background">
             {/* Desktop Table View (sm screens and above) */}
             <div className="hidden sm:block">
               <Table>
@@ -258,7 +258,7 @@ export function AttendanceDialog({
                 filteredStudents.map((student, index) => {
                   const currentStatus = selectedStatuses[student.id] ?? "hadir"
                   return (
-                    <div key={student.id} className="rounded-xl border bg-card p-3 shadow-2xs space-y-2">
+                    <div key={student.id} className="rounded-sm border bg-card p-3 shadow-2xs space-y-2">
                       <input type="hidden" name={`status-${student.id}`} value={currentStatus} />
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -283,7 +283,7 @@ export function AttendanceDialog({
                               disabled={isPending}
                               onClick={() => setStudentStatus(student.id, option.value)}
                               className={cn(
-                                "flex h-9 items-center justify-center rounded-lg text-xs font-semibold transition-all active:scale-95 touch-manipulation border",
+                                "flex h-9 items-center justify-center rounded-sm text-xs font-semibold transition-all active:scale-95 touch-manipulation border",
                                 isSelected
                                   ? option.value === "hadir"
                                     ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"

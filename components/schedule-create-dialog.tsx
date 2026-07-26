@@ -14,7 +14,15 @@ const initialState: ScheduleActionState = { success: false, message: "" }
 export type ScheduleOption = { id: string; name: string; kode?: string }
 const days = ["senin", "selasa", "rabu", "kamis", "jumat"]
 
-export function ScheduleCreateDialog({ subjects, classrooms }: { subjects: ScheduleOption[]; classrooms: ScheduleOption[] }) {
+export function ScheduleCreateDialog({
+  subjects,
+  classrooms,
+  triggerClassName,
+}: {
+  subjects: ScheduleOption[]
+  classrooms: ScheduleOption[]
+  triggerClassName?: string
+}) {
   const [open, setOpen] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
   const [state, formAction, isPending] = useActionState(createSchedule, initialState)
@@ -25,7 +33,11 @@ export function ScheduleCreateDialog({ subjects, classrooms }: { subjects: Sched
   }, [state])
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild><Button className="w-full sm:w-auto text-xs sm:text-sm">Tambah Jadwal</Button></DialogTrigger>
+      <DialogTrigger asChild>
+        <Button className={triggerClassName ?? "w-full sm:w-auto text-xs sm:text-sm"}>
+          Tambah Jadwal
+        </Button>
+      </DialogTrigger>
       <DialogContent className="max-w-[calc(100vw-1.5rem)] sm:max-w-lg p-4 sm:p-6">
         <form ref={formRef} action={formAction} className="space-y-4">
           <DialogHeader><DialogTitle className="text-base sm:text-lg">Tambah Jadwal</DialogTitle><DialogDescription className="text-xs sm:text-sm">Masukkan hari, jam, mapel, dan kelas.</DialogDescription></DialogHeader>

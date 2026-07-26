@@ -18,7 +18,7 @@ export default async function LoginPage() {
 
   return (
     <main className="flex min-h-svh items-center justify-center p-6">
-      <div className="w-full max-w-sm rounded-xl border bg-card p-6 text-card-foreground shadow-sm">
+      <div className="w-full max-w-sm rounded-sm border bg-card p-6 text-card-foreground shadow-sm">
         <div className="mb-6 space-y-2 text-center">
           <h1 className="text-2xl font-semibold">Masuk ke Jurnal</h1>
           <p className="text-sm text-muted-foreground">

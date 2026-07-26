@@ -57,7 +57,7 @@ export function KelasSiswaDialog({ kelasName, siswa }: KelasSiswaDialogProps) {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="max-h-[60vh] overflow-auto rounded-lg border">
+        <div className="max-h-[60vh] overflow-auto rounded-sm border">
           <Table>
             <TableHeader>
               <TableRow>

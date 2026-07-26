@@ -46,39 +46,46 @@ export function AttendanceReportFilter({
   }
 
   return (
-    <div className="flex flex-col sm:flex-row flex-wrap gap-2 w-full sm:w-auto opacity-100 data-[pending=true]:opacity-70" data-pending={isPending}>
+    <div
+      className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row data-[pending=true]:opacity-70"
+      data-pending={isPending}
+    >
       <Input
         type="month"
         defaultValue={month}
         onChange={(event) => updateParam("month", event.target.value, "")}
-        className="w-full sm:w-auto !h-9 text-xs sm:text-sm"
+        className="h-9 w-full border-border/80 bg-background text-sm shadow-none sm:w-auto"
         aria-label="Filter bulan laporan"
       />
-      <Select
-        value={classroomId}
-        onValueChange={(value) => updateParam("classroomId", value)}
-      >
-        <SelectTrigger className="w-full sm:w-40 !h-9 text-xs sm:text-sm" aria-label="Filter kelas laporan">
-          <SelectValue placeholder="Semua Kelas" />
+      <Select value={classroomId} onValueChange={(value) => updateParam("classroomId", value)}>
+        <SelectTrigger
+          className="h-9 w-full text-sm shadow-none sm:w-40"
+          aria-label="Filter kelas laporan"
+        >
+          <SelectValue placeholder="Semua kelas" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">Semua Kelas</SelectItem>
+          <SelectItem value="all">Semua kelas</SelectItem>
           {classrooms.map((classroom) => (
-            <SelectItem key={classroom.id} value={classroom.id}>{classroom.name}</SelectItem>
+            <SelectItem key={classroom.id} value={classroom.id}>
+              {classroom.name}
+            </SelectItem>
           ))}
         </SelectContent>
       </Select>
-      <Select
-        value={subjectId}
-        onValueChange={(value) => updateParam("subjectId", value)}
-      >
-        <SelectTrigger className="w-full sm:w-44 !h-9 text-xs sm:text-sm" aria-label="Filter mapel laporan">
-          <SelectValue placeholder="Semua Mapel" />
+      <Select value={subjectId} onValueChange={(value) => updateParam("subjectId", value)}>
+        <SelectTrigger
+          className="h-9 w-full text-sm shadow-none sm:w-44"
+          aria-label="Filter mapel laporan"
+        >
+          <SelectValue placeholder="Semua mapel" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">Semua Mapel</SelectItem>
+          <SelectItem value="all">Semua mapel</SelectItem>
           {subjects.map((subject) => (
-            <SelectItem key={subject.id} value={subject.id}>{subject.name}</SelectItem>
+            <SelectItem key={subject.id} value={subject.id}>
+              {subject.name}
+            </SelectItem>
           ))}
         </SelectContent>
       </Select>

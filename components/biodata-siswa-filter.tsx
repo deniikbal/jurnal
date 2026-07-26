@@ -77,40 +77,45 @@ export function BiodataSiswaFilter({ q, filter }: BiodataSiswaFilterProps) {
   }
 
   return (
-    <div className="flex flex-col sm:flex-row flex-wrap gap-2 w-full">
-      <div className="relative flex-1 min-w-0">
-        <SearchIcon className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
+    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+      <div className="relative min-w-0 flex-1">
+        <SearchIcon className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
         <Input
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          placeholder="Cari nama siswa..."
-          className="pl-8 text-xs sm:text-sm"
+          placeholder="Cari nama, orang tua, atau nomor HP..."
+          className="h-9 border-0 bg-transparent pl-8 text-xs shadow-none focus-visible:ring-0 sm:text-sm"
           aria-label="Cari biodata siswa"
         />
       </div>
-      <Select
-        value={filter}
-        onValueChange={(value) => updateParam("filter", value, "natural")}
-      >
-        <SelectTrigger className="w-full sm:w-40 !h-9 text-xs sm:text-sm" aria-label="Urutkan">
-          <SelectValue placeholder="Natural" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="natural">Natural</SelectItem>
-          <SelectItem value="za">Nama Z-A</SelectItem>
-          <SelectItem value="terbaru">Terbaru</SelectItem>
-          <SelectItem value="terlama">Terlama</SelectItem>
-        </SelectContent>
-      </Select>
-      <Button
-        type="button"
-        variant="outline"
-        onClick={handleReset}
-        disabled={isPending || (!search && filter === "natural")}
-        className="w-full sm:w-auto text-xs sm:text-sm"
-      >
-        Reset
-      </Button>
+      <div className="flex items-center gap-2 sm:shrink-0">
+        <Select
+          value={filter}
+          onValueChange={(value) => updateParam("filter", value, "natural")}
+        >
+          <SelectTrigger
+            className="h-9 w-full border-0 bg-transparent shadow-none sm:w-36 text-xs sm:text-sm"
+            aria-label="Urutkan"
+          >
+            <SelectValue placeholder="Natural" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="natural">Natural</SelectItem>
+            <SelectItem value="za">Nama Z-A</SelectItem>
+            <SelectItem value="terbaru">Terbaru</SelectItem>
+            <SelectItem value="terlama">Terlama</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={handleReset}
+          disabled={isPending || (!search && filter === "natural")}
+          className="h-9 shrink-0 text-xs sm:text-sm"
+        >
+          Reset
+        </Button>
+      </div>
     </div>
   )
 }

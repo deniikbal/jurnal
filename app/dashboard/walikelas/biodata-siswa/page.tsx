@@ -1,5 +1,12 @@
 import type { Metadata } from "next"
-import { HomeIcon, TableIcon, UsersIcon } from "lucide-react"
+import {
+  AlertTriangleIcon,
+  CheckCircle2Icon,
+  CircleDashedIcon,
+  HomeIcon,
+  PhoneIcon,
+  UsersIcon,
+} from "lucide-react"
 
 import { BiodataFotoPreview } from "@/components/biodata-foto-preview"
 import { BiodataSiswaActions } from "@/components/biodata-siswa-actions"
@@ -7,7 +14,6 @@ import { BiodataSiswaCreateDialog } from "@/components/biodata-siswa-create-dial
 import { BiodataSiswaImportDialog } from "@/components/biodata-siswa-import-dialog"
 import { BiodataSiswaFilter } from "@/components/biodata-siswa-filter"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Pagination,
   PaginationContent,
@@ -17,14 +23,10 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination"
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { getBiodataSiswaForCurrentUser, getKelasForCurrentUser } from "@/lib/dal"
+  getBiodataSiswaForCurrentUser,
+  getKelasForCurrentUser,
+} from "@/lib/dal"
+import { cn } from "@/lib/utils"
 
 export const metadata: Metadata = {
   title: "Biodata Siswa",
@@ -45,6 +47,20 @@ const naturalCollator = new Intl.Collator("id-ID", {
   sensitivity: "base",
 })
 
+type BiodataItem = {
+  id: string
+  nama: string
+  alamat: string | null
+  nohpOrtu: string | null
+  namaAyah: string | null
+  namaIbu: string | null
+  statusPernikahan: string | null
+  kondisiKeluarga: string | null
+  fotoRumah: string | null
+  createdAt: Date
+  updatedAt: Date
+}
+
 function createPageHref(params: {
   q: string
   filter: string
@@ -57,7 +73,54 @@ function createPageHref(params: {
   if (params.page > 1) searchParams.set("page", String(params.page))
 
   const query = searchParams.toString()
-  return query ? `/dashboard/walikelas/biodata-siswa?${query}` : "/dashboard/walikelas/biodata-siswa"
+  return query
+    ? `/dashboard/walikelas/biodata-siswa?${query}`
+    : "/dashboard/walikelas/biodata-siswa"
+}
+
+function getInitials(nama: string) {
+  return nama
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase()
+}
+
+function getCompleteness(item: BiodataItem) {
+  const fields = [
+    item.alamat,
+    item.nohpOrtu,
+    item.namaAyah,
+    item.namaIbu,
+    item.statusPernikahan,
+    item.fotoRumah,
+  ]
+  const filled = fields.filter((value) => Boolean(value?.toString().trim())).length
+  const total = fields.length
+  const percent = Math.round((filled / total) * 100)
+
+  return {
+    filled,
+    total,
+    percent,
+    isComplete: filled === total,
+  }
+}
+
+function isAttention(item: BiodataItem) {
+  return Boolean(item.kondisiKeluarga) || item.statusPernikahan === "Cerai Hidup" || item.statusPernikahan === "Cerai Meninggal"
+}
+
+function parentsLabel(item: BiodataItem) {
+  const ayah = item.namaAyah?.trim()
+  const ibu = item.namaIbu?.trim()
+
+  if (ayah && ibu) return `${ayah} · ${ibu}`
+  if (ayah) return `Ayah: ${ayah}`
+  if (ibu) return `Ibu: ${ibu}`
+  return "Data orang tua belum diisi"
 }
 
 export default async function BiodataSiswaPage({ searchParams }: BiodataPageProps) {
@@ -70,18 +133,28 @@ export default async function BiodataSiswaPage({ searchParams }: BiodataPageProp
     getBiodataSiswaForCurrentUser(),
     getKelasForCurrentUser(),
   ])
+
   const totalData = biodataList.length
+  const completeCount = biodataList.filter((item) => getCompleteness(item).isComplete).length
+  const attentionCount = biodataList.filter((item) => isAttention(item)).length
+  const incompleteCount = totalData - completeCount
 
   const filteredData = biodataList
     .filter((item) => {
-      const query = q.toLowerCase()
-      return (
-        !query ||
-        item.nama.toLowerCase().includes(query) ||
-        item.alamat?.toLowerCase().includes(query) ||
-        item.namaAyah?.toLowerCase().includes(query) ||
-        item.namaIbu?.toLowerCase().includes(query)
-      )
+      if (!q) return true
+      const haystack = [
+        item.nama,
+        item.alamat,
+        item.nohpOrtu,
+        item.namaAyah,
+        item.namaIbu,
+        item.statusPernikahan,
+        item.kondisiKeluarga,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+      return haystack.includes(q.toLowerCase())
     })
     .sort((a, b) => {
       if (filter === "terlama") return a.createdAt.getTime() - b.createdAt.getTime()
@@ -97,317 +170,408 @@ export default async function BiodataSiswaPage({ searchParams }: BiodataPageProp
   const paginatedData = filteredData.slice(startIndex, startIndex + PAGE_SIZE)
 
   return (
-    <div className="flex flex-col gap-4 sm:gap-5">
-      {/* ===== Page Header ===== */}
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-emerald-700 via-emerald-700/90 to-emerald-600/80 p-4 sm:p-5 shadow-lg shadow-emerald-700/20">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
-        <div className="relative flex items-center gap-3 sm:gap-4">
-          <div className="flex size-10 sm:size-12 shrink-0 items-center justify-center rounded-xl bg-white/15 ring-2 ring-white/20">
-            <UsersIcon className="size-5 sm:size-6 text-white" />
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
+      {/* Quiet case-file header */}
+      <div className="flex flex-col gap-4 border-b border-border/70 pb-5 sm:flex-row sm:items-end sm:justify-between">
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+            <UsersIcon className="size-3.5" />
+            Arsip wali kelas
           </div>
-          <div>
-            <h1 className="text-base sm:text-lg font-semibold text-white">Biodata Siswa</h1>
-            <p className="text-xs sm:text-sm text-white/70">
-              Kelola data biodata siswa, informasi orang tua, dan kondisi keluarga.
-            </p>
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+            Biodata Siswa
+          </h1>
+          <p className="max-w-xl text-sm text-muted-foreground">
+            Roster identitas siswa dan keluarga — ringkas untuk dipantau, detail
+            untuk dilengkapi.
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-2 sm:items-end">
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            <span className="rounded-sm border bg-muted/40 px-2.5 py-1 font-medium tabular-nums">
+              {totalData} siswa
+            </span>
+            <span className="rounded-sm border px-2.5 py-1 text-muted-foreground tabular-nums">
+              {completeCount} lengkap
+            </span>
+            <span
+              className={cn(
+                "rounded-sm border px-2.5 py-1 tabular-nums",
+                attentionCount > 0
+                  ? "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400"
+                  : "text-muted-foreground"
+              )}
+            >
+              {attentionCount} perlu perhatian
+            </span>
+          </div>
+          <div className="flex w-full items-center gap-2 sm:w-auto">
+            <div className="flex-1 sm:flex-none">
+              <BiodataSiswaImportDialog kelasList={kelasList} />
+            </div>
+            <div className="flex-1 sm:flex-none">
+              <BiodataSiswaCreateDialog />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* ===== Stat Cards ===== */}
-      <section className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-3">
-        {[
-          { key: "total", icon: UsersIcon, label: "Total Data", value: totalData },
-          { key: "tampil", icon: TableIcon, label: "Ditampilkan", value: totalFiltered },
-          { key: "foto", icon: HomeIcon, label: "Dengan Foto Rumah", value: biodataList.filter((item) => item.fotoRumah).length },
-        ].map((s) => {
-          const gradients: Record<string, { gradient: string; iconBg: string; ring: string }> = {
-            total: {
-              gradient: "from-emerald-500/10 via-emerald-500/5 to-transparent",
-              iconBg: "bg-emerald-500/15 text-emerald-600",
-              ring: "ring-emerald-500/20",
-            },
-            tampil: {
-              gradient: "from-emerald-500/10 via-emerald-500/5 to-transparent",
-              iconBg: "bg-emerald-500/15 text-emerald-500",
-              ring: "ring-emerald-500/20",
-            },
-            foto: {
-              gradient: "from-blue-500/10 via-blue-500/5 to-transparent",
-              iconBg: "bg-blue-500/15 text-blue-500",
-              ring: "ring-blue-500/20",
-            },
-          }
-          const c = gradients[s.key]
-          return (
-            <div
-              key={s.key}
-              className={`group relative overflow-hidden rounded-xl p-3 sm:p-4 ring-1 ${c.gradient} ${c.ring} shadow-xs transition-all duration-200 hover:shadow-md`}
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="space-y-1 min-w-0">
-                  <p className="text-[10px] sm:text-xs font-medium tracking-wide text-muted-foreground/80 uppercase">{s.label}</p>
-                  <p className="text-xl sm:text-2xl font-bold tabular-nums tracking-tight">{s.value}</p>
-                </div>
-                <div className={`flex size-8 sm:size-10 shrink-0 items-center justify-center rounded-lg ${c.iconBg}`}>
-                  <s.icon className="size-3.5 sm:size-4" />
-                </div>
-              </div>
-              <div className="mt-2.5 sm:mt-3 h-1 w-full overflow-hidden rounded-full bg-muted/50">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-primary/40 to-primary/60 transition-all duration-500"
-                  style={{ width: `${Math.min((Number(s.value) / Math.max(totalData, 1)) * 100, 100)}%` }}
-                />
-              </div>
-            </div>
-          )
-        })}
-      </section>
+      {/* Insight strip */}
+      <div className="grid gap-3 sm:grid-cols-3">
+        <div className="rounded-sm border bg-card px-4 py-3">
+          <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+            <CheckCircle2Icon className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+            Lengkap
+          </div>
+          <p className="mt-1.5 text-2xl font-semibold tabular-nums tracking-tight">
+            {completeCount}
+          </p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {totalData > 0
+              ? `${Math.round((completeCount / totalData) * 100)}% dari total roster`
+              : "Belum ada data"}
+          </p>
+        </div>
+        <div className="rounded-sm border bg-card px-4 py-3">
+          <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+            <CircleDashedIcon className="size-3.5" />
+            Belum lengkap
+          </div>
+          <p className="mt-1.5 text-2xl font-semibold tabular-nums tracking-tight">
+            {incompleteCount}
+          </p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Perlu dilengkapi field identitas/keluarga
+          </p>
+        </div>
+        <div className="rounded-sm border bg-card px-4 py-3">
+          <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+            <AlertTriangleIcon className="size-3.5 text-amber-600 dark:text-amber-400" />
+            Perlu perhatian
+          </div>
+          <p className="mt-1.5 text-2xl font-semibold tabular-nums tracking-tight">
+            {attentionCount}
+          </p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Yatim/piatu atau status orang tua khusus
+          </p>
+        </div>
+      </div>
 
-      {/* ===== Data Table ===== */}
-      <Card>
-        <CardHeader className="gap-3 sm:gap-4 p-4 sm:p-6 pb-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10">
-                <UsersIcon className="size-4 text-emerald-600" />
-              </div>
-              <div>
-                <CardTitle className="text-sm font-semibold">Daftar Biodata Siswa</CardTitle>
-                <p className="text-xs text-muted-foreground">Cari, urutkan, dan lihat data biodata siswa</p>
-              </div>
+      {/* Roster board */}
+      <section className="overflow-hidden rounded-sm border bg-card">
+        <div className="flex flex-col gap-3 border-b px-4 py-4 sm:px-5">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-sm font-semibold tracking-tight sm:text-base">
+                Roster siswa
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                {totalFiltered === totalData
+                  ? `${totalFiltered} berkas ditampilkan`
+                  : `${totalFiltered} dari ${totalData} berkas cocok dengan pencarian`}
+              </p>
             </div>
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <div className="flex-1 sm:flex-none"><BiodataSiswaImportDialog kelasList={kelasList} /></div>
-              <div className="flex-1 sm:flex-none"><BiodataSiswaCreateDialog /></div>
-            </div>
+            {kelasList.length > 0 && (
+              <p className="text-[11px] text-muted-foreground sm:text-xs">
+                {kelasList.length} kelas terhubung di sistem
+              </p>
+            )}
           </div>
           <BiodataSiswaFilter q={q} filter={filter} />
-        </CardHeader>
-        <CardContent className="p-4 sm:p-6 pt-0 space-y-4">
-          {/* Desktop Table View */}
-          <div className="hidden sm:block overflow-x-auto rounded-xl border shadow-2xs">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/30">
-                  <TableHead className="w-12 text-xs font-semibold text-muted-foreground">No</TableHead>
-                  <TableHead className="text-xs font-semibold text-muted-foreground">Nama Siswa</TableHead>
-                  <TableHead className="text-xs font-semibold text-muted-foreground">Alamat</TableHead>
-                  <TableHead className="text-xs font-semibold text-muted-foreground">Nama Ayah</TableHead>
-                  <TableHead className="text-xs font-semibold text-muted-foreground">Nama Ibu</TableHead>
-                  <TableHead className="text-xs font-semibold text-muted-foreground">Status Pernikahan</TableHead>
-                  <TableHead className="text-xs font-semibold text-muted-foreground">Kondisi Keluarga</TableHead>
-                  <TableHead className="w-14 text-center text-xs font-semibold text-muted-foreground">Foto</TableHead>
-                  <TableHead className="w-32 text-right text-xs font-semibold text-muted-foreground">Aksi</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {paginatedData.length > 0 ? (
-                  paginatedData.map((item, index) => (
-                    <TableRow key={item.id} className="group transition-colors hover:bg-muted/40">
-                      <TableCell className="text-xs text-muted-foreground">
-                        {startIndex + index + 1}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2.5">
-                          <div className="flex size-7 items-center justify-center rounded-md bg-emerald-500/10 text-[10px] font-semibold text-emerald-600">
-                            {item.nama.charAt(0)}
-                          </div>
-                          <div>
-                            <span className="text-sm font-medium">{item.nama}</span>
-                            {item.nohpOrtu && (
-                              <p className="text-[10px] text-muted-foreground">{item.nohpOrtu}</p>
-                            )}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="max-w-[200px] truncate text-xs" title={item.alamat ?? ""}>
-                        {item.alamat ?? "-"}
-                      </TableCell>
-                      <TableCell className="text-xs">{item.namaAyah ?? "-"}</TableCell>
-                      <TableCell className="text-xs">{item.namaIbu ?? "-"}</TableCell>
-                      <TableCell>
-                        {item.statusPernikahan ? (
-                          <Badge
-                            variant="secondary"
-                            className={
-                              item.statusPernikahan === "Menikah"
-                                ? "border-emerald-500/20 bg-emerald-500/10 text-[10px] font-medium text-emerald-600 dark:text-emerald-400"
-                                : item.statusPernikahan === "Cerai Hidup"
-                                  ? "border-amber-500/20 bg-amber-500/10 text-[10px] font-medium text-amber-600 dark:text-amber-400"
-                                  : "border-red-500/20 bg-red-500/10 text-[10px] font-medium text-red-600 dark:text-red-400"
-                            }
-                          >
-                            {item.statusPernikahan}
-                          </Badge>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {item.kondisiKeluarga ? (
-                          <Badge
-                            variant="secondary"
-                            className={
-                              item.kondisiKeluarga === "Anak Yatim"
-                                ? "border-blue-500/20 bg-blue-500/10 text-[10px] font-medium text-blue-600 dark:text-blue-400"
-                                : item.kondisiKeluarga === "Anak Piatu"
-                                  ? "border-purple-500/20 bg-purple-500/10 text-[10px] font-medium text-purple-600 dark:text-purple-400"
-                                  : "border-rose-500/20 bg-rose-500/10 text-[10px] font-medium text-rose-600 dark:text-rose-400"
-                            }
-                          >
-                            {item.kondisiKeluarga}
-                          </Badge>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {item.fotoRumah ? (
-                          <div className="flex justify-center">
-                            <BiodataFotoPreview fotoRumah={item.fotoRumah} nama={item.nama} />
-                          </div>
-                        ) : (
-                          <div className="flex justify-center">
-                            <div className="flex size-8 items-center justify-center rounded-md bg-muted/50 text-[10px] text-muted-foreground">
-                              -
-                            </div>
-                          </div>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex justify-end">
-                          <BiodataSiswaActions biodata={item} />
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={9} className="h-32 text-center text-muted-foreground">
-                      <div className="flex flex-col items-center gap-2">
-                        <UsersIcon className="size-8 text-muted-foreground/40" />
-                        <p className="text-xs">Tidak ada data biodata siswa.</p>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
+        </div>
 
-          {/* Mobile Card List View */}
-          <div className="block sm:hidden space-y-3">
-            {paginatedData.length > 0 ? (
-              paginatedData.map((item, index) => (
-                <div key={item.id} className="rounded-xl border bg-card p-3.5 shadow-2xs space-y-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-2.5">
+        {paginatedData.length > 0 ? (
+          <div className="divide-y">
+            {/* Desktop column hint */}
+            <div className="hidden grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_140px_88px] gap-4 border-b bg-muted/20 px-5 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground sm:grid">
+              <span>Siswa</span>
+              <span>Keluarga</span>
+              <span>Status</span>
+              <span className="text-right">Aksi</span>
+            </div>
+
+            {paginatedData.map((item, index) => {
+              const completeness = getCompleteness(item)
+              const attention = isAttention(item)
+              const absoluteIndex = startIndex + index + 1
+
+              return (
+                <article
+                  key={item.id}
+                  className="group px-4 py-4 transition-colors hover:bg-muted/20 sm:grid sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_140px_88px] sm:items-center sm:gap-4 sm:px-5 sm:py-4"
+                >
+                  {/* Identity */}
+                  <div className="flex items-start gap-3 min-w-0">
+                    <div className="relative shrink-0">
                       {item.fotoRumah ? (
                         <BiodataFotoPreview fotoRumah={item.fotoRumah} nama={item.nama} />
                       ) : (
-                        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-xs font-bold text-emerald-600">
-                          {item.nama.charAt(0)}
+                        <div className="flex size-10 items-center justify-center rounded-sm border bg-muted/40 text-xs font-semibold tracking-wide text-muted-foreground sm:size-11">
+                          {getInitials(item.nama) || "?"}
                         </div>
                       )}
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-sm font-bold">{item.nama}</h3>
-                          <span className="text-[10px] text-muted-foreground font-medium">#{startIndex + index + 1}</span>
+                      <span className="absolute -left-1 -top-1 flex size-4 items-center justify-center rounded-full border bg-background text-[9px] font-semibold tabular-nums text-muted-foreground sm:hidden">
+                        {absoluteIndex}
+                      </span>
+                    </div>
+
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="truncate text-sm font-semibold tracking-tight">
+                              {item.nama}
+                            </h3>
+                            <span className="hidden text-[11px] tabular-nums text-muted-foreground sm:inline">
+                              #{absoluteIndex}
+                            </span>
+                          </div>
+                          <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+                            {item.nohpOrtu ? (
+                              <span className="inline-flex items-center gap-1">
+                                <PhoneIcon className="size-3" />
+                                <span className="font-medium text-foreground/80">
+                                  {item.nohpOrtu}
+                                </span>
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 text-muted-foreground/80">
+                                <PhoneIcon className="size-3" />
+                                HP ortu belum ada
+                              </span>
+                            )}
+                          </div>
+                          {item.alamat && (
+                            <p className="mt-1 line-clamp-1 text-[11px] text-muted-foreground sm:text-xs">
+                              {item.alamat}
+                            </p>
+                          )}
                         </div>
-                        {item.nohpOrtu && (
-                          <p className="text-[11px] text-muted-foreground">No. HP: <span className="font-mono text-foreground">{item.nohpOrtu}</span></p>
-                        )}
+
+                        <div className="sm:hidden">
+                          <BiodataSiswaActions biodata={item} />
+                        </div>
+                      </div>
+
+                      {/* Mobile family + status */}
+                      <div className="mt-2 space-y-2 sm:hidden">
+                        <p className="text-xs text-muted-foreground">
+                          <span className="font-medium text-foreground/85">
+                            {parentsLabel(item)}
+                          </span>
+                        </p>
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <CompletenessBadge completeness={completeness} />
+                          {attention && item.kondisiKeluarga && (
+                            <Badge
+                              variant="secondary"
+                              className="border-amber-500/25 bg-amber-500/10 text-[10px] font-medium text-amber-700 dark:text-amber-400"
+                            >
+                              {item.kondisiKeluarga}
+                            </Badge>
+                          )}
+                          {item.statusPernikahan && (
+                            <Badge variant="outline" className="text-[10px] font-medium">
+                              {item.statusPernikahan}
+                            </Badge>
+                          )}
+                          {item.fotoRumah && (
+                            <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
+                              <HomeIcon className="size-3" />
+                              Ada foto
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
-                    {item.statusPernikahan && (
+                  </div>
+
+                  {/* Family (desktop) */}
+                  <div className="hidden min-w-0 sm:block">
+                    <p className="truncate text-sm font-medium text-foreground/90">
+                      {item.namaAyah || item.namaIbu ? parentsLabel(item) : "—"}
+                    </p>
+                    <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                      {item.statusPernikahan ? (
+                        <span className="text-[11px] text-muted-foreground">
+                          {item.statusPernikahan}
+                        </span>
+                      ) : (
+                        <span className="text-[11px] text-muted-foreground/70">
+                          Status ortu —
+                        </span>
+                      )}
+                      {item.fotoRumah && (
+                        <>
+                          <span className="text-border">·</span>
+                          <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+                            <HomeIcon className="size-3" />
+                            Foto rumah
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Status (desktop) */}
+                  <div className="hidden sm:flex sm:flex-col sm:gap-1.5">
+                    <CompletenessBadge completeness={completeness} />
+                    {attention && item.kondisiKeluarga ? (
                       <Badge
                         variant="secondary"
-                        className={
-                          item.statusPernikahan === "Menikah"
-                            ? "border-emerald-500/20 bg-emerald-500/10 text-[10px] font-medium text-emerald-600 shrink-0"
-                            : "border-amber-500/20 bg-amber-500/10 text-[10px] font-medium text-amber-600 shrink-0"
-                        }
+                        className="w-fit border-amber-500/25 bg-amber-500/10 text-[10px] font-medium text-amber-700 dark:text-amber-400"
                       >
-                        {item.statusPernikahan}
-                      </Badge>
-                    )}
-                  </div>
-
-                  {item.alamat && (
-                    <p className="text-xs text-muted-foreground line-clamp-2">
-                      <span className="font-medium text-foreground">Alamat:</span> {item.alamat}
-                    </p>
-                  )}
-
-                  <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
-                    {item.namaAyah && <span>Ayah: <strong className="text-foreground">{item.namaAyah}</strong></span>}
-                    {item.namaAyah && item.namaIbu && <span>•</span>}
-                    {item.namaIbu && <span>Ibu: <strong className="text-foreground">{item.namaIbu}</strong></span>}
-                  </div>
-
-                  <div className="flex items-center justify-between pt-2 border-t border-border/40 text-xs">
-                    {item.kondisiKeluarga ? (
-                      <Badge variant="secondary" className="text-[10px]">
                         {item.kondisiKeluarga}
                       </Badge>
-                    ) : <span />}
+                    ) : attention && item.statusPernikahan ? (
+                      <Badge
+                        variant="secondary"
+                        className="w-fit border-amber-500/25 bg-amber-500/10 text-[10px] font-medium text-amber-700 dark:text-amber-400"
+                      >
+                        Perhatian
+                      </Badge>
+                    ) : null}
+                    <div className="h-1 w-full max-w-[120px] overflow-hidden rounded-full bg-muted">
+                      <div
+                        className={cn(
+                          "h-full rounded-full transition-all",
+                          completeness.isComplete
+                            ? "bg-emerald-500/80"
+                            : completeness.percent >= 50
+                              ? "bg-primary/70"
+                              : "bg-muted-foreground/40"
+                        )}
+                        style={{ width: `${completeness.percent}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Actions (desktop) */}
+                  <div className="hidden justify-end opacity-70 transition-opacity group-hover:opacity-100 sm:flex">
                     <BiodataSiswaActions biodata={item} />
                   </div>
-                </div>
-              ))
-            ) : (
-              <div className="flex flex-col items-center gap-2 rounded-xl border py-12 text-center p-4">
-                <UsersIcon className="size-8 text-muted-foreground/40" />
-                <p className="text-xs text-muted-foreground">Tidak ada data biodata siswa.</p>
+                </article>
+              )
+            })}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center gap-4 px-6 py-16 text-center">
+            <div className="flex size-14 items-center justify-center rounded-full border border-dashed bg-muted/30">
+              <UsersIcon className="size-6 text-muted-foreground/60" />
+            </div>
+            <div className="space-y-1.5">
+              <p className="text-sm font-semibold">
+                {q ? "Tidak ada berkas yang cocok" : "Roster masih kosong"}
+              </p>
+              <p className="mx-auto max-w-sm text-xs text-muted-foreground sm:text-sm">
+                {q
+                  ? `Tidak ditemukan biodata untuk “${q}”. Coba kata kunci lain atau reset filter.`
+                  : "Tambahkan biodata siswa secara manual atau impor massal untuk mulai mengisi arsip kelas."}
+              </p>
+            </div>
+            {!q && (
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <BiodataSiswaImportDialog kelasList={kelasList} />
+                <BiodataSiswaCreateDialog />
               </div>
             )}
           </div>
+        )}
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pt-2">
-            <p className="text-xs text-muted-foreground text-center sm:text-left">
-              Menampilkan {paginatedData.length ? startIndex + 1 : 0}-
-              {Math.min(startIndex + paginatedData.length, totalFiltered)} dari {totalFiltered} data
-            </p>
-            <Pagination className="justify-center sm:justify-end sm:mx-0 sm:w-auto">
-              <PaginationContent className="gap-1">
-                <PaginationItem>
-                  <PaginationPrevious
-                    text="Sebelumnya"
-                    href={createPageHref({ q, filter, page: Math.max(safePage - 1, 1) })}
-                    aria-disabled={safePage === 1}
-                    className={safePage === 1 ? "pointer-events-none opacity-50 text-xs" : "text-xs"}
-                  />
-                </PaginationItem>
-                {Array.from({ length: totalPages }, (_, index) => index + 1)
-                  .filter((page) =>
-                    page === 1 ||
-                    page === totalPages ||
-                    Math.abs(page - safePage) <= 1
-                  )
-                  .map((page) => (
-                    <PaginationItem key={page}>
-                      <PaginationLink
-                        href={createPageHref({ q, filter, page })}
-                        isActive={page === safePage}
-                      >
-                        {page}
-                      </PaginationLink>
-                    </PaginationItem>
-                  ))}
-                <PaginationItem>
-                  <PaginationNext
-                    text="Berikutnya"
-                    href={createPageHref({ q, filter, page: Math.min(safePage + 1, totalPages) })}
-                    aria-disabled={safePage === totalPages}
-                    className={safePage === totalPages ? "pointer-events-none opacity-50 text-xs" : "text-xs"}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
+        {totalPages > 1 && (
+          <div className="border-t px-4 py-3 sm:px-5">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-center text-[11px] text-muted-foreground sm:text-left sm:text-xs">
+                Menampilkan {startIndex + 1}–
+                {Math.min(startIndex + PAGE_SIZE, totalFiltered)} dari {totalFiltered}{" "}
+                berkas
+              </p>
+              <Pagination className="mx-0 w-full justify-center sm:w-auto sm:justify-end">
+                <PaginationContent className="gap-1">
+                  <PaginationItem>
+                    <PaginationPrevious
+                      text="Prev"
+                      href={createPageHref({
+                        q,
+                        filter,
+                        page: Math.max(safePage - 1, 1),
+                      })}
+                      aria-disabled={safePage === 1}
+                      className={cn(
+                        "text-xs",
+                        safePage === 1 && "pointer-events-none opacity-50"
+                      )}
+                    />
+                  </PaginationItem>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter(
+                      (page) =>
+                        page === 1 ||
+                        page === totalPages ||
+                        Math.abs(page - safePage) <= 1
+                    )
+                    .map((page) => (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          href={createPageHref({ q, filter, page })}
+                          isActive={page === safePage}
+                          className="text-xs"
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+                  <PaginationItem>
+                    <PaginationNext
+                      text="Next"
+                      href={createPageHref({
+                        q,
+                        filter,
+                        page: Math.min(safePage + 1, totalPages),
+                      })}
+                      aria-disabled={safePage === totalPages}
+                      className={cn(
+                        "text-xs",
+                        safePage === totalPages && "pointer-events-none opacity-50"
+                      )}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
           </div>
-        </CardContent>
-      </Card>
+        )}
+      </section>
+
+      <p className="text-xs text-muted-foreground">
+        Tip: status “Perlu perhatian” muncul jika ada kondisi keluarga khusus atau
+        status orang tua cerai.
+      </p>
     </div>
+  )
+}
+
+function CompletenessBadge({
+  completeness,
+}: {
+  completeness: { filled: number; total: number; percent: number; isComplete: boolean }
+}) {
+  if (completeness.isComplete) {
+    return (
+      <Badge
+        variant="secondary"
+        className="w-fit border-emerald-500/20 bg-emerald-500/10 text-[10px] font-medium text-emerald-700 dark:text-emerald-400"
+      >
+        Lengkap
+      </Badge>
+    )
+  }
+
+  return (
+    <Badge variant="outline" className="w-fit text-[10px] font-medium text-muted-foreground">
+      {completeness.filled}/{completeness.total} field
+    </Badge>
   )
 }

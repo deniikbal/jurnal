@@ -26,7 +26,7 @@ export function BiodataFotoPreview({ fotoRumah, nama }: BiodataFotoPreviewProps)
       <DialogTrigger asChild>
         <button
           type="button"
-          className="group relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-lg border bg-muted/30 transition-all hover:ring-2 hover:ring-primary/50 focus:outline-hidden cursor-pointer"
+          className="group relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-sm border bg-muted/30 transition-all hover:ring-2 hover:ring-primary/50 focus:outline-hidden cursor-pointer"
           title="Klik untuk melihat foto lebih besar"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -44,12 +44,12 @@ export function BiodataFotoPreview({ fotoRumah, nama }: BiodataFotoPreviewProps)
         <DialogHeader className="text-left">
           <DialogTitle className="text-base sm:text-lg truncate">Foto Rumah - {nama}</DialogTitle>
         </DialogHeader>
-        <div className="mt-2 relative overflow-hidden rounded-xl border bg-black/5 flex items-center justify-center p-1">
+        <div className="mt-2 relative overflow-hidden rounded-sm border bg-black/5 flex items-center justify-center p-1">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={imageUrl}
             alt={`Foto rumah ${nama}`}
-            className="max-h-[70vh] w-full object-contain rounded-lg shadow-md"
+            className="max-h-[70vh] w-full object-contain rounded-sm shadow-md"
           />
         </div>
       </DialogContent>
