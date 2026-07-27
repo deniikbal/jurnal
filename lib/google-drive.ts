@@ -9,7 +9,13 @@ async function getAccessToken(): Promise<string> {
       grant_type: "refresh_token",
     }),
   })
+  if (!res.ok) {
+    throw new Error(`Gagal mendapatkan access token Google: ${res.status}`)
+  }
   const data = await res.json()
+  if (!data.access_token) {
+    throw new Error("Access token Google tidak tersedia")
+  }
   return data.access_token
 }
 
@@ -54,8 +60,17 @@ export async function uploadToGoogleDrive(
     },
   )
 
+  if (!uploadRes.ok) {
+    const errorText = await uploadRes.text().catch(() => "Unknown error")
+    throw new Error(`Google Drive upload gagal (${uploadRes.status}): ${errorText}`)
+  }
+
   const uploadData = await uploadRes.json()
   const fileId: string = uploadData.id
+
+  if (!fileId) {
+    throw new Error("Google Drive tidak mengembalikan file ID")
+  }
 
   await fetch(
     `https://www.googleapis.com/drive/v3/files/${fileId}/permissions`,

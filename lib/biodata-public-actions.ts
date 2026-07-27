@@ -85,52 +85,76 @@ export async function saveBiodataPublic(
   _prevState: BiodataPublicState,
   formData: FormData,
 ): Promise<BiodataPublicState> {
-  const nis = String(formData.get("nis") ?? "").trim()
-  const alamat = String(formData.get("alamat") ?? "").trim()
-  const nohpOrtu = String(formData.get("nohp_ortu") ?? "").trim()
-  const namaAyah = String(formData.get("nama_ayah") ?? "").trim()
-  const namaIbu = String(formData.get("nama_ibu") ?? "").trim()
-  const statusPernikahan = String(formData.get("status_pernikahan") ?? "").trim()
-  const kondisiKeluarga = String(formData.get("kondisi_keluarga") ?? "").trim()
-  const existingFoto = String(formData.get("existing_foto") ?? "").trim()
+  try {
+    const nis = String(formData.get("nis") ?? "").trim()
+    const alamat = String(formData.get("alamat") ?? "").trim()
+    const nohpOrtu = String(formData.get("nohp_ortu") ?? "").trim()
+    const namaAyah = String(formData.get("nama_ayah") ?? "").trim()
+    const namaIbu = String(formData.get("nama_ibu") ?? "").trim()
+    const statusPernikahan = String(formData.get("status_pernikahan") ?? "").trim()
+    const kondisiKeluarga = String(formData.get("kondisi_keluarga") ?? "").trim()
+    const existingFoto = String(formData.get("existing_foto") ?? "").trim()
 
-  if (!nis) {
-    return { success: false, message: "NIS tidak valid" }
-  }
+    if (!nis) {
+      return { success: false, message: "NIS tidak valid" }
+    }
 
-  const [found] = await db
-    .select({ id: siswa.id, name: siswa.name, nis: siswa.nis })
-    .from(siswa)
-    .where(eq(siswa.nis, nis))
-    .limit(1)
+    const [found] = await db
+      .select({ id: siswa.id, name: siswa.name, nis: siswa.nis })
+      .from(siswa)
+      .where(eq(siswa.nis, nis))
+      .limit(1)
 
-  if (!found) {
-    return { success: false, message: "Siswa tidak ditemukan" }
-  }
+    if (!found) {
+      return { success: false, message: "Siswa tidak ditemukan" }
+    }
 
-  let fotoRumah: string | null = existingFoto || null
-  const fotoFile = formData.get("foto_rumah") as File | null
-  if (fotoFile && fotoFile.size > 0) {
-    const ext = fotoFile.name.split(".").pop() ?? "jpg"
-    const fileName = `biodata_${Date.now()}_${found.name.replace(/\s+/g, "_")}.${ext}`
-    fotoRumah = await uploadToGoogleDrive(fotoFile, fileName)
-  }
+    let fotoRumah: string | null = existingFoto || null
+    const fotoFile = formData.get("foto_rumah") as File | null
+    if (fotoFile && fotoFile.size > 0) {
+      // Validate file size (max 5MB)
+      if (fotoFile.size > 5 * 1024 * 1024) {
+        return { success: false, message: "Ukuran foto terlalu besar. Maksimal 5MB." }
+      }
+      try {
+        const ext = fotoFile.name.split(".").pop() ?? "jpg"
+        const fileName = `biodata_${Date.now()}_${found.name.replace(/\s+/g, "_")}.${ext}`
+        fotoRumah = await uploadToGoogleDrive(fotoFile, fileName)
+      } catch (uploadError) {
+        console.warn("Gagal upload foto ke Google Drive:", uploadError)
+        return { success: false, message: "Gagal mengupload foto. Coba lagi atau gunakan foto dengan ukuran lebih kecil." }
+      }
+    }
 
-  const [existing] = await db
-    .select({ id: biodataSiswa.id })
-    .from(biodataSiswa)
-    .where(
-      or(
-        eq(biodataSiswa.siswaId, found.id),
-        ilike(biodataSiswa.nama, found.name)
+    const [existing] = await db
+      .select({ id: biodataSiswa.id })
+      .from(biodataSiswa)
+      .where(
+        or(
+          eq(biodataSiswa.siswaId, found.id),
+          ilike(biodataSiswa.nama, found.name)
+        )
       )
-    )
-    .limit(1)
+      .limit(1)
 
-  if (existing) {
-    await db
-      .update(biodataSiswa)
-      .set({
+    if (existing) {
+      await db
+        .update(biodataSiswa)
+        .set({
+          nama: found.name,
+          siswaId: found.id,
+          alamat: alamat || null,
+          nohpOrtu: nohpOrtu || null,
+          namaAyah: namaAyah || null,
+          namaIbu: namaIbu || null,
+          statusPernikahan: (statusPernikahan as typeof biodataSiswa.$inferSelect["statusPernikahan"]) || null,
+          kondisiKeluarga: (kondisiKeluarga as typeof biodataSiswa.$inferSelect["kondisiKeluarga"]) || null,
+          fotoRumah,
+          updatedAt: new Date(),
+        })
+        .where(eq(biodataSiswa.id, existing.id))
+    } else {
+      await db.insert(biodataSiswa).values({
         nama: found.name,
         siswaId: found.id,
         alamat: alamat || null,
@@ -140,28 +164,19 @@ export async function saveBiodataPublic(
         statusPernikahan: (statusPernikahan as typeof biodataSiswa.$inferSelect["statusPernikahan"]) || null,
         kondisiKeluarga: (kondisiKeluarga as typeof biodataSiswa.$inferSelect["kondisiKeluarga"]) || null,
         fotoRumah,
-        updatedAt: new Date(),
       })
-      .where(eq(biodataSiswa.id, existing.id))
-  } else {
-    await db.insert(biodataSiswa).values({
-      nama: found.name,
-      siswaId: found.id,
-      alamat: alamat || null,
-      nohpOrtu: nohpOrtu || null,
-      namaAyah: namaAyah || null,
-      namaIbu: namaIbu || null,
-      statusPernikahan: (statusPernikahan as typeof biodataSiswa.$inferSelect["statusPernikahan"]) || null,
-      kondisiKeluarga: (kondisiKeluarga as typeof biodataSiswa.$inferSelect["kondisiKeluarga"]) || null,
-      fotoRumah,
-    })
-  }
+    }
 
-  revalidatePath("/dashboard/walikelas/biodata-siswa")
+    revalidatePath("/dashboard/walikelas/biodata-siswa")
 
-  return {
-    success: true,
-    message: "Biodata berhasil disimpan",
-    student: { id: found.id, name: found.name, nis: found.nis ?? "" },
+    return {
+      success: true,
+      message: "Biodata berhasil disimpan",
+      student: { id: found.id, name: found.name, nis: found.nis ?? "" },
+    }
+  } catch (error) {
+    console.warn("Error di saveBiodataPublic:", error)
+    return { success: false, message: "Terjadi kesalahan saat menyimpan. Coba lagi." }
   }
 }
+
