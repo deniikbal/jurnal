@@ -1,6 +1,6 @@
 "use client"
 
-import { useActionState, useEffect, useState } from "react"
+import { useActionState, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { ArrowLeftIcon } from "lucide-react"
 
@@ -9,6 +9,7 @@ import {
   saveBiodataPublic,
   type BiodataPublicState,
 } from "@/lib/biodata-public-actions"
+import { compressImage } from "@/lib/compress-image"
 import { BiodataSiswaFormFields } from "@/components/biodata-siswa-create-dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -26,6 +27,8 @@ export function BiodataPublicForm() {
   const [step, setStep] = useState<"nis" | "biodata" | "done">("nis")
   const [studentName, setStudentName] = useState("")
   const [studentNis, setStudentNis] = useState("")
+  const [isCompressing, setIsCompressing] = useState(false)
+  const formRef = useRef<HTMLFormElement>(null)
 
   const [lookupState, lookupAction, lookupPending] = useActionState(
     lookupSiswaByNis,
@@ -59,6 +62,36 @@ export function BiodataPublicForm() {
       toast.error(saveState.message)
     }
   }, [saveState])
+
+  async function handleSaveSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    if (!formRef.current) return
+
+    const formData = new FormData(formRef.current)
+
+    // Compress image before sending
+    const fotoFile = formData.get("foto_rumah") as File | null
+    if (fotoFile && fotoFile.size > 0) {
+      try {
+        setIsCompressing(true)
+        const compressed = await compressImage(fotoFile, {
+          maxWidth: 1200,
+          maxHeight: 1200,
+          quality: 0.7,
+        })
+        formData.set("foto_rumah", compressed)
+      } catch {
+        toast.error("Gagal memproses foto. Coba gunakan foto lain.")
+        return
+      } finally {
+        setIsCompressing(false)
+      }
+    }
+
+    saveAction(formData)
+  }
+
+  const isBusy = savePending || isCompressing
 
   const stepIndex = steps.findIndex((s) => s.id === step)
 
@@ -175,7 +208,7 @@ export function BiodataPublicForm() {
       ) : null}
 
       {step === "biodata" ? (
-        <form action={saveAction} className="space-y-0 border border-border">
+        <form ref={formRef} onSubmit={handleSaveSubmit} className="space-y-0 border border-border">
           <input type="hidden" name="nis" value={studentNis} />
 
           <div className="flex items-start justify-between gap-3 border-b border-border px-5 py-4 sm:px-6">
@@ -194,7 +227,7 @@ export function BiodataPublicForm() {
               size="sm"
               className="shrink-0 gap-1.5 text-xs text-muted-foreground"
               onClick={() => setStep("nis")}
-              disabled={savePending}
+              disabled={isBusy}
             >
               <ArrowLeftIcon className="size-3.5" />
               Ganti NIS
@@ -210,7 +243,7 @@ export function BiodataPublicForm() {
             </div>
 
             <BiodataSiswaFormFields
-              disabled={savePending}
+              disabled={isBusy}
               editableNama={false}
               defaultValues={{
                 nama: studentName,
@@ -230,12 +263,12 @@ export function BiodataPublicForm() {
               variant="outline"
               className="shadow-none"
               onClick={() => setStep("nis")}
-              disabled={savePending}
+              disabled={isBusy}
             >
               Batal
             </Button>
-            <Button type="submit" disabled={savePending} className="shadow-none">
-              {savePending ? "Menyimpan…" : "Simpan biodata"}
+            <Button type="submit" disabled={isBusy} className="shadow-none">
+              {isCompressing ? "Mengompresi foto…" : savePending ? "Menyimpan…" : "Simpan biodata"}
             </Button>
           </div>
         </form>
@@ -243,3 +276,4 @@ export function BiodataPublicForm() {
     </div>
   )
 }
+
