@@ -6,6 +6,7 @@ import { AttendanceDialog } from "@/components/attendance-dialog"
 import { GradeDialog } from "@/components/grade-dialog"
 import { JournalDeleteButton } from "@/components/journal-delete-button"
 import { JournalDialog } from "@/components/journal-dialog"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
   Table,
@@ -136,6 +137,13 @@ export function JurnalPageClient({
   const [date, setDate] = useState(today)
   const [tab, setTab] = useState<"input" | "laporan">("input")
 
+  const now = new Date()
+  const defaultMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
+  const [reportMonth, setReportMonth] = useState(defaultMonth)
+  const [reportPage, setReportPage] = useState(0)
+
+  const PAGE_SIZE = 10
+
   const selectedDay = getDayName(date)
 
   const subjectById = useMemo(() => new Map(subjects.map((item) => [item.id, item])), [subjects])
@@ -225,12 +233,18 @@ export function JurnalPageClient({
 
   const filledSchedules = schedulesToday.filter((item) => journalBySchedule.has(item.id)).length
 
-  const reportRows = useMemo(
-    () =>
-      [...journalsToday].sort(
-        (a, b) => a.jamKe - b.jamKe || a.startTime.localeCompare(b.startTime),
-      ),
-    [journalsToday],
+  const reportJournals = useMemo(() => {
+    const rows = journals
+      .filter((j) => j.date.startsWith(reportMonth))
+      .sort((a, b) => a.date.localeCompare(b.date) || a.jamKe - b.jamKe)
+    return rows
+  }, [journals, reportMonth])
+
+  const reportTotalPages = Math.max(Math.ceil(reportJournals.length / PAGE_SIZE), 1)
+  const reportSafePage = Math.min(reportPage, reportTotalPages - 1)
+  const paginatedReport = reportJournals.slice(
+    reportSafePage * PAGE_SIZE,
+    (reportSafePage + 1) * PAGE_SIZE,
   )
 
   const allScoresByAssessment = useMemo(
@@ -454,11 +468,25 @@ export function JurnalPageClient({
         </section>
       ) : (
         <section className="overflow-hidden rounded-md border border-border bg-card">
-          <div className="border-b border-border px-4 py-4 sm:px-5">
-            <h2 className="text-sm font-semibold text-foreground">Laporan jurnal</h2>
-            <p className="text-xs text-muted-foreground">
-              {labelDay(selectedDay)} · {date} · {reportRows.length} entri
-            </p>
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-4 sm:px-5">
+            <div>
+              <h2 className="text-sm font-semibold text-foreground">Laporan jurnal</h2>
+              <p className="text-xs text-muted-foreground">
+                {reportMonth} · {reportJournals.length} entri
+              </p>
+            </div>
+            <Input
+              type="month"
+              value={reportMonth}
+              onChange={(e) => {
+                if (e.target.value) {
+                  setReportMonth(e.target.value)
+                  setReportPage(0)
+                }
+              }}
+              className="h-9 w-44 border-border/80 bg-background text-sm shadow-none"
+              aria-label="Bulan laporan"
+            />
           </div>
 
           <div className="hidden sm:block">
@@ -467,6 +495,9 @@ export function JurnalPageClient({
                 <TableRow className="hover:bg-transparent">
                   <TableHead className="w-12 pl-5 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
                     No
+                  </TableHead>
+                  <TableHead className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+                    Tanggal
                   </TableHead>
                   <TableHead className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
                     Mapel
@@ -489,11 +520,14 @@ export function JurnalPageClient({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {reportRows.length > 0 ? (
-                  reportRows.map((journal, index) => (
+                {paginatedReport.length > 0 ? (
+                  paginatedReport.map((journal, index) => (
                     <TableRow key={journal.id} className="group">
                       <TableCell className="pl-5 text-xs tabular-nums text-muted-foreground">
-                        {index + 1}
+                        {reportSafePage * PAGE_SIZE + index + 1}
+                      </TableCell>
+                      <TableCell className="text-xs tabular-nums text-foreground whitespace-nowrap">
+                        {journal.date}
                       </TableCell>
                       <TableCell className="text-sm font-medium text-foreground">
                         {journal.subjectName}
@@ -506,7 +540,7 @@ export function JurnalPageClient({
                       <TableCell className="text-sm text-foreground">
                         {journal.classroomName}
                       </TableCell>
-                      <TableCell className="text-xs tabular-nums text-muted-foreground">
+                      <TableCell className="text-xs tabular-nums text-muted-foreground whitespace-nowrap">
                         {journal.jamKe} · {journal.startTime}–{journal.endTime}
                       </TableCell>
                       <TableCell className="max-w-[12rem] truncate text-xs text-muted-foreground">
@@ -524,9 +558,9 @@ export function JurnalPageClient({
                   ))
                 ) : (
                   <TableRow className="hover:bg-transparent">
-                    <TableCell colSpan={7} className="h-40 text-center">
+                    <TableCell colSpan={8} className="h-40 text-center">
                       <p className="text-sm text-muted-foreground">
-                        Belum ada jurnal pada tanggal ini.
+                        Belum ada jurnal pada bulan ini.
                       </p>
                     </TableCell>
                   </TableRow>
@@ -536,13 +570,15 @@ export function JurnalPageClient({
           </div>
 
           <div className="divide-y divide-border sm:hidden">
-            {reportRows.length > 0 ? (
-              reportRows.map((journal) => (
+            {paginatedReport.length > 0 ? (
+              paginatedReport.map((journal) => (
                 <div key={journal.id} className="space-y-2 px-4 py-3.5">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 space-y-0.5">
                       <p className="text-sm font-medium text-foreground">{journal.subjectName}</p>
                       <p className="text-xs text-muted-foreground">
+                        {journal.date}
+                        <span className="mx-1.5 text-border">·</span>
                         {journal.classroomName}
                         <span className="mx-1.5 text-border">·</span>
                         Jam {journal.jamKe} ({journal.startTime}–{journal.endTime})
@@ -563,11 +599,59 @@ export function JurnalPageClient({
             ) : (
               <div className="px-4 py-14 text-center">
                 <p className="text-sm text-muted-foreground">
-                  Belum ada jurnal pada tanggal ini.
+                  Belum ada jurnal pada bulan ini.
                 </p>
               </div>
             )}
           </div>
+
+          {reportTotalPages > 1 && (
+            <div className="flex items-center justify-between gap-4 border-t border-border px-4 py-3 sm:px-5">
+              <p className="text-xs text-muted-foreground">
+                Menampilkan {reportSafePage * PAGE_SIZE + 1}–
+                {Math.min((reportSafePage + 1) * PAGE_SIZE, reportJournals.length)} dari{" "}
+                {reportJournals.length} entri
+              </p>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  disabled={reportSafePage === 0}
+                  onClick={() => setReportPage((p) => Math.max(p - 1, 0))}
+                  className="text-xs"
+                >
+                  Prev
+                </Button>
+                {Array.from({ length: reportTotalPages }, (_, i) => i + 1)
+                  .filter(
+                    (p) =>
+                      p === 1 ||
+                      p === reportTotalPages ||
+                      Math.abs(p - (reportSafePage + 1)) <= 1,
+                  )
+                  .map((p) => (
+                    <Button
+                      key={p}
+                      variant={p === reportSafePage + 1 ? "default" : "ghost"}
+                      size="sm"
+                      onClick={() => setReportPage(p - 1)}
+                      className="text-xs min-w-[32px]"
+                    >
+                      {p}
+                    </Button>
+                  ))}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  disabled={reportSafePage === reportTotalPages - 1}
+                  onClick={() => setReportPage((p) => Math.min(p + 1, reportTotalPages - 1))}
+                  className="text-xs"
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
         </section>
       )}
     </div>

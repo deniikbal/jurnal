@@ -1,21 +1,14 @@
 "use client"
 
-import { useMemo, useState } from "react"
-import { SchoolIcon } from "lucide-react"
+import { useCallback, useMemo, useState } from "react"
+import { ChevronLeftIcon, ChevronRightIcon, SchoolIcon } from "lucide-react"
 
 import { KelasActions } from "@/components/kelas-actions"
 import { KelasCreateDialog } from "@/components/kelas-create-dialog"
 import { KelasFilter } from "@/components/kelas-filter"
 import { KelasImportDialog } from "@/components/kelas-import-dialog"
 import { KelasSiswaDialog } from "@/components/kelas-siswa-dialog"
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination"
+import { Button } from "@/components/ui/button"
 import {
   Table,
   TableBody,
@@ -54,17 +47,22 @@ const naturalCollator = new Intl.Collator("id-ID", {
 export function KelasTableClient({ daftarKelas, daftarSiswa }: KelasTableClientProps) {
   const [search, setSearch] = useState("")
   const [filter, setFilter] = useState("natural")
-  const [page, setPage] = useState(1)
+  const [page, setPage] = useState(0)
 
-  const handleSearchChange = (value: string) => {
-    setSearch(value)
-    setPage(1)
-  }
+  const handleSearchChange = useCallback((value: string) => {
+    setSearch((prev) => {
+      if (prev !== value) {
+        setPage(0)
+        return value
+      }
+      return prev
+    })
+  }, [])
 
-  const handleFilterChange = (value: string) => {
+  const handleFilterChange = useCallback((value: string) => {
     setFilter(value)
-    setPage(1)
-  }
+    setPage(0)
+  }, [])
 
   const siswaByKelas = useMemo(() => {
     const map = new Map<string, Siswa[]>()
@@ -95,8 +93,8 @@ export function KelasTableClient({ daftarKelas, daftarSiswa }: KelasTableClientP
 
   const totalFiltered = filteredKelas.length
   const totalPages = Math.max(Math.ceil(totalFiltered / PAGE_SIZE), 1)
-  const safePage = Math.min(page, totalPages)
-  const startIndex = (safePage - 1) * PAGE_SIZE
+  const safePage = Math.min(page, totalPages - 1)
+  const startIndex = safePage * PAGE_SIZE
   const paginatedKelas = filteredKelas.slice(startIndex, startIndex + PAGE_SIZE)
 
   return (
@@ -232,37 +230,47 @@ export function KelasTableClient({ daftarKelas, daftarSiswa }: KelasTableClientP
             : "0"}{" "}
           dari {totalFiltered}
         </p>
-        <Pagination className="justify-center sm:mx-0 sm:w-auto sm:justify-end">
-          <PaginationContent className="gap-1">
-            <PaginationItem>
-              <PaginationPrevious
-                text="Sebelumnya"
-                onClick={() => setPage(Math.max(safePage - 1, 1))}
-                aria-disabled={safePage === 1}
-                className={safePage === 1 ? "pointer-events-none opacity-50 text-xs" : "text-xs"}
-              />
-            </PaginationItem>
-            {Array.from({ length: totalPages }, (_, index) => index + 1)
-              .filter((p) => p === 1 || p === totalPages || Math.abs(p - safePage) <= 1)
-              .map((p) => (
-                <PaginationItem key={p}>
-                  <PaginationLink isActive={p === safePage} onClick={() => setPage(p)}>
-                    {p}
-                  </PaginationLink>
-                </PaginationItem>
+        {totalPages > 1 && (
+          <nav className="flex items-center gap-1" aria-label="pagination">
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={safePage === 0}
+              onClick={() => setPage(safePage - 1)}
+              className="text-xs gap-1"
+            >
+              <ChevronLeftIcon className="size-3.5" />
+              <span className="hidden sm:inline">Sebelumnya</span>
+            </Button>
+            {Array.from({ length: totalPages }, (_, i) => i)
+              .filter((p) => p === 0 || p === totalPages - 1 || Math.abs(p - safePage) <= 1)
+              .map((p, idx, arr) => (
+                <span key={p} className="flex items-center">
+                  {idx > 0 && arr[idx - 1] !== p - 1 && (
+                    <span className="px-1 text-xs text-muted-foreground">…</span>
+                  )}
+                  <Button
+                    variant={p === safePage ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setPage(p)}
+                    className="text-xs min-w-[32px]"
+                  >
+                    {p + 1}
+                  </Button>
+                </span>
               ))}
-            <PaginationItem>
-              <PaginationNext
-                text="Berikutnya"
-                onClick={() => setPage(Math.min(safePage + 1, totalPages))}
-                aria-disabled={safePage === totalPages}
-                className={
-                  safePage === totalPages ? "pointer-events-none opacity-50 text-xs" : "text-xs"
-                }
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={safePage === totalPages - 1}
+              onClick={() => setPage(safePage + 1)}
+              className="text-xs gap-1"
+            >
+              <span className="hidden sm:inline">Berikutnya</span>
+              <ChevronRightIcon className="size-3.5" />
+            </Button>
+          </nav>
+        )}
       </div>
     </section>
   )

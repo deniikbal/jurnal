@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { PercentIcon } from "lucide-react"
 
 import { GradeWeightActions } from "@/components/grade-weight-actions"
@@ -82,25 +82,30 @@ export function GradeWeightTableClient({
     [subjects],
   )
 
-  const handleSearchChange = (value: string) => {
-    setSearch(value)
-    setPage(1)
-  }
+  const handleSearchChange = useCallback((value: string) => {
+    setSearch((prev) => {
+      if (prev !== value) {
+        setPage(1)
+        return value
+      }
+      return prev
+    })
+  }, [])
 
-  const handleFilterChange = (value: string) => {
+  const handleFilterChange = useCallback((value: string) => {
     setFilter(value)
     setPage(1)
-  }
+  }, [])
 
-  const handleSubjectChange = (value: string) => {
+  const handleSubjectChange = useCallback((value: string) => {
     setSubjectId(value)
     setPage(1)
-  }
+  }, [])
 
-  const handleStatusChange = (value: string) => {
+  const handleStatusChange = useCallback((value: string) => {
     setStatus(value)
     setPage(1)
-  }
+  }, [])
 
   const filteredWeights = useMemo(() => {
     return weights

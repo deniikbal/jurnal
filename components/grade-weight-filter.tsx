@@ -44,7 +44,7 @@ export function GradeWeightFilter({
     }, 350)
 
     return () => window.clearTimeout(timeout)
-  }, [search, onSearchChange])
+  }, [search])
 
   const isDefault =
     !search && filter === "natural" && subjectId === "all" && status === "all"

@@ -34,7 +34,7 @@ export function KelasFilter({
     }, 350)
 
     return () => window.clearTimeout(timeout)
-  }, [search, onSearchChange])
+  }, [search])
 
   const isDefault = !search && filter === "natural"
 

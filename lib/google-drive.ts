@@ -1,4 +1,4 @@
-async function getAccessToken(): Promise<string> {
+export async function getAccessToken(): Promise<string> {
   const res = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -72,7 +72,7 @@ export async function uploadToGoogleDrive(
     throw new Error("Google Drive tidak mengembalikan file ID")
   }
 
-  await fetch(
+  const permRes = await fetch(
     `https://www.googleapis.com/drive/v3/files/${fileId}/permissions`,
     {
       method: "POST",
@@ -84,17 +84,49 @@ export async function uploadToGoogleDrive(
     },
   )
 
-  return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`
+  if (!permRes.ok) {
+    const permError = await permRes.text().catch(() => "Unknown error")
+    console.error(`Gagal mengatur permission public untuk file ${fileId}: ${permError}`)
+  }
+
+  return `https://drive.google.com/uc?export=view&id=${fileId}`
 }
 
-/** Convert any Google Drive URL to a thumbnail embed URL that works in <img> tags */
+/** Extract a Google Drive file ID from various URL formats */
+function extractDriveFileId(url: string): string | null {
+  // Already a thumbnail or uc URL with id param
+  if (url.includes("drive.google.com/thumbnail") || url.includes("drive.google.com/uc")) {
+    try {
+      const id = new URL(url).searchParams.get("id")
+      if (id) return id
+    } catch { /* ignore invalid URLs */ }
+  }
+
+  // /file/d/FILE_ID/view...
+  const fileDMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/)
+  if (fileDMatch?.[1]) return fileDMatch[1]
+
+  // uc?export=view&id=FILE_ID or open?id=FILE_ID
+  const idMatch = url.match(/[?&]id=([a-zA-Z0-9_-]+)/)
+  if (idMatch?.[1]) return idMatch[1]
+
+  // Raw Google Drive file ID (20+ alphanumeric chars)
+  if (/^[a-zA-Z0-9_-]{20,}$/.test(url)) return url
+
+  return null
+}
+
+/** Convert any Google Drive URL to a local proxy URL that works in <img> tags */
 export function getDriveImageUrl(url: string | null): string | null {
   if (!url) return null
-  // Already a thumbnail URL
-  if (url.includes("drive.google.com/thumbnail")) return url
-  // Extract file ID from uc?export=view or other formats
-  const match = url.match(/[?&]id=([^&]+)/)
-  if (match) return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1000`
-  // Fallback: return as-is
-  return url
+  const trimmed = url.trim()
+  if (!trimmed) return null
+
+  const fileId = extractDriveFileId(trimmed)
+  if (fileId) return `/api/drive-image?id=${fileId}`
+
+  // Not a recognized Google Drive URL — return as-is
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) return trimmed
+
+  return null
 }

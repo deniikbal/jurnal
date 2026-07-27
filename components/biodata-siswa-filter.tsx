@@ -1,7 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState, useTransition } from "react"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useEffect, useRef, useState } from "react"
 import { SearchIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -17,63 +16,39 @@ import {
 type BiodataSiswaFilterProps = {
   q: string
   filter: string
+  onSearchChange: (q: string) => void
+  onFilterChange: (filter: string) => void
 }
 
-export function BiodataSiswaFilter({ q, filter }: BiodataSiswaFilterProps) {
-  const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const currentQuery = searchParams.toString()
+export function BiodataSiswaFilter({
+  q,
+  filter,
+  onSearchChange,
+  onFilterChange,
+}: BiodataSiswaFilterProps) {
   const [search, setSearch] = useState(q)
-  const [isPending, startTransition] = useTransition()
-  const prevSearchRef = useRef(q)
+  const prevQRef = useRef(q)
 
   useEffect(() => {
-    const searchChanged = search !== prevSearchRef.current
-    prevSearchRef.current = search
+    if (q !== prevQRef.current) {
+      prevQRef.current = q
+      setSearch(q)
+    }
+  }, [q])
 
+  useEffect(() => {
     const timeout = window.setTimeout(() => {
-      const params = new URLSearchParams(currentQuery)
-      const trimmedSearch = search.trim()
-
-      if (trimmedSearch) params.set("q", trimmedSearch)
-      else params.delete("q")
-
-      if (searchChanged) {
-        params.delete("page")
+      if (search !== q) {
+        onSearchChange(search)
       }
-
-      const nextQuery = params.toString()
-
-      if (nextQuery === currentQuery) return
-
-      startTransition(() => {
-        router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname)
-      })
     }, 350)
 
     return () => window.clearTimeout(timeout)
-  }, [currentQuery, pathname, router, search, q])
-
-  function updateParam(key: string, value: string, defaultValue: string) {
-    const params = new URLSearchParams(searchParams)
-
-    if (value !== defaultValue) params.set(key, value)
-    else params.delete(key)
-
-    params.delete("page")
-
-    startTransition(() => {
-      const query = params.toString()
-      router.replace(query ? `${pathname}?${query}` : pathname)
-    })
-  }
+  }, [search, q, onSearchChange])
 
   function handleReset() {
     setSearch("")
-    startTransition(() => {
-      router.replace(pathname)
-    })
+    onSearchChange("")
   }
 
   return (
@@ -91,7 +66,7 @@ export function BiodataSiswaFilter({ q, filter }: BiodataSiswaFilterProps) {
       <div className="flex items-center gap-2 sm:shrink-0">
         <Select
           value={filter}
-          onValueChange={(value) => updateParam("filter", value, "natural")}
+          onValueChange={(value) => onFilterChange(value)}
         >
           <SelectTrigger
             className="h-9 w-full border-0 bg-transparent shadow-none sm:w-36 text-xs sm:text-sm"
@@ -110,7 +85,7 @@ export function BiodataSiswaFilter({ q, filter }: BiodataSiswaFilterProps) {
           type="button"
           variant="ghost"
           onClick={handleReset}
-          disabled={isPending || (!search && filter === "natural")}
+          disabled={!search && filter === "natural"}
           className="h-9 shrink-0 text-xs sm:text-sm"
         >
           Reset

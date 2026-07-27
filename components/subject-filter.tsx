@@ -38,7 +38,7 @@ export function SubjectFilter({
     }, 350)
 
     return () => window.clearTimeout(timeout)
-  }, [search, onSearchChange])
+  }, [search])
 
   const isDefault = !search && filter === "natural" && status === "all"
 

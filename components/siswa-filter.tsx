@@ -44,7 +44,7 @@ export function SiswaFilter({
     }, 350)
 
     return () => window.clearTimeout(timeout)
-  }, [search, onSearchChange])
+  }, [search])
 
   const isDefault =
     !search && filter === "natural" && kelas === "all" && status === "all"
