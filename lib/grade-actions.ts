@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache"
 import { and, eq, inArray } from "drizzle-orm"
+import * as XLSX from "xlsx"
 
 import { db } from "@/lib/db"
 import { assessment, classroom, grade, gradeWeight, schedule, siswa, subject } from "@/lib/db/schema"
@@ -214,4 +215,172 @@ export async function getGradesByAssessmentIds(assessmentIds: string[], userId: 
     .select()
     .from(grade)
     .where(and(inArray(grade.assessmentId, assessmentIds), eq(grade.userId, userId)))
+}
+
+export type GradeImportRow = {
+  name: string
+  nis: string | null
+  score: number
+  matched: boolean
+  reason?: string
+}
+
+export type GradeImportState = {
+  success: boolean
+  message: string
+  imported: number
+  skipped: number
+  rows?: GradeImportRow[]
+  errors?: string[]
+}
+
+const importError = (message: string): GradeImportState => ({
+  success: false, message, imported: 0, skipped: 0,
+})
+
+export async function importGrades(
+  _prevState: GradeImportState,
+  formData: FormData,
+): Promise<GradeImportState> {
+  const session = await verifySession()
+  const assessmentId = String(formData.get("assessmentId") ?? "").trim()
+  const file = formData.get("file")
+
+  if (!assessmentId) return importError("Penilaian harus dipilih")
+
+  if (!(file instanceof File) || file.size === 0) {
+    return importError("File belum dipilih")
+  }
+
+  const fileName = file.name.toLowerCase()
+  if (!fileName.endsWith(".xls") && !fileName.endsWith(".xlsx")) {
+    return importError("Format file harus .xls atau .xlsx")
+  }
+
+  let rawRows: unknown[][]
+  try {
+    const buffer = Buffer.from(await file.arrayBuffer())
+    const workbook = XLSX.read(buffer, { type: "buffer" })
+    const sheet = workbook.Sheets[workbook.SheetNames[0]]
+    if (!sheet) return importError("File Excel tidak memiliki sheet")
+    rawRows = XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1, defval: "" })
+  } catch {
+    return importError("Gagal membaca file Excel")
+  }
+
+  const dataRows = rawRows.slice(1).filter((r) => r.some((cell) => cell !== ""))
+  if (!dataRows.length) return importError("File Excel tidak berisi data")
+
+  const [assessmentRecord] = await db
+    .select({ classroomId: assessment.classroomId })
+    .from(assessment)
+    .where(and(eq(assessment.id, assessmentId), eq(assessment.userId, session.userId)))
+    .limit(1)
+
+  if (!assessmentRecord) return importError("Penilaian tidak ditemukan")
+
+  const students = await db
+    .select({ id: siswa.id, name: siswa.name, nis: siswa.nis })
+    .from(siswa)
+    .where(
+      and(
+        eq(siswa.classroomId, assessmentRecord.classroomId),
+        eq(siswa.userId, session.userId),
+        eq(siswa.status, "aktif"),
+      ),
+    )
+
+  const siswaByNis = new Map(
+    students.filter((s) => s.nis).map((s) => [s.nis!.toLowerCase(), s]),
+  )
+  const siswaByName = new Map(
+    students.map((s) => [s.name.toLowerCase(), s]),
+  )
+
+  const rows: GradeImportRow[] = []
+  const errors: string[] = []
+  const toInsert: { siswaId: string; score: number }[] = []
+
+  for (const [index, row] of dataRows.entries()) {
+    const rowNumber = index + 2
+    const nis = String(row[0] ?? "").trim()
+    const nama = String(row[1] ?? "").trim()
+    const nilaiRaw = String(row[2] ?? "").trim()
+
+    let matchedStudent: (typeof students)[number] | undefined
+    let reason: string | undefined
+
+    if (nis) {
+      matchedStudent = siswaByNis.get(nis.toLowerCase())
+      if (!matchedStudent) {
+        reason = `NIS "${nis}" tidak ditemukan`
+        errors.push(`Baris ${rowNumber}: ${reason}`)
+      }
+    } else if (nama) {
+      matchedStudent = siswaByName.get(nama.toLowerCase())
+      if (!matchedStudent) {
+        reason = `nama "${nama}" tidak ditemukan`
+        errors.push(`Baris ${rowNumber}: ${reason}`)
+      }
+    } else {
+      reason = "NIS dan Nama kosong"
+      errors.push(`Baris ${rowNumber}: ${reason}`)
+    }
+
+    if (!matchedStudent || reason) {
+      rows.push({
+        name: nama || "(kosong)",
+        nis: nis || null,
+        score: 0,
+        matched: false,
+        reason,
+      })
+      continue
+    }
+
+    const score = Math.min(Math.max(Math.round(Number(nilaiRaw)) || 0, 0), 100)
+    rows.push({
+      name: matchedStudent.name,
+      nis: matchedStudent.nis,
+      score,
+      matched: true,
+    })
+    toInsert.push({ siswaId: matchedStudent.id, score })
+  }
+
+  if (!toInsert.length) {
+    return {
+      success: false,
+      message: "Tidak ada data nilai valid. Periksa kembali file atau data siswa.",
+      imported: 0,
+      skipped: errors.length,
+      rows,
+      errors,
+    }
+  }
+
+  await db.batch([
+    db
+      .delete(grade)
+      .where(and(eq(grade.assessmentId, assessmentId), eq(grade.userId, session.userId))),
+    db.insert(grade).values(
+      toInsert.map((s) => ({
+        assessmentId,
+        siswaId: s.siswaId,
+        score: s.score,
+        userId: session.userId,
+      })),
+    ),
+  ])
+
+  revalidatePath("/dashboard/jurnal")
+
+  return {
+    success: true,
+    message: `${toInsert.length} nilai berhasil diimport`,
+    imported: toInsert.length,
+    skipped: errors.length,
+    rows,
+    errors,
+  }
 }

@@ -11,6 +11,7 @@ import {
 } from "@/lib/grade-actions"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { GradeImportDialog } from "@/components/grade-import-dialog"
 import {
   Dialog,
   DialogContent,
@@ -233,10 +234,19 @@ function AssessmentList({
             <p className="text-sm text-muted-foreground">
               Daftar penilaian (mis. Tugas 1, Tugas 2, UH 1, ...).
             </p>
-            <Button type="button" size="sm" onClick={onAdd}>
-              <PlusIcon />
-              Tambah Penilaian
-            </Button>
+            <div className="flex items-center gap-2">
+              <GradeImportDialog
+                assessments={assessments.map((a) => ({
+                  id: a.id,
+                  title: a.title,
+                  gradeWeightName: a.gradeWeightName,
+                }))}
+              />
+              <Button type="button" size="sm" onClick={onAdd}>
+                <PlusIcon />
+                Tambah Penilaian
+              </Button>
+            </div>
           </div>
 
           <div className="max-h-[55vh] overflow-auto rounded-sm border">

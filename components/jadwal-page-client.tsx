@@ -31,7 +31,10 @@ function shortDay(d: string) {
 }
 
 function todayWeekday() {
-  return weekdayNames[new Date().getDay()]
+  return new Intl.DateTimeFormat("id-ID", {
+    timeZone: "Asia/Jakarta",
+    weekday: "long",
+  }).format(new Date()).toLowerCase()
 }
 
 function formatRange(start: string, end: string) {
@@ -62,9 +65,9 @@ export function JadwalPageClient({
   subjects,
   classrooms,
 }: JadwalPageClientProps) {
-  const [day, setDay] = useState("senin")
-  const [page, setPage] = useState(0)
   const today = todayWeekday()
+  const [day, setDay] = useState<string>((days as readonly string[]).includes(today) ? today : "senin")
+  const [page, setPage] = useState(0)
 
   const subjectById = useMemo(
     () => new Map(subjects.map((s) => [s.id, s])),

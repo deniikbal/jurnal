@@ -29,7 +29,12 @@ type KehadiranPageProps = {
 const dayMap = ["minggu", "senin", "selasa", "rabu", "kamis", "jumat", "sabtu"]
 
 function today() {
-  return new Date().toISOString().slice(0, 10)
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Jakarta",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date())
 }
 
 function currentMonth() {
@@ -48,7 +53,7 @@ function labelMonth(month: string) {
 }
 
 function getDayName(date: string) {
-  return dayMap[new Date(`${date}T00:00:00`).getDay()]
+  return dayMap[new Date(`${date}T12:00:00+07:00`).getUTCDay()]
 }
 
 function labelDay(day: string) {
