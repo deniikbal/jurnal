@@ -14,6 +14,7 @@ import {
 
 type AttendanceReportFilterProps = {
   month: string
+  currentMonth: string
   classroomId: string
   subjectId: string
   classrooms: { id: string; name: string }[]
@@ -22,6 +23,7 @@ type AttendanceReportFilterProps = {
 
 export function AttendanceReportFilter({
   month,
+  currentMonth,
   classroomId,
   subjectId,
   classrooms,
@@ -36,7 +38,8 @@ export function AttendanceReportFilter({
     const params = new URLSearchParams(searchParams)
     params.set("tab", "laporan")
 
-    if (value && value !== defaultValue) params.set(key, value)
+    if (value && value !== defaultValue && !(key === "month" && value === currentMonth))
+      params.set(key, value)
     else params.delete(key)
 
     startTransition(() => {

@@ -5,6 +5,15 @@ import { AttendanceDialog } from "@/components/attendance-dialog"
 import { AttendanceReportFilter } from "@/components/attendance-report-filter"
 import { KehadiranFilter } from "@/components/kehadiran-filter"
 import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination"
+import {
   Table,
   TableBody,
   TableCell,
@@ -23,7 +32,7 @@ import {
 export const metadata: Metadata = { title: "Kehadiran" }
 
 type KehadiranPageProps = {
-  searchParams: Promise<{ month?: string; tab?: string; classroomId?: string; subjectId?: string }>
+  searchParams: Promise<{ month?: string; tab?: string; classroomId?: string; subjectId?: string; page?: string }>
 }
 
 const dayMap = ["minggu", "senin", "selasa", "rabu", "kamis", "jumat", "sabtu"]
@@ -65,6 +74,7 @@ function buildHref(params: {
   classroomId?: string
   subjectId?: string
   month?: string
+  page?: number
 }) {
   const search = new URLSearchParams()
   if (params.tab && params.tab !== "kehadiran") search.set("tab", params.tab)
@@ -74,7 +84,8 @@ function buildHref(params: {
   if (params.subjectId && params.subjectId !== "all") {
     search.set("subjectId", params.subjectId)
   }
-  if (params.month) search.set("month", params.month)
+  if (params.month && params.month !== currentMonth()) search.set("month", params.month)
+  if (params.page && params.page > 1) search.set("page", String(params.page))
   const query = search.toString()
   return query ? `/dashboard/kehadiran?${query}` : "/dashboard/kehadiran"
 }
@@ -86,6 +97,8 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
   const selectedTab = params.tab === "laporan" ? "laporan" : "kehadiran"
   const selectedClassroomId = params.classroomId ?? "all"
   const selectedSubjectId = params.subjectId ?? "all"
+  const PAGE_SIZE = 10
+  const currentPage = Math.max(1, parseInt(params.page ?? "1", 10) || 1)
   const selectedDay = getDayName(date)
 
   const [schedules, subjects, classrooms, students, attendances] = await Promise.all([
@@ -162,6 +175,10 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
       (a, b) =>
         a.date.localeCompare(b.date) || a.jamKe - b.jamKe || a.startTime.localeCompare(b.startTime),
     )
+
+  const totalPages = Math.max(1, Math.ceil(reportRows.length / PAGE_SIZE))
+  const safePage = Math.min(currentPage, totalPages)
+  const pagedReportRows = reportRows.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE)
 
   const totalHadir = attendancesToday.filter((item) => item.status === "hadir").length
   const totalTidakHadir = attendancesToday.filter((item) => item.status !== "hadir").length
@@ -354,6 +371,7 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
             </div>
             <AttendanceReportFilter
               month={reportMonth}
+              currentMonth={currentMonth()}
               classroomId={selectedClassroomId}
               subjectId={selectedSubjectId}
               classrooms={classrooms}
@@ -399,10 +417,10 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
               </TableHeader>
               <TableBody>
                 {reportRows.length > 0 ? (
-                  reportRows.map((row, index) => (
+                  pagedReportRows.map((row, index) => (
                     <TableRow key={row.id} className="group">
                       <TableCell className="pl-5 text-xs tabular-nums text-muted-foreground">
-                        {index + 1}
+                        {(safePage - 1) * PAGE_SIZE + index + 1}
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col">
@@ -460,7 +478,7 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
 
           <div className="divide-y divide-border sm:hidden">
             {reportRows.length > 0 ? (
-              reportRows.map((row) => (
+              pagedReportRows.map((row) => (
                 <div key={row.id} className="space-y-3 px-4 py-3.5">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 space-y-0.5">
@@ -507,6 +525,84 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
               </div>
             )}
           </div>
+
+          {totalPages > 1 && (
+            <div className="border-t border-border px-4 py-3">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      text="Sebelumnya"
+                      href={buildHref({
+                        tab: "laporan",
+                        classroomId: selectedClassroomId,
+                        subjectId: selectedSubjectId,
+                        month: reportMonth,
+                        page: safePage - 1,
+                      })}
+                      aria-disabled={safePage <= 1}
+                      className={safePage <= 1 ? "pointer-events-none opacity-50" : ""}
+                    />
+                  </PaginationItem>
+
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
+                    const showPage =
+                      p === 1 || p === totalPages || Math.abs(p - safePage) <= 1
+                    const showEllipsisBefore = p === safePage - 2 && safePage - 2 > 1
+                    const showEllipsisAfter = p === safePage + 2 && safePage + 2 < totalPages
+
+                    if (showEllipsisBefore) {
+                      return (
+                        <PaginationItem key={`ellipsis-before`}>
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                      )
+                    }
+                    if (showEllipsisAfter) {
+                      return (
+                        <PaginationItem key={`ellipsis-after`}>
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                      )
+                    }
+                    if (!showPage) return null
+
+                    return (
+                      <PaginationItem key={p}>
+                        <PaginationLink
+                          href={buildHref({
+                            tab: "laporan",
+                            classroomId: selectedClassroomId,
+                            subjectId: selectedSubjectId,
+                            month: reportMonth,
+                            page: p,
+                          })}
+                          isActive={p === safePage}
+                        >
+                          {p}
+                        </PaginationLink>
+                      </PaginationItem>
+                    )
+                  })}
+
+                  <PaginationItem>
+                    <PaginationNext
+                      text="Berikutnya"
+                      href={buildHref({
+                        tab: "laporan",
+                        classroomId: selectedClassroomId,
+                        subjectId: selectedSubjectId,
+                        month: reportMonth,
+                        page: safePage + 1,
+                      })}
+                      aria-disabled={safePage >= totalPages}
+                      className={safePage >= totalPages ? "pointer-events-none opacity-50" : ""}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
         </section>
       )}
     </div>

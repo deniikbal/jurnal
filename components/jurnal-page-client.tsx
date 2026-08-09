@@ -4,10 +4,18 @@ import { useMemo, useState } from "react"
 
 import { AttendanceDialog } from "@/components/attendance-dialog"
 import { GradeDialog } from "@/components/grade-dialog"
+import { GradeRecap } from "@/components/grade-recap"
 import { JournalDeleteButton } from "@/components/journal-delete-button"
 import { JournalDialog } from "@/components/journal-dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import {
   Table,
   TableBody,
@@ -65,6 +73,7 @@ type Journal = {
   endTime: string
   subjectName: string
   subjectKode: string | null
+  classroomId: string
   classroomName: string
   materi: string
   kegiatan: string
@@ -135,11 +144,9 @@ export function JurnalPageClient({
   assessments,
 }: JurnalPageClientProps) {
   const [date, setDate] = useState(today)
-  const [tab, setTab] = useState<"input" | "laporan">("input")
+  const [tab, setTab] = useState<"input" | "laporan" | "rekap">("input")
 
-  const now = new Date()
-  const defaultMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
-  const [reportMonth, setReportMonth] = useState(defaultMonth)
+  const [reportClassroomId, setReportClassroomId] = useState("all")
   const [reportPage, setReportPage] = useState(0)
 
   const PAGE_SIZE = 10
@@ -235,10 +242,10 @@ export function JurnalPageClient({
 
   const reportJournals = useMemo(() => {
     const rows = journals
-      .filter((j) => j.date.startsWith(reportMonth))
+      .filter((j) => reportClassroomId === "all" || j.classroomId === reportClassroomId)
       .sort((a, b) => a.date.localeCompare(b.date) || a.jamKe - b.jamKe)
     return rows
-  }, [journals, reportMonth])
+  }, [journals, reportClassroomId])
 
   const reportTotalPages = Math.max(Math.ceil(reportJournals.length / PAGE_SIZE), 1)
   const reportSafePage = Math.min(reportPage, reportTotalPages - 1)
@@ -308,6 +315,17 @@ export function JurnalPageClient({
             }`}
           >
             Laporan
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab("rekap")}
+            className={`-mb-px border-b-2 pb-2.5 text-sm transition-colors ${
+              tab === "rekap"
+                ? "border-foreground font-medium text-foreground"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Rekap Nilai
           </button>
         </div>
 
@@ -466,27 +484,44 @@ export function JurnalPageClient({
             )}
           </div>
         </section>
-      ) : (
+      ) : tab === "laporan" ? (
         <section className="overflow-hidden rounded-md border border-border bg-card">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-4 sm:px-5">
             <div>
               <h2 className="text-sm font-semibold text-foreground">Laporan jurnal</h2>
               <p className="text-xs text-muted-foreground">
-                {reportMonth} · {reportJournals.length} entri
+                {reportJournals.length} entri
               </p>
             </div>
-            <Input
-              type="month"
-              value={reportMonth}
-              onChange={(e) => {
-                if (e.target.value) {
-                  setReportMonth(e.target.value)
-                  setReportPage(0)
-                }
+            <Select
+              value={reportClassroomId}
+              onValueChange={(value) => {
+                setReportClassroomId(value)
+                setReportPage(0)
               }}
-              className="h-9 w-44 border-border/80 bg-background text-sm shadow-none"
-              aria-label="Bulan laporan"
-            />
+            >
+              <SelectTrigger
+                className="h-9 w-full text-sm shadow-none sm:w-40"
+                aria-label="Filter kelas laporan"
+              >
+                <SelectValue placeholder="Semua kelas" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Semua kelas</SelectItem>
+                {[...classrooms]
+                  .sort((a, b) =>
+                    a.name.localeCompare(b.name, undefined, {
+                      numeric: true,
+                      sensitivity: "base",
+                    }),
+                  )
+                  .map((classroom) => (
+                    <SelectItem key={classroom.id} value={classroom.id}>
+                      {classroom.name}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="hidden sm:block">
@@ -653,7 +688,16 @@ export function JurnalPageClient({
             </div>
           )}
         </section>
-      )}
+      ) : tab === "rekap" ? (
+        <GradeRecap
+          classrooms={classrooms}
+          subjects={subjects}
+          students={students}
+          assessments={assessments}
+          grades={grades}
+          gradeWeights={gradeWeights}
+        />
+      ) : null}
     </div>
   )
 }

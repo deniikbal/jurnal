@@ -13,8 +13,9 @@ export default async function KelasPage() {
     getSiswaForCurrentUser(),
   ])
 
+  const siswaAktif = daftarSiswa.filter((item) => item.status === "aktif")
   const totalKelas = daftarKelas.length
-  const totalSiswa = daftarSiswa.length
+  const totalSiswa = siswaAktif.length
   const avgSiswaPerKelas =
     totalKelas > 0 ? Math.round((totalSiswa / totalKelas) * 10) / 10 : 0
   const withWali = daftarKelas.filter((item) => item.waliKelas).length
@@ -58,7 +59,7 @@ export default async function KelasPage() {
         </dl>
       </div>
 
-      <KelasTableClient daftarKelas={daftarKelas} daftarSiswa={daftarSiswa} />
+      <KelasTableClient daftarKelas={daftarKelas} daftarSiswa={siswaAktif} />
     </div>
   )
 }

@@ -30,6 +30,8 @@ export default async function DashboardPage() {
       getJournalsForCurrentUser(),
     ])
 
+  const siswaAktif = daftarSiswa.filter((item) => item.status === "aktif")
+
   const tanggal = new Date().toLocaleDateString("id-ID", {
     weekday: "long",
     day: "numeric",
@@ -40,9 +42,11 @@ export default async function DashboardPage() {
   const siswaPerKelas = daftarKelas
     .map((kelas) => ({
       name: kelas.name,
-      count: daftarSiswa.filter((s) => s.classroomId === kelas.id).length,
+      count: siswaAktif.filter((s) => s.classroomId === kelas.id).length,
     }))
-    .sort((a, b) => b.count - a.count)
+    .sort((a, b) =>
+      a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" }),
+    )
 
   const maxSiswa = Math.max(...siswaPerKelas.map((k) => k.count), 1)
 
@@ -108,7 +112,7 @@ export default async function DashboardPage() {
           <div>
             <dt className="text-[11px] text-muted-foreground">Siswa</dt>
             <dd className="font-semibold tabular-nums text-foreground">
-              {daftarSiswa.length}
+              {siswaAktif.length}
             </dd>
           </div>
           <div>

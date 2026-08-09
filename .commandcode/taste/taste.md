@@ -1,0 +1,3 @@
+- Prefers buttons with clear, high contrast for better visibility and usability. Confidence: 0.7
+- Prefers natural (numeric-aware) sorting for class names (X1, X2, X3, ..., X10) instead of lexical or count-based ordering when displaying class lists/cards and in class filter dropdown options. Confidence: 0.8
+- Communicates in Indonesian (Bahasa Indonesia) and expects the assistant to respond in Indonesian. Confidence: 0.9

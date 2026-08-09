@@ -510,6 +510,16 @@ function AssessmentForm({
             Semua sudah dinilai
           </Badge>
         )}
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => setScores(Object.fromEntries(students.map((s) => [s.id, "100"])))}
+          disabled={isPending}
+          className="ml-auto"
+        >
+          Isi Semua 100
+        </Button>
       </div>
 
       <div className="max-h-[45vh] overflow-auto rounded-sm border">
