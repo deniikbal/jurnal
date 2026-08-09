@@ -1,8 +1,9 @@
 "use client"
 
 import { Fragment, useMemo, useState } from "react"
-import { ClipboardListIcon } from "lucide-react"
+import { ClipboardListIcon, FileSpreadsheetIcon } from "lucide-react"
 
+import { Button } from "@/components/ui/button"
 import {
   Select,
   SelectContent,
@@ -259,6 +260,12 @@ export function GradeRecap({
               ))}
             </SelectContent>
           </Select>
+          <Button asChild variant="outline" size="default" className="h-9 text-sm">
+            <a href="/api/rekap-nilai/export">
+              <FileSpreadsheetIcon />
+              Export Excel
+            </a>
+          </Button>
         </div>
       </div>
 

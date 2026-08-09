@@ -1,3 +1,9 @@
 - Prefers buttons with clear, high contrast for better visibility and usability. Confidence: 0.7
 - Prefers natural (numeric-aware) sorting for class names (X1, X2, X3, ..., X10) instead of lexical or count-based ordering when displaying class lists/cards and in class filter dropdown options. Confidence: 0.8
 - Communicates in Indonesian (Bahasa Indonesia) and expects the assistant to respond in Indonesian. Confidence: 0.9
+- Wants exported files/reports (e.g. Excel) to mirror the headers and layout of the on-screen UI page they come from, so the export looks consistent with the screen. Confidence: 0.6
+- Wants exported Excel files to be visually polished: cells with borders, colored header rows, and distinct styling for the summary/footer row. Confidence: 0.8
+- Prefers concise Excel sheet tab names in exports — just the essential identifier (e.g., class name only, not "class + subject"), with numeric suffixes for duplicates. Confidence: 0.7
+- Prefers fixed/identifier header columns in Excel exports (e.g., No, NIS, Nama, Nilai Akhir) to be merged vertically across the multi-row header so they appear centered. Confidence: 0.7
+- Prefers identifier columns in Excel exports (e.g., No/NIS) to display whole numbers only; decimal formatting (e.g., 0.0) should apply only to score/value columns, not index columns. Confidence: 0.8
+- Wants UI controls in the same toolbar/header row to be visually consistent in size (e.g., a button's height matching adjacent form selects so they align). Confidence: 0.8
