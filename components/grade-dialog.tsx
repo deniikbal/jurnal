@@ -1,7 +1,7 @@
 "use client"
 
 import { useActionState, useEffect, useMemo, useState } from "react"
-import { PencilIcon, PlusIcon, Trash2Icon } from "lucide-react"
+import { PencilIcon, PlusIcon, SearchIcon, Trash2Icon } from "lucide-react"
 import { toast } from "sonner"
 
 import {
@@ -368,6 +368,7 @@ function AssessmentForm({
     ),
   )
   const [statusFilter, setStatusFilter] = useState("")
+  const [searchQuery, setSearchQuery] = useState("")
 
   function isDinilai(studentId: string) {
     const v = scores[studentId]
@@ -377,11 +378,13 @@ function AssessmentForm({
   const sudahDinilai = students.filter((s) => isDinilai(s.id)).length
   const belumDinilai = students.filter((s) => !isDinilai(s.id)).length
 
-  const filteredStudents = statusFilter
-    ? students.filter((s) =>
-        statusFilter === "sudah" ? isDinilai(s.id) : !isDinilai(s.id),
-      )
-    : students
+  const query = searchQuery.trim().toLowerCase()
+
+  const filteredStudents = students.filter((s) => {
+    const matchStatus = statusFilter ? (statusFilter === "sudah" ? isDinilai(s.id) : !isDinilai(s.id)) : true
+    const matchSearch = !query || s.name.toLowerCase().includes(query)
+    return matchStatus && matchSearch
+  })
 
   useEffect(() => {
     if (!state.message) return
@@ -478,6 +481,18 @@ function AssessmentForm({
       )}
 
       <div className="flex gap-2">
+        <div className="relative flex-1">
+          <SearchIcon className="pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="search"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="Cari siswa..."
+            disabled={isPending}
+            className="h-8 pl-7 text-sm"
+            aria-label="Cari siswa"
+          />
+        </div>
         <button
           type="button"
           onClick={() => setStatusFilter(statusFilter === "sudah" ? "" : "sudah")}
@@ -568,7 +583,11 @@ function AssessmentForm({
             ) : (
               <TableRow>
                 <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
-                  {statusFilter ? `Tidak ada siswa dengan status "${statusFilter === "sudah" ? "sudah dinilai" : "belum dinilai"}".` : "Belum ada siswa aktif di kelas ini."}
+                  {searchQuery
+                    ? "Tidak ada siswa yang sesuai dengan pencarian."
+                    : statusFilter
+                      ? `Tidak ada siswa dengan status "${statusFilter === "sudah" ? "sudah dinilai" : "belum dinilai"}".`
+                      : "Belum ada siswa aktif di kelas ini."}
                 </TableCell>
               </TableRow>
             )}

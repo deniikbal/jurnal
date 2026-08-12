@@ -344,11 +344,13 @@ export function JurnalPageClient({
 
       {tab === "input" ? (
         <section className="overflow-hidden rounded-md border border-border bg-card">
-          <div className="border-b border-border px-4 py-4 sm:px-5">
-            <h2 className="text-sm font-semibold text-foreground">Jadwal hari ini</h2>
-            <p className="text-xs text-muted-foreground">
-              {labelDay(selectedDay)} · {date}
-            </p>
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-4 sm:px-5">
+            <div>
+              <h2 className="text-sm font-semibold text-foreground">Jadwal hari ini</h2>
+              <p className="text-xs text-muted-foreground">
+                {labelDay(selectedDay)} · {date}
+              </p>
+            </div>
           </div>
 
           <div className="divide-y divide-border">
@@ -357,9 +359,9 @@ export function JurnalPageClient({
                 const subject = subjectById.get(schedule.subjectId)
                 const classroom = classroomById.get(schedule.classroomId)
                 const journal = journalBySchedule.get(schedule.id)
-                const classStudents = [...(studentsByClassroom.get(schedule.classroomId) ?? [])].sort(
-                  (a, b) => collator.compare(a.name, b.name),
-                )
+                const classStudents = [
+                  ...(studentsByClassroom.get(schedule.classroomId) ?? []),
+                ].sort((a, b) => collator.compare(a.name, b.name))
                 const scheduleAttendances = attendanceBySchedule.get(schedule.id) ?? []
                 const attendanceStatuses = Object.fromEntries(
                   scheduleAttendances.map((item) => [item.siswaId, item.status]),
@@ -371,7 +373,8 @@ export function JurnalPageClient({
                   ) ?? []),
                 ].sort(
                   (a, b) =>
-                    (a.date ?? "").localeCompare(b.date ?? "") || collator.compare(a.title, b.title),
+                    (a.date ?? "").localeCompare(b.date ?? "") ||
+                    collator.compare(a.title, b.title),
                 )
                 const scheduleScoresByAssessment = Object.fromEntries(
                   scheduleAssessments.map((assessment) => [
@@ -382,7 +385,8 @@ export function JurnalPageClient({
 
                 const subjectClassrooms = classrooms.filter((c) =>
                   schedules.some(
-                    (s) => s.subjectId === schedule.subjectId && s.classroomId === c.id,
+                    (s) =>
+                      s.subjectId === schedule.subjectId && s.classroomId === c.id,
                   ),
                 )
                 const allSubjectAssessments = assessments.filter(
@@ -390,98 +394,105 @@ export function JurnalPageClient({
                 )
                 const studentCountsByClassroom: Record<string, number> = {}
                 for (const c of subjectClassrooms) {
-                  studentCountsByClassroom[c.id] = (studentsByClassroom.get(c.id) ?? []).length
+                  studentCountsByClassroom[c.id] = (
+                    studentsByClassroom.get(c.id) ?? []
+                  ).length
                 }
                 const isFilled = !!journal
 
                 return (
-                  <div
-                    key={schedule.id}
-                    className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5"
-                  >
-                    <div className="min-w-0 space-y-1">
-                      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                        <h3 className="text-sm font-medium text-foreground">
-                          {subject?.name ?? "Mapel tidak ditemukan"}
-                        </h3>
-                        {subject?.kode ? (
-                          <span className="text-xs text-muted-foreground">({subject.kode})</span>
-                        ) : null}
-                        <span className="text-xs tabular-nums text-muted-foreground">
-                          Jam ke-{schedule.jamKe}
-                        </span>
-                        <span className="inline-flex items-center gap-1.5 text-xs">
-                          <span
-                            className={`size-1.5 shrink-0 rounded-full ${
-                              isFilled
-                                ? "bg-emerald-600 dark:bg-emerald-400"
-                                : "bg-stone-400"
-                            }`}
-                            aria-hidden
-                          />
-                          <span
-                            className={
-                              isFilled ? "text-foreground" : "text-muted-foreground"
-                            }
-                          >
-                            {isFilled ? "Sudah diisi" : "Belum diisi"}
-                          </span>
-                        </span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {classroom?.name ?? "Kelas tidak ditemukan"}
-                        <span className="mx-1.5 text-border">·</span>
-                        {schedule.startTime}–{schedule.endTime}
-                        <span className="mx-1.5 text-border">·</span>
-                        {classStudents.length} siswa aktif
-                      </p>
-                      {journal?.materi ? (
-                        <p className="line-clamp-1 text-xs text-muted-foreground">
-                          Materi: {journal.materi}
-                        </p>
-                      ) : null}
-                    </div>
+                              <div
+                                key={schedule.id}
+                                className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5"
+                              >
+                                <div className="min-w-0 space-y-1">
+                                  <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                                    <h3 className="text-sm font-medium text-foreground">
+                                      {subject?.name ?? "Mapel tidak ditemukan"}
+                                    </h3>
+                                    {subject?.kode ? (
+                                      <span className="text-xs text-muted-foreground">
+                                        ({subject.kode})
+                                      </span>
+                                    ) : null}
+                                    <span className="text-xs tabular-nums text-muted-foreground">
+                                      Jam ke-{schedule.jamKe}
+                                    </span>
+                                    <span className="inline-flex items-center gap-1.5 text-xs">
+                                      <span
+                                        className={`size-1.5 shrink-0 rounded-full ${
+                                          isFilled
+                                            ? "bg-emerald-600 dark:bg-emerald-400"
+                                            : "bg-stone-400"
+                                        }`}
+                                        aria-hidden
+                                      />
+                                      <span
+                                        className={
+                                          isFilled ? "text-foreground" : "text-muted-foreground"
+                                        }
+                                      >
+                                        {isFilled ? "Sudah diisi" : "Belum diisi"}
+                                      </span>
+                                    </span>
+                                  </div>
+                                  <p className="text-xs text-muted-foreground">
+                                    {classroom?.name ?? "Kelas tidak ditemukan"}
+                                    <span className="mx-1.5 text-border">·</span>
+                                    {schedule.startTime}–{schedule.endTime}
+                                    <span className="mx-1.5 text-border">·</span>
+                                    {classStudents.length} siswa aktif
+                                  </p>
+                                  {journal?.materi ? (
+                                    <p className="line-clamp-1 text-xs text-muted-foreground">
+                                      Materi: {journal.materi}
+                                    </p>
+                                  ) : null}
+                                </div>
 
-                    <div className="flex flex-wrap gap-2 self-end sm:self-center sm:justify-end">
-                      <JournalDialog
-                        date={date}
-                        schedule={schedule}
-                        subjectName={subject?.name ?? "Mapel tidak ditemukan"}
-                        classroomName={classroom?.name ?? "Kelas tidak ditemukan"}
-                        journal={journal}
-                      />
-                      <AttendanceDialog
-                        date={date}
-                        schedule={schedule}
-                        subjectName={subject?.name ?? "Mapel tidak ditemukan"}
-                        classroomName={classroom?.name ?? "Kelas tidak ditemukan"}
-                        students={classStudents}
-                        statuses={attendanceStatuses}
-                      />
-                      <GradeDialog
-                        schedule={schedule}
-                        subjectName={subject?.name ?? "Mapel tidak ditemukan"}
-                        classroomName={classroom?.name ?? "Kelas tidak ditemukan"}
-                        students={classStudents}
-                        weights={scheduleWeights}
-                        assessments={scheduleAssessments}
-                        scoresByAssessment={scheduleScoresByAssessment}
-                        allClassrooms={subjectClassrooms}
-                        allAssessments={allSubjectAssessments}
-                        studentCountsByClassroom={studentCountsByClassroom}
-                        allScoresByAssessment={allScoresByAssessment}
-                      />
-                    </div>
-                  </div>
-                )
-              })
-            ) : (
-              <div className="px-4 py-14 text-center sm:px-5">
-                <p className="text-sm text-muted-foreground">
-                  Tidak ada jadwal untuk {labelDay(selectedDay)}.
-                </p>
-              </div>
-            )}
+                                <div className="flex flex-wrap gap-2 self-end sm:self-center sm:justify-end">
+                                  <JournalDialog
+                                    date={date}
+                                    schedule={schedule}
+                                    subjectName={subject?.name ?? "Mapel tidak ditemukan"}
+                                    classroomName={classroom?.name ?? "Kelas tidak ditemukan"}
+                                    journal={journal}
+                                    historyJournals={journals.filter(
+                                      (j) => j.classroomId === schedule.classroomId,
+                                    )}
+                                  />
+                                  <AttendanceDialog
+                                    date={date}
+                                    schedule={schedule}
+                                    subjectName={subject?.name ?? "Mapel tidak ditemukan"}
+                                    classroomName={classroom?.name ?? "Kelas tidak ditemukan"}
+                                    students={classStudents}
+                                    statuses={attendanceStatuses}
+                                  />
+                                  <GradeDialog
+                                    schedule={schedule}
+                                    subjectName={subject?.name ?? "Mapel tidak ditemukan"}
+                                    classroomName={classroom?.name ?? "Kelas tidak ditemukan"}
+                                    students={classStudents}
+                                    weights={scheduleWeights}
+                                    assessments={scheduleAssessments}
+                                    scoresByAssessment={scheduleScoresByAssessment}
+                                    allClassrooms={subjectClassrooms}
+                                    allAssessments={allSubjectAssessments}
+                                    studentCountsByClassroom={studentCountsByClassroom}
+                                    allScoresByAssessment={allScoresByAssessment}
+                                  />
+                                </div>
+                              </div>
+                            )
+                          })
+              ) : (
+                <div className="px-4 py-14 text-center sm:px-5">
+                  <p className="text-sm text-muted-foreground">
+                    Tidak ada jadwal untuk {labelDay(selectedDay)}.
+                  </p>
+                </div>
+              )}
           </div>
         </section>
       ) : tab === "laporan" ? (
