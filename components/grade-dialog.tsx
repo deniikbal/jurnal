@@ -405,6 +405,14 @@ function AssessmentForm({
       {assessment ? <input type="hidden" name="assessmentId" value={assessment.id} /> : null}
       <input type="hidden" name="scheduleId" value={schedule.id} />
       <input type="hidden" name="gradeWeightId" value={selectedWeightId} />
+      {students.map((student) => (
+        <input
+          key={student.id}
+          type="hidden"
+          name={`score-${student.id}`}
+          value={scores[student.id] ?? ""}
+        />
+      ))}
 
       <DialogHeader>
         <DialogTitle>

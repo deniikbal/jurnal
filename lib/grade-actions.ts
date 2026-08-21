@@ -123,20 +123,19 @@ export async function saveAssessment(
     currentAssessmentId = created.id
   }
 
-  await db
-    .delete(grade)
-    .where(and(eq(grade.assessmentId, currentAssessmentId), eq(grade.userId, session.userId)))
-
-  if (students.length) {
-    await db.insert(grade).values(
+  await db.batch([
+    db
+      .delete(grade)
+      .where(and(eq(grade.assessmentId, currentAssessmentId), eq(grade.userId, session.userId))),
+    db.insert(grade).values(
       students.map((student) => ({
         assessmentId: currentAssessmentId,
         siswaId: student.id,
         score: parseScore(formData.get(`score-${student.id}`)),
         userId: session.userId,
       })),
-    )
-  }
+    ),
+  ])
 
   // ponytail: applyAll — salin assessment ke semua kelas dengan mapel yang sama
   if (!assessmentId && formData.get("applyAll") === "1") {
