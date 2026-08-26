@@ -29,161 +29,166 @@ export async function saveAssessment(
   _prevState: GradeActionState,
   formData: FormData,
 ): Promise<GradeActionState> {
-  const session = await verifySession()
-  const assessmentId = String(formData.get("assessmentId") ?? "").trim()
-  const scheduleId = String(formData.get("scheduleId") ?? "")
-  const gradeWeightId = String(formData.get("gradeWeightId") ?? "")
-  const title = String(formData.get("title") ?? "").trim()
-  const description = String(formData.get("description") ?? "").trim()
-  const date = String(formData.get("date") ?? "").trim()
+  try {
+    const session = await verifySession()
+    const assessmentId = String(formData.get("assessmentId") ?? "").trim()
+    const scheduleId = String(formData.get("scheduleId") ?? "")
+    const gradeWeightId = String(formData.get("gradeWeightId") ?? "")
+    const title = String(formData.get("title") ?? "").trim()
+    const description = String(formData.get("description") ?? "").trim()
+    const date = String(formData.get("date") ?? "").trim()
 
-  if (!scheduleId) return errorState("Jadwal wajib dipilih")
-  if (!gradeWeightId) return errorState("Komponen penilaian wajib dipilih")
-  if (!title) return errorState("Nama penilaian wajib diisi")
+    if (!scheduleId) return errorState("Jadwal wajib dipilih")
+    if (!gradeWeightId) return errorState("Komponen penilaian wajib dipilih")
+    if (!title) return errorState("Nama penilaian wajib diisi")
 
-  const [selectedSchedule] = await db
-    .select()
-    .from(schedule)
-    .where(and(eq(schedule.id, scheduleId), eq(schedule.userId, session.userId)))
-    .limit(1)
-
-  if (!selectedSchedule) return errorState("Jadwal tidak ditemukan")
-
-  const [[selectedSubject], [selectedClassroom], [selectedWeight]] = await Promise.all([
-    db
-      .select({ id: subject.id, name: subject.name, kode: subject.kode })
-      .from(subject)
-      .where(and(eq(subject.id, selectedSchedule.subjectId), eq(subject.userId, session.userId)))
-      .limit(1),
-    db
-      .select({ id: classroom.id, name: classroom.name })
-      .from(classroom)
-      .where(and(eq(classroom.id, selectedSchedule.classroomId), eq(classroom.userId, session.userId)))
-      .limit(1),
-    db
-      .select({ id: gradeWeight.id, name: gradeWeight.name, subjectId: gradeWeight.subjectId })
-      .from(gradeWeight)
-      .where(and(eq(gradeWeight.id, gradeWeightId), eq(gradeWeight.userId, session.userId)))
-      .limit(1),
-  ])
-
-  if (!selectedSubject) return errorState("Mata pelajaran tidak ditemukan")
-  if (!selectedClassroom) return errorState("Kelas tidak ditemukan")
-  if (!selectedWeight) return errorState("Komponen penilaian tidak ditemukan")
-  if (selectedWeight.subjectId !== selectedSubject.id) {
-    return errorState("Komponen penilaian tidak sesuai mata pelajaran")
-  }
-
-  const students = await db
-    .select({ id: siswa.id })
-    .from(siswa)
-    .where(
-      and(
-        eq(siswa.classroomId, selectedSchedule.classroomId),
-        eq(siswa.userId, session.userId),
-        eq(siswa.status, "aktif"),
-      ),
-    )
-
-  let currentAssessmentId = assessmentId
-
-  if (currentAssessmentId) {
-    const updated = await db
-      .update(assessment)
-      .set({
-        title,
-        description: description || null,
-        date: date || null,
-        gradeWeightId,
-        gradeWeightName: selectedWeight.name,
-        updatedAt: new Date(),
-      })
-      .where(and(eq(assessment.id, currentAssessmentId), eq(assessment.userId, session.userId)))
-      .returning({ id: assessment.id })
-
-    if (!updated.length) return errorState("Penilaian tidak ditemukan")
-  } else {
-    const [created] = await db
-      .insert(assessment)
-      .values({
-        title,
-        description: description || null,
-        date: date || null,
-        gradeWeightId,
-        gradeWeightName: selectedWeight.name,
-        subjectId: selectedSubject.id,
-        subjectName: selectedSubject.name,
-        subjectKode: selectedSubject.kode,
-        classroomId: selectedClassroom.id,
-        classroomName: selectedClassroom.name,
-        userId: session.userId,
-      })
-      .returning({ id: assessment.id })
-
-    currentAssessmentId = created.id
-  }
-
-  await db.batch([
-    db
-      .delete(grade)
-      .where(and(eq(grade.assessmentId, currentAssessmentId), eq(grade.userId, session.userId))),
-    db.insert(grade).values(
-      students.map((student) => ({
-        assessmentId: currentAssessmentId,
-        siswaId: student.id,
-        score: parseScore(formData.get(`score-${student.id}`)),
-        userId: session.userId,
-      })),
-    ),
-  ])
-
-  // ponytail: applyAll — salin assessment ke semua kelas dengan mapel yang sama
-  if (!assessmentId && formData.get("applyAll") === "1") {
-    const otherSchedules = await db
-      .select({ classroomId: schedule.classroomId })
+    const [selectedSchedule] = await db
+      .select()
       .from(schedule)
+      .where(and(eq(schedule.id, scheduleId), eq(schedule.userId, session.userId)))
+      .limit(1)
+
+    if (!selectedSchedule) return errorState("Jadwal tidak ditemukan")
+
+    const [[selectedSubject], [selectedClassroom], [selectedWeight]] = await Promise.all([
+      db
+        .select({ id: subject.id, name: subject.name, kode: subject.kode })
+        .from(subject)
+        .where(and(eq(subject.id, selectedSchedule.subjectId), eq(subject.userId, session.userId)))
+        .limit(1),
+      db
+        .select({ id: classroom.id, name: classroom.name })
+        .from(classroom)
+        .where(and(eq(classroom.id, selectedSchedule.classroomId), eq(classroom.userId, session.userId)))
+        .limit(1),
+      db
+        .select({ id: gradeWeight.id, name: gradeWeight.name, subjectId: gradeWeight.subjectId })
+        .from(gradeWeight)
+        .where(and(eq(gradeWeight.id, gradeWeightId), eq(gradeWeight.userId, session.userId)))
+        .limit(1),
+    ])
+
+    if (!selectedSubject) return errorState("Mata pelajaran tidak ditemukan")
+    if (!selectedClassroom) return errorState("Kelas tidak ditemukan")
+    if (!selectedWeight) return errorState("Komponen penilaian tidak ditemukan")
+    if (selectedWeight.subjectId !== selectedSubject.id) {
+      return errorState("Komponen penilaian tidak sesuai mata pelajaran")
+    }
+
+    const students = await db
+      .select({ id: siswa.id })
+      .from(siswa)
       .where(
         and(
-          eq(schedule.subjectId, selectedSubject.id),
-          eq(schedule.userId, session.userId),
+          eq(siswa.classroomId, selectedSchedule.classroomId),
+          eq(siswa.userId, session.userId),
+          eq(siswa.status, "aktif"),
         ),
       )
 
-    const otherClassroomIds = [
-      ...new Set(otherSchedules.map((s) => s.classroomId)),
-    ].filter((id) => id !== selectedClassroom.id)
+    let currentAssessmentId = assessmentId
 
-    for (const classroomId of otherClassroomIds) {
-      const [cls] = await db
-        .select({ id: classroom.id, name: classroom.name })
-        .from(classroom)
-        .where(
-          and(eq(classroom.id, classroomId), eq(classroom.userId, session.userId)),
-        )
-        .limit(1)
-      if (!cls) continue
+    if (currentAssessmentId) {
+      const updated = await db
+        .update(assessment)
+        .set({
+          title,
+          description: description || null,
+          date: date || null,
+          gradeWeightId,
+          gradeWeightName: selectedWeight.name,
+          updatedAt: new Date(),
+        })
+        .where(and(eq(assessment.id, currentAssessmentId), eq(assessment.userId, session.userId)))
+        .returning({ id: assessment.id })
 
-      await db.insert(assessment).values({
-        title,
-        description: description || null,
-        date: date || null,
-        gradeWeightId,
-        gradeWeightName: selectedWeight.name,
-        subjectId: selectedSubject.id,
-        subjectName: selectedSubject.name,
-        subjectKode: selectedSubject.kode,
-        classroomId: cls.id,
-        classroomName: cls.name,
-        userId: session.userId,
-      })
+      if (!updated.length) return errorState("Penilaian tidak ditemukan")
+    } else {
+      const [created] = await db
+        .insert(assessment)
+        .values({
+          title,
+          description: description || null,
+          date: date || null,
+          gradeWeightId,
+          gradeWeightName: selectedWeight.name,
+          subjectId: selectedSubject.id,
+          subjectName: selectedSubject.name,
+          subjectKode: selectedSubject.kode,
+          classroomId: selectedClassroom.id,
+          classroomName: selectedClassroom.name,
+          userId: session.userId,
+        })
+        .returning({ id: assessment.id })
+
+      currentAssessmentId = created.id
     }
+
+    await db.batch([
+      db
+        .delete(grade)
+        .where(and(eq(grade.assessmentId, currentAssessmentId), eq(grade.userId, session.userId))),
+      db.insert(grade).values(
+        students.map((student) => ({
+          assessmentId: currentAssessmentId,
+          siswaId: student.id,
+          score: parseScore(formData.get(`score-${student.id}`)),
+          userId: session.userId,
+        })),
+      ),
+    ])
+
+    // ponytail: applyAll — salin assessment ke semua kelas dengan mapel yang sama
+    if (!assessmentId && formData.get("applyAll") === "1") {
+      const otherSchedules = await db
+        .select({ classroomId: schedule.classroomId })
+        .from(schedule)
+        .where(
+          and(
+            eq(schedule.subjectId, selectedSubject.id),
+            eq(schedule.userId, session.userId),
+          ),
+        )
+
+      const otherClassroomIds = [
+        ...new Set(otherSchedules.map((s) => s.classroomId)),
+      ].filter((id) => id !== selectedClassroom.id)
+
+      for (const classroomId of otherClassroomIds) {
+        const [cls] = await db
+          .select({ id: classroom.id, name: classroom.name })
+          .from(classroom)
+          .where(
+            and(eq(classroom.id, classroomId), eq(classroom.userId, session.userId)),
+          )
+          .limit(1)
+        if (!cls) continue
+
+        await db.insert(assessment).values({
+          title,
+          description: description || null,
+          date: date || null,
+          gradeWeightId,
+          gradeWeightName: selectedWeight.name,
+          subjectId: selectedSubject.id,
+          subjectName: selectedSubject.name,
+          subjectKode: selectedSubject.kode,
+          classroomId: cls.id,
+          classroomName: cls.name,
+          userId: session.userId,
+        })
+      }
+    }
+
+    revalidatePath("/dashboard/jurnal")
+
+    return successState(
+      assessmentId ? "Penilaian berhasil diperbarui" : "Penilaian berhasil disimpan",
+    )
+  } catch (error) {
+    console.error("saveAssessment error:", error)
+    return errorState("Gagal menyimpan penilaian. Coba lagi.")
   }
-
-  revalidatePath("/dashboard/jurnal")
-
-  return successState(
-    assessmentId ? "Penilaian berhasil diperbarui" : "Penilaian berhasil disimpan",
-  )
 }
 
 export async function deleteAssessment(

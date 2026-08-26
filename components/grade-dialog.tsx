@@ -405,14 +405,17 @@ function AssessmentForm({
       {assessment ? <input type="hidden" name="assessmentId" value={assessment.id} /> : null}
       <input type="hidden" name="scheduleId" value={schedule.id} />
       <input type="hidden" name="gradeWeightId" value={selectedWeightId} />
-      {students.map((student) => (
-        <input
-          key={student.id}
-          type="hidden"
-          name={`score-${student.id}`}
-          value={scores[student.id] ?? ""}
-        />
-      ))}
+      {/* Hidden inputs untuk siswa yang tidak tampil di filter (biar nilai eksistingnya tidak hilang) */}
+      {students
+        .filter((s) => !filteredStudents.some((fs) => fs.id === s.id))
+        .map((student) => (
+          <input
+            key={student.id}
+            type="hidden"
+            name={`score-${student.id}`}
+            value={scores[student.id] ?? ""}
+          />
+        ))}
 
       <DialogHeader>
         <DialogTitle>
