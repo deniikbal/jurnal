@@ -92,6 +92,13 @@
       "when": 1742600000000,
       "tag": "0012_add_siswa_id_to_biodata",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1742700000000,
+      "tag": "0013_grade_perf_indexes",
+      "breakpoints": true
     }
   ]
 }

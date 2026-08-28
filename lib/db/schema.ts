@@ -1,10 +1,12 @@
 import {
   boolean,
+  index,
   integer,
   pgTable,
   primaryKey,
   text,
   timestamp,
+  uniqueIndex,
 } from "drizzle-orm/pg-core"
 
 export const users = pgTable("users", {
@@ -93,192 +95,238 @@ export const kelas = pgTable("kelas", {
   updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
 })
 
-export const classroom = pgTable("classroom", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  name: text("name").notNull(),
-  waliKelas: text("wali_kelas"),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
-})
+export const classroom = pgTable(
+  "classroom",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    name: text("name").notNull(),
+    waliKelas: text("wali_kelas"),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [index("classroom_user_idx").on(table.userId)],
+)
 
-export const subject = pgTable("subject", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  name: text("name").notNull(),
-  kode: text("kode").notNull(),
-  status: text("status", { enum: ["aktif", "nonaktif"] }).notNull().default("aktif"),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
-})
+export const subject = pgTable(
+  "subject",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    name: text("name").notNull(),
+    kode: text("kode").notNull(),
+    status: text("status", { enum: ["aktif", "nonaktif"] }).notNull().default("aktif"),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [index("subject_user_idx").on(table.userId)],
+)
 
-export const schedule = pgTable("schedule", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  day: text("day", {
-    enum: ["senin", "selasa", "rabu", "kamis", "jumat", "sabtu", "minggu"],
-  }).notNull(),
-  jamKe: integer("jam_ke").notNull(),
-  startTime: text("start_time").notNull(),
-  endTime: text("end_time").notNull(),
-  subjectId: text("subject_id")
-    .notNull()
-    .references(() => subject.id, { onDelete: "cascade" }),
-  classroomId: text("classroom_id")
-    .notNull()
-    .references(() => classroom.id, { onDelete: "cascade" }),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
-})
+export const schedule = pgTable(
+  "schedule",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    day: text("day", {
+      enum: ["senin", "selasa", "rabu", "kamis", "jumat", "sabtu", "minggu"],
+    }).notNull(),
+    jamKe: integer("jam_ke").notNull(),
+    startTime: text("start_time").notNull(),
+    endTime: text("end_time").notNull(),
+    subjectId: text("subject_id")
+      .notNull()
+      .references(() => subject.id, { onDelete: "cascade" }),
+    classroomId: text("classroom_id")
+      .notNull()
+      .references(() => classroom.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("schedule_user_subject_idx").on(table.userId, table.subjectId),
+    index("schedule_user_classroom_idx").on(table.userId, table.classroomId),
+  ],
+)
 
-export const gradeWeight = pgTable("grade_weight", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  name: text("name").notNull(),
-  weight: integer("weight").notNull(),
-  subjectId: text("subject_id")
-    .notNull()
-    .references(() => subject.id, { onDelete: "cascade" }),
-  status: text("status", { enum: ["aktif", "nonaktif"] }).notNull().default("aktif"),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
-})
+export const gradeWeight = pgTable(
+  "grade_weight",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    name: text("name").notNull(),
+    weight: integer("weight").notNull(),
+    subjectId: text("subject_id")
+      .notNull()
+      .references(() => subject.id, { onDelete: "cascade" }),
+    status: text("status", { enum: ["aktif", "nonaktif"] }).notNull().default("aktif"),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [index("grade_weight_user_idx").on(table.userId)],
+)
 
-export const siswa = pgTable("siswa", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  name: text("name").notNull(),
-  nis: text("nis"),
-  classroomId: text("classroom_id")
-    .notNull()
-    .references(() => classroom.id, { onDelete: "cascade" }),
-  jenisKelamin: text("jenis_kelamin", { enum: ["laki-laki", "perempuan"] })
-    .notNull()
-    .default("laki-laki"),
-  status: text("status", { enum: ["aktif", "keluar"] }).notNull().default("aktif"),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
-})
+export const siswa = pgTable(
+  "siswa",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    name: text("name").notNull(),
+    nis: text("nis"),
+    classroomId: text("classroom_id")
+      .notNull()
+      .references(() => classroom.id, { onDelete: "cascade" }),
+    jenisKelamin: text("jenis_kelamin", { enum: ["laki-laki", "perempuan"] })
+      .notNull()
+      .default("laki-laki"),
+    status: text("status", { enum: ["aktif", "keluar"] }).notNull().default("aktif"),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [index("siswa_classroom_user_idx").on(table.classroomId, table.userId)],
+)
 
-export const journal = pgTable("journal", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  date: text("date").notNull(),
-  scheduleId: text("schedule_id")
-    .notNull()
-    .references(() => schedule.id, { onDelete: "cascade" }),
-  subjectId: text("subject_id").notNull(),
-  subjectName: text("subject_name").notNull(),
-  subjectKode: text("subject_kode"),
-  classroomId: text("classroom_id").notNull(),
-  classroomName: text("classroom_name").notNull(),
-  day: text("day").notNull(),
-  jamKe: integer("jam_ke").notNull(),
-  startTime: text("start_time").notNull(),
-  endTime: text("end_time").notNull(),
-  materi: text("materi").notNull(),
-  kegiatan: text("kegiatan").notNull(),
-  catatan: text("catatan"),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
-})
+export const journal = pgTable(
+  "journal",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    date: text("date").notNull(),
+    scheduleId: text("schedule_id")
+      .notNull()
+      .references(() => schedule.id, { onDelete: "cascade" }),
+    subjectId: text("subject_id").notNull(),
+    subjectName: text("subject_name").notNull(),
+    subjectKode: text("subject_kode"),
+    classroomId: text("classroom_id").notNull(),
+    classroomName: text("classroom_name").notNull(),
+    day: text("day").notNull(),
+    jamKe: integer("jam_ke").notNull(),
+    startTime: text("start_time").notNull(),
+    endTime: text("end_time").notNull(),
+    materi: text("materi").notNull(),
+    kegiatan: text("kegiatan").notNull(),
+    catatan: text("catatan"),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [index("journal_user_idx").on(table.userId)],
+)
 
-export const attendance = pgTable("attendance", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  date: text("date").notNull(),
-  scheduleId: text("schedule_id")
-    .notNull()
-    .references(() => schedule.id, { onDelete: "cascade" }),
-  siswaId: text("siswa_id")
-    .notNull()
-    .references(() => siswa.id, { onDelete: "cascade" }),
-  status: text("status", { enum: ["hadir", "sakit", "izin", "alfa"] })
-    .notNull()
-    .default("hadir"),
-  subjectId: text("subject_id").notNull(),
-  subjectName: text("subject_name").notNull(),
-  subjectKode: text("subject_kode"),
-  classroomId: text("classroom_id").notNull(),
-  classroomName: text("classroom_name").notNull(),
-  day: text("day").notNull(),
-  jamKe: integer("jam_ke").notNull(),
-  startTime: text("start_time").notNull(),
-  endTime: text("end_time").notNull(),
+export const attendance = pgTable(
+  "attendance",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    date: text("date").notNull(),
+    scheduleId: text("schedule_id")
+      .notNull()
+      .references(() => schedule.id, { onDelete: "cascade" }),
+    siswaId: text("siswa_id")
+      .notNull()
+      .references(() => siswa.id, { onDelete: "cascade" }),
+    status: text("status", { enum: ["hadir", "sakit", "izin", "alfa"] })
+      .notNull()
+      .default("hadir"),
+    subjectId: text("subject_id").notNull(),
+    subjectName: text("subject_name").notNull(),
+    subjectKode: text("subject_kode"),
+    classroomId: text("classroom_id").notNull(),
+    classroomName: text("classroom_name").notNull(),
+    day: text("day").notNull(),
+    jamKe: integer("jam_ke").notNull(),
+    startTime: text("start_time").notNull(),
+    endTime: text("end_time").notNull(),
   userId: text("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
-})
+  },
+  (table) => [index("attendance_user_idx").on(table.userId)],
+)
 
-export const assessment = pgTable("assessment", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  title: text("title").notNull(),
-  description: text("description"),
-  date: text("date"),
-  gradeWeightId: text("grade_weight_id")
-    .notNull()
-    .references(() => gradeWeight.id, { onDelete: "cascade" }),
-  gradeWeightName: text("grade_weight_name").notNull(),
-  subjectId: text("subject_id").notNull(),
-  subjectName: text("subject_name").notNull(),
-  subjectKode: text("subject_kode"),
-  classroomId: text("classroom_id")
-    .notNull()
-    .references(() => classroom.id, { onDelete: "cascade" }),
-  classroomName: text("classroom_name").notNull(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
-})
+export const assessment = pgTable(
+  "assessment",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    title: text("title").notNull(),
+    description: text("description"),
+    date: text("date"),
+    gradeWeightId: text("grade_weight_id")
+      .notNull()
+      .references(() => gradeWeight.id, { onDelete: "cascade" }),
+    gradeWeightName: text("grade_weight_name").notNull(),
+    subjectId: text("subject_id").notNull(),
+    subjectName: text("subject_name").notNull(),
+    subjectKode: text("subject_kode"),
+    classroomId: text("classroom_id")
+      .notNull()
+      .references(() => classroom.id, { onDelete: "cascade" }),
+    classroomName: text("classroom_name").notNull(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("assessment_user_classroom_idx").on(table.userId, table.classroomId),
+    index("assessment_user_subject_idx").on(table.userId, table.subjectId),
+  ],
+)
 
-export const grade = pgTable("grade", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  assessmentId: text("assessment_id")
-    .notNull()
-    .references(() => assessment.id, { onDelete: "cascade" }),
-  siswaId: text("siswa_id")
-    .notNull()
-    .references(() => siswa.id, { onDelete: "cascade" }),
-  score: integer("score").notNull().default(0),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
-})
+export const grade = pgTable(
+  "grade",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    assessmentId: text("assessment_id")
+      .notNull()
+      .references(() => assessment.id, { onDelete: "cascade" }),
+    siswaId: text("siswa_id")
+      .notNull()
+      .references(() => siswa.id, { onDelete: "cascade" }),
+    score: integer("score").notNull().default(0),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("grade_assessment_idx").on(table.assessmentId),
+    uniqueIndex("grade_assessment_siswa_uq").on(table.assessmentId, table.siswaId),
+    index("grade_user_idx").on(table.userId),
+  ],
+)
 
 export const jurnal = pgTable("jurnal", {
   id: text("id")

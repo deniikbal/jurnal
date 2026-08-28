@@ -1,7 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { and, eq, inArray } from "drizzle-orm"
+import { and, eq, inArray, sql } from "drizzle-orm"
 import * as XLSX from "xlsx"
 
 import { db } from "@/lib/db"
@@ -75,16 +75,18 @@ export async function saveAssessment(
       return errorState("Komponen penilaian tidak sesuai mata pelajaran")
     }
 
-    const students = await db
-      .select({ id: siswa.id })
-      .from(siswa)
-      .where(
-        and(
-          eq(siswa.classroomId, selectedSchedule.classroomId),
-          eq(siswa.userId, session.userId),
-          eq(siswa.status, "aktif"),
+    const [students] = await Promise.all([
+      db
+        .select({ id: siswa.id })
+        .from(siswa)
+        .where(
+          and(
+            eq(siswa.classroomId, selectedSchedule.classroomId),
+            eq(siswa.userId, session.userId),
+            eq(siswa.status, "aktif"),
+          ),
         ),
-      )
+    ])
 
     let currentAssessmentId = assessmentId
 
@@ -124,19 +126,52 @@ export async function saveAssessment(
       currentAssessmentId = created.id
     }
 
-    await db.batch([
-      db
-        .delete(grade)
-        .where(and(eq(grade.assessmentId, currentAssessmentId), eq(grade.userId, session.userId))),
-      db.insert(grade).values(
-        students.map((student) => ({
+    // UPSERT grade: 1 RT, atomic, no delete scan, no delete+insert window.
+    // Butuh unique index grade_assessment_siswa_uq (lihat migrasi 0013).
+    //
+    // Tambah baru: insert semua siswa (default 0 untuk yang tidak dikirim).
+    // Edit: hanya siswa yang FormData kirim nilai non-kosong — nilai DB tetap
+    // untuk siswa yang difilter (mencegah nilai eksisting tertimpa 0).
+    const isEdit = Boolean(assessmentId)
+    const rows = students
+      .map((student) => {
+        const raw = formData.get(`score-${student.id}`)
+        if (raw === null) {
+          // Key tidak ada di FormData (client tidak kirim siswa ini).
+          if (isEdit) return null
+          return {
+            assessmentId: currentAssessmentId,
+            siswaId: student.id,
+            score: 0,
+            userId: session.userId,
+          }
+        }
+        const value = String(raw).trim()
+        if (value === "" && isEdit) {
+          // Edit: input kosong = user tidak menyentuh siswa ini, skip.
+          return null
+        }
+        return {
           assessmentId: currentAssessmentId,
           siswaId: student.id,
-          score: parseScore(formData.get(`score-${student.id}`)),
+          score: value === "" ? 0 : parseScore(value),
           userId: session.userId,
-        })),
-      ),
-    ])
+        }
+      })
+      .filter((row): row is NonNullable<typeof row> => row !== null)
+
+    if (rows.length > 0) {
+      await db
+        .insert(grade)
+        .values(rows)
+        .onConflictDoUpdate({
+          target: [grade.assessmentId, grade.siswaId],
+          set: {
+            score: sql`excluded.score`,
+            updatedAt: new Date(),
+          },
+        })
+    }
 
     // ponytail: applyAll — salin assessment ke semua kelas dengan mapel yang sama
     if (!assessmentId && formData.get("applyAll") === "1") {
@@ -154,29 +189,33 @@ export async function saveAssessment(
         ...new Set(otherSchedules.map((s) => s.classroomId)),
       ].filter((id) => id !== selectedClassroom.id)
 
-      for (const classroomId of otherClassroomIds) {
-        const [cls] = await db
+      // Lookup classroom names 1 RT, lalu bulk insert 1 RT.
+      if (otherClassroomIds.length > 0) {
+        const otherClassrooms = await db
           .select({ id: classroom.id, name: classroom.name })
           .from(classroom)
           .where(
-            and(eq(classroom.id, classroomId), eq(classroom.userId, session.userId)),
+            and(
+              inArray(classroom.id, otherClassroomIds),
+              eq(classroom.userId, session.userId),
+            ),
           )
-          .limit(1)
-        if (!cls) continue
 
-        await db.insert(assessment).values({
-          title,
-          description: description || null,
-          date: date || null,
-          gradeWeightId,
-          gradeWeightName: selectedWeight.name,
-          subjectId: selectedSubject.id,
-          subjectName: selectedSubject.name,
-          subjectKode: selectedSubject.kode,
-          classroomId: cls.id,
-          classroomName: cls.name,
-          userId: session.userId,
-        })
+        await db.insert(assessment).values(
+          otherClassrooms.map((cls) => ({
+            title,
+            description: description || null,
+            date: date || null,
+            gradeWeightId,
+            gradeWeightName: selectedWeight.name,
+            subjectId: selectedSubject.id,
+            subjectName: selectedSubject.name,
+            subjectKode: selectedSubject.kode,
+            classroomId: cls.id,
+            classroomName: cls.name,
+            userId: session.userId,
+          })),
+        )
       }
     }
 
@@ -363,19 +402,23 @@ export async function importGrades(
     }
   }
 
-  await db.batch([
-    db
-      .delete(grade)
-      .where(and(eq(grade.assessmentId, assessmentId), eq(grade.userId, session.userId))),
-    db.insert(grade).values(
+  await db
+    .insert(grade)
+    .values(
       toInsert.map((s) => ({
         assessmentId,
         siswaId: s.siswaId,
         score: s.score,
         userId: session.userId,
       })),
-    ),
-  ])
+    )
+    .onConflictDoUpdate({
+      target: [grade.assessmentId, grade.siswaId],
+      set: {
+        score: sql`excluded.score`,
+        updatedAt: new Date(),
+      },
+    })
 
   revalidatePath("/dashboard/jurnal")
 
