@@ -17,3 +17,5 @@
 - Prefers removal of decorative arrows (`&rarr;` etc.) and decorative icons in empty states; CTAs should be specific text only. Confidence: 0.8
 - Prefers accessibility-first interactive controls: `aria-label` on icon-only buttons and dropdown triggers, `aria-hidden` on decorative icons, `<time dateTime>` on date displays. Confidence: 0.85
 - Prefers language attribute set to `id` (Indonesian) on `<html lang>` for Indonesian-language apps, not the default `en`. Confidence: 0.8
+- Prefers a 2-column split layout for authentication pages (login/signup) — left column for branding/visual identity panel, right column for the form — with the branding panel hidden on mobile and form going full-width. Confidence: 0.85
+- Prefers 2-column hero layouts on marketing/landing pages — left column for text (eyebrow chip, headline, CTA, secondary link) and right column for a visual product mockup/preview. Confidence: 0.75
