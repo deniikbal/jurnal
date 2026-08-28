@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from "react"
 import { useActionState, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 
@@ -23,7 +24,11 @@ const initialState: KelasActionState = {
   message: "",
 }
 
-export function KelasCreateDialog() {
+type KelasCreateDialogProps = {
+  trigger?: React.ReactNode
+}
+
+export function KelasCreateDialog({ trigger }: KelasCreateDialogProps = {}) {
   const [open, setOpen] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
   const [state, formAction, isPending] = useActionState(createKelas, initialState)
@@ -43,7 +48,9 @@ export function KelasCreateDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="w-full sm:w-auto text-xs sm:text-sm">Tambah Kelas</Button>
+        {trigger ?? (
+          <Button className="w-full sm:w-auto text-xs sm:text-sm">Tambah Kelas</Button>
+        )}
       </DialogTrigger>
       <DialogContent className="max-w-[calc(100vw-1.5rem)] sm:max-w-md p-4 sm:p-6">
         <form ref={formRef} action={formAction} className="space-y-4">

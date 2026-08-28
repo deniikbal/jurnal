@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useMemo, useState } from "react"
-import { ChevronLeftIcon, ChevronRightIcon, SchoolIcon } from "lucide-react"
+import { ChevronLeftIcon, ChevronRightIcon, PlusIcon, SchoolIcon, UploadIcon } from "lucide-react"
 
 import { KelasActions } from "@/components/kelas-actions"
 import { KelasCreateDialog } from "@/components/kelas-create-dialog"
@@ -98,26 +98,36 @@ export function KelasTableClient({ daftarKelas, daftarSiswa }: KelasTableClientP
   const paginatedKelas = filteredKelas.slice(startIndex, startIndex + PAGE_SIZE)
 
   return (
-    <section className="overflow-hidden rounded-md border border-border bg-card">
-      <div className="flex flex-col gap-3 border-b border-border px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-        <div>
-          <h2 className="text-sm font-semibold text-foreground">Daftar kelas</h2>
+    <section className="overflow-hidden rounded-lg border border-border bg-card">
+      <div className="flex flex-col gap-4 border-b border-border px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1">
+          <h2 className="text-base font-semibold text-foreground">Daftar kelas</h2>
           <p className="text-xs text-muted-foreground">
-            {totalFiltered} data
-            {search ? " (terfilter)" : ""}
+            {totalFiltered} kelas
+            {search ? " cocok dengan filter" : " terdaftar"}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex-1 sm:flex-none">
-            <KelasImportDialog />
-          </div>
-          <div className="flex-1 sm:flex-none">
-            <KelasCreateDialog />
-          </div>
+          <KelasImportDialog
+            trigger={
+              <Button variant="outline" size="sm" className="gap-1.5 shadow-none">
+                <UploadIcon className="size-3.5" />
+                Impor
+              </Button>
+            }
+          />
+          <KelasCreateDialog
+            trigger={
+              <Button size="sm" className="gap-1.5">
+                <PlusIcon className="size-3.5" />
+                Tambah kelas
+              </Button>
+            }
+          />
         </div>
       </div>
 
-      <div className="border-b border-border bg-muted/30 px-4 py-3 sm:px-5">
+      <div className="border-b border-border bg-muted/20 px-5 py-3">
         <KelasFilter
           q={search}
           filter={filter}
@@ -130,19 +140,19 @@ export function KelasTableClient({ daftarKelas, daftarSiswa }: KelasTableClientP
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent">
-              <TableHead className="w-12 pl-5 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+              <TableHead className="w-14 pl-5 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
                 No
               </TableHead>
-              <TableHead className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+              <TableHead className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
                 Nama kelas
               </TableHead>
-              <TableHead className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+              <TableHead className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
                 Wali kelas
               </TableHead>
-              <TableHead className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+              <TableHead className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
                 Siswa
               </TableHead>
-              <TableHead className="w-28 pr-5 text-right text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+              <TableHead className="w-32 pr-5 text-right text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
                 Aksi
               </TableHead>
             </TableRow>
@@ -157,11 +167,25 @@ export function KelasTableClient({ daftarKelas, daftarSiswa }: KelasTableClientP
                       {startIndex + index + 1}
                     </TableCell>
                     <TableCell>
-                      <span className="text-sm font-medium text-foreground">{item.name}</span>
+                      <div className="flex items-center gap-3">
+                        <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                          <SchoolIcon className="size-4" />
+                        </div>
+                        <span className="text-sm font-medium text-foreground">
+                          {item.name}
+                        </span>
+                      </div>
                     </TableCell>
-                    <TableCell className="text-sm text-foreground">
-                      {item.waliKelas ?? (
-                        <span className="text-muted-foreground">—</span>
+                    <TableCell>
+                      {item.waliKelas ? (
+                        <span className="text-sm text-foreground">
+                          {item.waliKelas}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <span className="size-1.5 rounded-full bg-muted-foreground/40" />
+                          Belum ditentukan
+                        </span>
                       )}
                     </TableCell>
                     <TableCell>
@@ -177,10 +201,17 @@ export function KelasTableClient({ daftarKelas, daftarSiswa }: KelasTableClientP
               })
             ) : (
               <TableRow className="hover:bg-transparent">
-                <TableCell colSpan={5} className="h-40">
+                <TableCell colSpan={5} className="h-48">
                   <div className="flex flex-col items-center justify-center gap-2 text-center">
-                    <SchoolIcon className="size-7 text-muted-foreground/35" />
-                    <p className="text-sm text-muted-foreground">Tidak ada data yang cocok.</p>
+                    <div className="flex size-12 items-center justify-center rounded-full bg-muted">
+                      <SchoolIcon className="size-5 text-muted-foreground/60" />
+                    </div>
+                    <p className="text-sm font-medium text-foreground">
+                      Tidak ada kelas yang cocok
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Coba ubah pencarian atau tambahkan kelas baru.
+                    </p>
                   </div>
                 </TableCell>
               </TableRow>
@@ -196,48 +227,64 @@ export function KelasTableClient({ daftarKelas, daftarSiswa }: KelasTableClientP
             return (
               <div key={item.id} className="flex flex-col gap-3 px-4 py-3.5">
                 <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0 space-y-0.5">
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-[11px] tabular-nums text-muted-foreground">
-                        {startIndex + index + 1}.
-                      </span>
-                      <h3 className="truncate text-sm font-medium text-foreground">{item.name}</h3>
+                  <div className="flex min-w-0 items-start gap-3">
+                    <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                      <SchoolIcon className="size-4" />
                     </div>
-                    <p className="pl-5 text-xs text-muted-foreground">
-                      {item.waliKelas ? `Wali: ${item.waliKelas}` : "Belum ada wali kelas"}
-                    </p>
+                    <div className="min-w-0 space-y-0.5">
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-[11px] tabular-nums text-muted-foreground">
+                          {startIndex + index + 1}.
+                        </span>
+                        <h3 className="truncate text-sm font-medium text-foreground">
+                          {item.name}
+                        </h3>
+                      </div>
+                      <p className="pl-4 text-xs text-muted-foreground">
+                        {item.waliKelas
+                          ? `Wali: ${item.waliKelas}`
+                          : "Belum ada wali kelas"}
+                      </p>
+                    </div>
                   </div>
                   <KelasActions kelas={item} />
                 </div>
-                <div className="pl-5">
+                <div className="pl-11">
                   <KelasSiswaDialog kelasName={item.name} siswa={siswaKelas} />
                 </div>
               </div>
             )
           })
         ) : (
-          <div className="flex flex-col items-center gap-2 py-14 text-center">
-            <SchoolIcon className="size-7 text-muted-foreground/35" />
-            <p className="text-sm text-muted-foreground">Tidak ada data yang cocok.</p>
+          <div className="flex flex-col items-center gap-2 py-16 text-center">
+            <div className="flex size-12 items-center justify-center rounded-full bg-muted">
+              <SchoolIcon className="size-5 text-muted-foreground/60" />
+            </div>
+            <p className="text-sm font-medium text-foreground">
+              Tidak ada kelas yang cocok
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Coba ubah pencarian atau tambahkan kelas baru.
+            </p>
           </div>
         )}
       </div>
 
-      <div className="flex flex-col gap-3 border-t border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-        <p className="text-center text-xs text-muted-foreground sm:text-left">
-          {paginatedKelas.length
-            ? `${startIndex + 1}–${Math.min(startIndex + paginatedKelas.length, totalFiltered)}`
-            : "0"}{" "}
-          dari {totalFiltered}
-        </p>
-        {totalPages > 1 && (
-          <nav className="flex items-center gap-1" aria-label="pagination">
+      {totalPages > 1 ? (
+        <div className="flex flex-col gap-3 border-t border-border px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-center text-xs text-muted-foreground sm:text-left">
+            {paginatedKelas.length
+              ? `${startIndex + 1}–${Math.min(startIndex + paginatedKelas.length, totalFiltered)}`
+              : "0"}{" "}
+            dari {totalFiltered}
+          </p>
+          <nav className="flex items-center justify-center gap-1" aria-label="pagination">
             <Button
               variant="ghost"
               size="sm"
               disabled={safePage === 0}
               onClick={() => setPage(safePage - 1)}
-              className="text-xs gap-1"
+              className="gap-1 text-xs"
             >
               <ChevronLeftIcon className="size-3.5" />
               <span className="hidden sm:inline">Sebelumnya</span>
@@ -253,7 +300,7 @@ export function KelasTableClient({ daftarKelas, daftarSiswa }: KelasTableClientP
                     variant={p === safePage ? "default" : "ghost"}
                     size="sm"
                     onClick={() => setPage(p)}
-                    className="text-xs min-w-[32px]"
+                    className="min-w-[32px] text-xs"
                   >
                     {p + 1}
                   </Button>
@@ -264,14 +311,20 @@ export function KelasTableClient({ daftarKelas, daftarSiswa }: KelasTableClientP
               size="sm"
               disabled={safePage === totalPages - 1}
               onClick={() => setPage(safePage + 1)}
-              className="text-xs gap-1"
+              className="gap-1 text-xs"
             >
               <span className="hidden sm:inline">Berikutnya</span>
               <ChevronRightIcon className="size-3.5" />
             </Button>
           </nav>
-        )}
-      </div>
+        </div>
+      ) : totalFiltered > 0 ? (
+        <div className="border-t border-border px-5 py-3">
+          <p className="text-center text-xs text-muted-foreground sm:text-left">
+            Menampilkan {totalFiltered} kelas
+          </p>
+        </div>
+      ) : null}
     </section>
   )
 }

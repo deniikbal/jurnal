@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from "react"
 import { useActionState, useEffect, useRef, useState } from "react"
 import { UploadIcon } from "lucide-react"
 import { toast } from "sonner"
@@ -21,7 +22,11 @@ import { Label } from "@/components/ui/label"
 
 const initialState: KelasImportState = { success: false, message: "" }
 
-export function KelasImportDialog() {
+type KelasImportDialogProps = {
+  trigger?: React.ReactNode
+}
+
+export function KelasImportDialog({ trigger }: KelasImportDialogProps = {}) {
   const [open, setOpen] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
   const [state, formAction, isPending] = useActionState(importKelas, initialState)
@@ -41,10 +46,12 @@ export function KelasImportDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="w-full sm:w-auto text-xs sm:text-sm">
-          <UploadIcon className="size-4" />
-          Import Excel
-        </Button>
+        {trigger ?? (
+          <Button variant="outline" className="w-full sm:w-auto text-xs sm:text-sm">
+            <UploadIcon className="size-4" />
+            Import Excel
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="max-w-[calc(100vw-1.5rem)] sm:max-w-md p-4 sm:p-6">
         <form ref={formRef} action={formAction} className="space-y-4">
