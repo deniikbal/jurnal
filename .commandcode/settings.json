@@ -3,7 +3,13 @@
     "allow": [
       "powershell",
       "Shell(del:*)",
-      "Shell(dir:*)"
+      "Shell(dir:*)",
+      "Shell(cd /d \"D:\\KESISWAAN\\projek\\jurnal\" && type .env.local 2>nul | findstr /v \"^#\" | findstr . 2>&1 | more)",
+      "Shell(pnpm:*)",
+      "Shell(more:*)",
+      "Shell(Tee-Object:*)",
+      "Shell(Select-Object:*)",
+      "Shell(rmdir:*)"
     ],
     "deny": [],
     "defaultMode": "default"

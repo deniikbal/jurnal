@@ -47,7 +47,10 @@ export default async function DashboardLayout({
           <div className="ml-auto flex items-center gap-2">
             <ThemeToggle />
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center gap-2 rounded-sm p-1.5 text-left outline-hidden hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring">
+              <DropdownMenuTrigger
+                className="flex items-center gap-2 rounded-sm p-1.5 text-left outline-hidden hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring"
+                aria-label="Buka menu pengguna"
+              >
                 <Avatar className="size-8 rounded-sm">
                   <AvatarImage src={user?.image ?? undefined} alt={user?.name ?? "User"} />
                   <AvatarFallback className="rounded-sm">

@@ -7,3 +7,13 @@
 - Prefers fixed/identifier header columns in Excel exports (e.g., No, NIS, Nama, Nilai Akhir) to be merged vertically across the multi-row header so they appear centered. Confidence: 0.7
 - Prefers identifier columns in Excel exports (e.g., No/NIS) to display whole numbers only; decimal formatting (e.g., 0.0) should apply only to score/value columns, not index columns. Confidence: 0.8
 - Wants UI controls in the same toolbar/header row to be visually consistent in size (e.g., a button's height matching adjacent form selects so they align). Confidence: 0.8
+- Follows a strict "antislop" design review workflow: prefers the assistant to ASK before making visual changes (choose DURING vs AFTER audit mode, choose design direction, write DESIGN.md first) rather than silently applying defaults. Confidence: 0.9
+- Maintains a DESIGN.md as the single source of design truth (identitas produk, audience, personality, palette, typography, mood, dial ENERGY/RHYTHM/MOTION) and expects the assistant to read it and align all visual decisions to it. Confidence: 0.9
+- Expects every visual/design decision to be accompanied by a written reason (R-31 antislop rule) — no silent defaults for fonts, icon set, or color choices. Confidence: 0.8
+- When a design direction is not yet defined, prefers the assistant to STOP and collect findings, then wait for the design file rather than making provisional changes. Confidence: 0.85
+- Prefers hotkey-driven theme toggle ("press D to toggle dark/light") and expects the theme toggle button to stay in sync with the provider (single source of truth via React context) so the icon never goes stale. Confidence: 0.75
+- Prefers a "professional tenang" / modern minimalis aesthetic for internal school apps (low-contrast, jelas, hierarki tegas, biru dongker accent) over colorful/playful designs. Confidence: 0.7
+- Prefers verifikable end-of-work signals: typecheck (`tsc --noEmit`) AND `next build` both clean before declaring a task done. Confidence: 0.85
+- Prefers removal of decorative arrows (`&rarr;` etc.) and decorative icons in empty states; CTAs should be specific text only. Confidence: 0.8
+- Prefers accessibility-first interactive controls: `aria-label` on icon-only buttons and dropdown triggers, `aria-hidden` on decorative icons, `<time dateTime>` on date displays. Confidence: 0.85
+- Prefers language attribute set to `id` (Indonesian) on `<html lang>` for Indonesian-language apps, not the default `en`. Confidence: 0.8

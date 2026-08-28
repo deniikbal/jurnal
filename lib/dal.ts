@@ -2,14 +2,17 @@ import "server-only"
 
 import { cache } from "react"
 import { redirect } from "next/navigation"
-import { eq, inArray } from "drizzle-orm"
+import { eq } from "drizzle-orm"
+import { headers } from "next/headers"
 
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { assessment, attendance, biodataSiswa, classroom, grade, gradeWeight, journal, schedule, siswa, subject, users } from "@/lib/db/schema"
 
 export const verifySession = cache(async () => {
-  const session = await auth()
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  })
 
   if (!session?.user?.id) {
     redirect("/login")
@@ -17,7 +20,7 @@ export const verifySession = cache(async () => {
 
   return {
     userId: session.user.id,
-    role: session.user.role,
+    role: (session.user as { role?: string }).role as "user" | "admin",
     name: session.user.name,
     email: session.user.email,
     image: session.user.image,

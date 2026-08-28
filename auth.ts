@@ -1,43 +1,40 @@
-import NextAuth from "next-auth"
-import Google from "next-auth/providers/google"
-import { DrizzleAdapter } from "@auth/drizzle-adapter"
-
+import { betterAuth } from "better-auth"
+import { drizzleAdapter } from "better-auth/adapters/drizzle"
+import { nextCookies } from "better-auth/next-js"
 import { db } from "@/lib/db"
-import {
-  accounts,
-  authenticators,
-  sessions,
-  users,
-  verificationTokens,
-} from "@/lib/db/schema"
+import { users, session, account, verification } from "@/lib/db/schema"
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: DrizzleAdapter(db, {
-    usersTable: users,
-    accountsTable: accounts,
-    sessionsTable: sessions,
-    verificationTokensTable: verificationTokens,
-    authenticatorsTable: authenticators,
+export const auth = betterAuth({
+  database: drizzleAdapter(db, {
+    provider: "pg",
+    schema: {
+      user: users,
+      session,
+      account,
+      verification,
+    },
   }),
-  providers: [
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    }),
-  ],
-  session: {
-    strategy: "database",
+  emailAndPassword: {
+    enabled: true,
   },
-  callbacks: {
-    session({ session, user }) {
-      session.user.id = user.id
-      session.user.role = user.role
-
-      return session
+  user: {
+    additionalFields: {
+      role: {
+        type: ["user", "admin"] as const,
+        required: false,
+        defaultValue: "user",
+        input: false,
+      },
     },
   },
-  pages: {
-    signIn: "/login",
+  session: {
+    expiresIn: 60 * 60 * 24 * 30,
+    updateAge: 60 * 60 * 24,
   },
-  trustHost: true,
+  advanced: {
+    database: {
+      generateId: false,
+    },
+  },
+  plugins: [nextCookies()],
 })

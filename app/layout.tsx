@@ -1,19 +1,20 @@
 import type { Metadata } from "next"
-import { DM_Sans, Lora, IBM_Plex_Mono } from "next/font/google"
+import { DM_Sans, IBM_Plex_Mono } from "next/font/google"
 
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
 
+// Body: DM Sans. Humanist sans, jelas di ukuran kecil, tidak berkarakter
+// "techy". Cocok untuk aplikasi internal yang dipakai guru tiap hari
+// (DESIGN.md: modern profesional, simple).
+// Mono: IBM Plex Mono. Dipakai untuk NIS, kode mapel, dan jam. Karakter
+// slab-nya membantu scanning angka dibanding Geist/JetBrains Mono yang
+// terlalu "developer aesthetic" untuk konteks sekolah.
 const fontSans = DM_Sans({
   subsets: ["latin"],
   variable: "--font-sans",
-})
-
-const fontSerif = Lora({
-  subsets: ["latin"],
-  variable: "--font-serif",
 })
 
 const fontMono = IBM_Plex_Mono({
@@ -37,9 +38,9 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="id"
       suppressHydrationWarning
-      className={`${fontSans.variable} ${fontSerif.variable} ${fontMono.variable} antialiased`}
+      className={`${fontSans.variable} ${fontMono.variable} antialiased`}
     >
       <body>
         <ThemeProvider>

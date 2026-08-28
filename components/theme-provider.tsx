@@ -3,90 +3,136 @@
 import * as React from "react"
 
 type Theme = "light" | "dark" | "system"
+type ResolvedTheme = "light" | "dark"
 
-function getSystemTheme() {
+type ThemeContextValue = {
+  theme: Theme
+  resolvedTheme: ResolvedTheme
+  setTheme: (next: Theme) => void
+  toggle: () => void
+}
+
+const ThemeContext = React.createContext<ThemeContextValue | null>(null)
+
+const STORAGE_KEY = "theme"
+const DOM_ATTR = "data-theme-attr"
+
+function getSystemTheme(): ResolvedTheme {
+  if (typeof window === "undefined") return "light"
   return window.matchMedia("(prefers-color-scheme: dark)").matches
     ? "dark"
     : "light"
 }
 
-function getStoredTheme(): Theme {
-  const theme = window.localStorage.getItem("theme")
-  return theme === "light" || theme === "dark" || theme === "system"
-    ? theme
-    : "system"
+function readStoredTheme(): Theme {
+  if (typeof window === "undefined") return "system"
+  const raw = window.localStorage.getItem(STORAGE_KEY)
+  return raw === "light" || raw === "dark" || raw === "system" ? raw : "system"
 }
 
-function applyTheme(theme: Theme) {
-  const resolvedTheme = theme === "system" ? getSystemTheme() : theme
-  document.documentElement.classList.toggle("dark", resolvedTheme === "dark")
+function resolveTheme(theme: Theme): ResolvedTheme {
+  return theme === "system" ? getSystemTheme() : theme
 }
 
-function ThemeProvider({ children }: { children: React.ReactNode }) {
+function applyDocumentTheme(resolved: ResolvedTheme) {
+  if (typeof document === "undefined") return
+  const root = document.documentElement
+  root.classList.toggle("dark", resolved === "dark")
+  root.setAttribute(DOM_ATTR, resolved)
+}
+
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const [theme, setThemeState] = React.useState<Theme>("system")
+  const [resolvedTheme, setResolvedTheme] = React.useState<ResolvedTheme>("light")
+
   React.useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
+    const initial = readStoredTheme()
+    const resolved = resolveTheme(initial)
+    setThemeState(initial)
+    setResolvedTheme(resolved)
+    applyDocumentTheme(resolved)
 
-    function syncTheme() {
-      applyTheme(getStoredTheme())
+    const media = window.matchMedia("(prefers-color-scheme: dark)")
+
+    const onSystemChange = () => {
+      if (readStoredTheme() === "system") {
+        const next = resolveTheme("system")
+        setResolvedTheme(next)
+        applyDocumentTheme(next)
+      }
     }
 
-    syncTheme()
-    mediaQuery.addEventListener("change", syncTheme)
-    window.addEventListener("storage", syncTheme)
-
-    return () => {
-      mediaQuery.removeEventListener("change", syncTheme)
-      window.removeEventListener("storage", syncTheme)
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== STORAGE_KEY) return
+      const next = readStoredTheme()
+      const resolvedNext = resolveTheme(next)
+      setThemeState(next)
+      setResolvedTheme(resolvedNext)
+      applyDocumentTheme(resolvedNext)
     }
-  }, [])
 
-  return (
-    <>
-      <ThemeHotkey />
-      {children}
-    </>
-  )
-}
-
-function isTypingTarget(target: EventTarget | null) {
-  if (!(target instanceof HTMLElement)) {
-    return false
-  }
-
-  return (
-    target.isContentEditable ||
-    target.tagName === "INPUT" ||
-    target.tagName === "TEXTAREA" ||
-    target.tagName === "SELECT"
-  )
-}
-
-function ThemeHotkey() {
-  React.useEffect(() => {
-    function onKeyDown(event: KeyboardEvent) {
+    const onKeyDown = (event: KeyboardEvent) => {
       if (event.defaultPrevented || event.repeat) return
       if (event.metaKey || event.ctrlKey || event.altKey) return
       if (typeof event.key !== "string") return
       if (event.key.toLowerCase() !== "d") return
-      if (isTypingTarget(event.target)) return
 
-      const currentTheme = document.documentElement.classList.contains("dark")
-        ? "dark"
-        : "light"
-      const nextTheme = currentTheme === "dark" ? "light" : "dark"
+      const target = event.target
+      if (target instanceof HTMLElement) {
+        if (
+          target.isContentEditable ||
+          target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT"
+        ) {
+          return
+        }
+      }
 
-      window.localStorage.setItem("theme", nextTheme)
-      applyTheme(nextTheme)
+      const current = readStoredTheme()
+      const next: Theme = current === "dark" ? "light" : "dark"
+      const resolvedNext = resolveTheme(next)
+      window.localStorage.setItem(STORAGE_KEY, next)
+      setThemeState(next)
+      setResolvedTheme(resolvedNext)
+      applyDocumentTheme(resolvedNext)
     }
 
+    media.addEventListener("change", onSystemChange)
+    window.addEventListener("storage", onStorage)
     window.addEventListener("keydown", onKeyDown)
 
     return () => {
+      media.removeEventListener("change", onSystemChange)
+      window.removeEventListener("storage", onStorage)
       window.removeEventListener("keydown", onKeyDown)
     }
   }, [])
 
-  return null
+  const setTheme = React.useCallback((next: Theme) => {
+    const resolvedNext = resolveTheme(next)
+    window.localStorage.setItem(STORAGE_KEY, next)
+    setThemeState(next)
+    setResolvedTheme(resolvedNext)
+    applyDocumentTheme(resolvedNext)
+  }, [])
+
+  const toggle = React.useCallback(() => {
+    setTheme(resolvedTheme === "dark" ? "light" : "dark")
+  }, [resolvedTheme, setTheme])
+
+  const value = React.useMemo<ThemeContextValue>(
+    () => ({ theme, resolvedTheme, setTheme, toggle }),
+    [theme, resolvedTheme, setTheme, toggle],
+  )
+
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
 }
 
-export { ThemeProvider }
+export function useTheme() {
+  const ctx = React.useContext(ThemeContext)
+  if (!ctx) {
+    throw new Error("useTheme must be used inside <ThemeProvider>")
+  }
+  return ctx
+}

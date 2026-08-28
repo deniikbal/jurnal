@@ -1,26 +1,22 @@
 "use client"
 
-import * as React from "react"
 import { MoonIcon, SunIcon } from "lucide-react"
 
+import { useTheme } from "@/components/theme-provider"
 import { Button } from "@/components/ui/button"
 
 export function ThemeToggle() {
-  const [isDark, setIsDark] = React.useState(false)
-
-  React.useEffect(() => {
-    setIsDark(document.documentElement.classList.contains("dark"))
-  }, [])
-
-  function toggle() {
-    const next = !isDark
-    setIsDark(next)
-    document.documentElement.classList.toggle("dark", next)
-    window.localStorage.setItem("theme", next ? "dark" : "light")
-  }
+  const { resolvedTheme, toggle } = useTheme()
+  const isDark = resolvedTheme === "dark"
 
   return (
-    <Button variant="ghost" size="icon-sm" onClick={toggle} aria-label="Toggle theme">
+    <Button
+      variant="ghost"
+      size="icon-sm"
+      onClick={toggle}
+      aria-label={isDark ? "Aktifkan mode terang" : "Aktifkan mode gelap"}
+      title={isDark ? "Mode terang" : "Mode gelap"}
+    >
       {isDark ? <SunIcon className="size-4" /> : <MoonIcon className="size-4" />}
     </Button>
   )

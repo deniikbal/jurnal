@@ -22,41 +22,34 @@ export default async function KelasPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-end sm:justify-between">
-        <div className="space-y-1">
-          <p className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">
-            Data kesiswaan
-          </p>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Kelas</h1>
-          <p className="max-w-xl text-sm text-muted-foreground">
-            Kelola rombongan belajar, wali kelas, dan daftar siswa per kelas.
-          </p>
-        </div>
+      <div className="space-y-1">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">Kelas</h1>
+        <p className="text-sm text-muted-foreground">
+          Kelola rombongan belajar, wali kelas, dan daftar siswa per kelas.
+        </p>
+      </div>
 
-        <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-4 sm:gap-x-8">
-          <div>
-            <dt className="text-[11px] text-muted-foreground">Total kelas</dt>
-            <dd className="font-semibold tabular-nums text-foreground">{totalKelas}</dd>
-          </div>
-          <div>
-            <dt className="text-[11px] text-muted-foreground">Total siswa</dt>
-            <dd className="font-semibold tabular-nums text-foreground">{totalSiswa}</dd>
-          </div>
-          <div>
-            <dt className="text-[11px] text-muted-foreground">Rata-rata / kelas</dt>
-            <dd className="font-semibold tabular-nums text-foreground">
-              {totalKelas > 0 ? avgSiswaPerKelas : "—"}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-[11px] text-muted-foreground">Punya wali</dt>
-            <dd className="font-semibold tabular-nums text-foreground">
-              {withWali}
-              <span className="mx-1 font-normal text-muted-foreground">/</span>
-              {totalKelas}
-            </dd>
-          </div>
-        </dl>
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+        <div className="flex items-center gap-1.5">
+          <span className="text-muted-foreground">Total</span>
+          <span className="font-medium tabular-nums text-foreground">{totalKelas}</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-muted-foreground">Siswa</span>
+          <span className="font-medium tabular-nums text-foreground">{totalSiswa}</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-muted-foreground">Rata-rata/kelas</span>
+          <span className="font-medium tabular-nums text-foreground">
+            {totalKelas > 0 ? avgSiswaPerKelas : "—"}
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-muted-foreground">Punya wali</span>
+          <span className="font-medium tabular-nums text-foreground">
+            {withWali}/{totalKelas}
+          </span>
+        </div>
       </div>
 
       <KelasTableClient daftarKelas={daftarKelas} daftarSiswa={siswaAktif} />

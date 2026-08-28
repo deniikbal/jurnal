@@ -22,46 +22,25 @@ export default async function GradeWeightPage() {
   const incompleteSubjects = Array.from(subjectTotals.values()).filter(
     (total) => total !== 100,
   ).length
-  const subjectsWithWeight = subjectTotals.size
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="space-y-1">
-          <p className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">
-            Penilaian
-          </p>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Bobot nilai</h1>
-          <p className="max-w-xl text-sm text-muted-foreground">
-            Atur komponen penilaian per mapel. Idealnya total bobot aktif tiap mapel = 100%.
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+            Bobot nilai
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Atur komponen penilaian per mapel. Total bobot aktif tiap mapel = 100%.
           </p>
         </div>
 
-        <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-4 sm:gap-x-8">
-          <div>
-            <dt className="text-[11px] text-muted-foreground">Total komponen</dt>
-            <dd className="font-semibold tabular-nums text-foreground">{weights.length}</dd>
-          </div>
-          <div>
-            <dt className="text-[11px] text-muted-foreground">Aktif</dt>
-            <dd className="font-semibold tabular-nums text-foreground">{activeWeights.length}</dd>
-          </div>
-          <div>
-            <dt className="text-[11px] text-muted-foreground">Mapel terisi</dt>
-            <dd className="font-semibold tabular-nums text-foreground">{subjectsWithWeight}</dd>
-          </div>
-          <div>
-            <dt className="text-[11px] text-muted-foreground">Belum 100%</dt>
-            <dd className="font-semibold tabular-nums text-foreground">
-              {incompleteSubjects}
-              {activeWeights.length > 0 ? (
-                <span className="ml-1.5 text-xs font-normal text-muted-foreground">
-                  · Σ {totalActiveWeight}%
-                </span>
-              ) : null}
-            </dd>
-          </div>
-        </dl>
+        {incompleteSubjects > 0 && (
+          <p className="text-sm text-muted-foreground">
+            <span className="font-medium text-foreground">{incompleteSubjects}</span> mapel
+            belum 100%
+          </p>
+        )}
       </div>
 
       <GradeWeightTableClient weights={weights} subjects={subjects} />
