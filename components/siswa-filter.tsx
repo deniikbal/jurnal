@@ -72,7 +72,10 @@ export function SiswaFilter({
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:flex lg:shrink-0">
         <Select value={kelas} onValueChange={(value) => onKelasChange?.(value)}>
-          <SelectTrigger className="h-9 w-full text-sm lg:w-[9.5rem]" aria-label="Filter kelas">
+          <SelectTrigger
+            className="!h-9 w-full text-sm lg:w-[9.5rem]"
+            aria-label="Filter kelas"
+          >
             <SelectValue placeholder="Kelas" />
           </SelectTrigger>
           <SelectContent>
@@ -86,7 +89,10 @@ export function SiswaFilter({
         </Select>
 
         <Select value={status} onValueChange={(value) => onStatusChange?.(value)}>
-          <SelectTrigger className="h-9 w-full text-sm lg:w-[8.5rem]" aria-label="Filter status">
+          <SelectTrigger
+            className="!h-9 w-full text-sm lg:w-[8.5rem]"
+            aria-label="Filter status"
+          >
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
@@ -97,7 +103,10 @@ export function SiswaFilter({
         </Select>
 
         <Select value={filter} onValueChange={(value) => onFilterChange?.(value)}>
-          <SelectTrigger className="h-9 w-full text-sm lg:w-[8.5rem]" aria-label="Urutkan siswa">
+          <SelectTrigger
+            className="!h-9 w-full text-sm lg:w-[8.5rem]"
+            aria-label="Urutkan siswa"
+          >
             <SelectValue placeholder="Urutan" />
           </SelectTrigger>
           <SelectContent>

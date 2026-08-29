@@ -64,7 +64,10 @@ export function SubjectFilter({
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:flex sm:shrink-0">
         <Select value={status} onValueChange={(value) => onStatusChange?.(value)}>
-          <SelectTrigger className="h-9 w-full text-sm lg:w-[8.5rem]" aria-label="Filter status">
+          <SelectTrigger
+            className="!h-9 w-full text-sm lg:w-[8.5rem]"
+            aria-label="Filter status"
+          >
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
@@ -75,7 +78,10 @@ export function SubjectFilter({
         </Select>
 
         <Select value={filter} onValueChange={(value) => onFilterChange?.(value)}>
-          <SelectTrigger className="h-9 w-full text-sm lg:w-[8.5rem]" aria-label="Urutkan mapel">
+          <SelectTrigger
+            className="!h-9 w-full text-sm lg:w-[8.5rem]"
+            aria-label="Urutkan mapel"
+          >
             <SelectValue placeholder="Urutan" />
           </SelectTrigger>
           <SelectContent>

@@ -54,6 +54,9 @@ const naturalCollator = new Intl.Collator("id-ID", {
 })
 
 function StatusMark({ status }: { status: "aktif" | "keluar" }) {
+  // Motif identitas (DESIGN.md): status = dot + label, bukan badge capsule.
+  // Alasan: scanner perlu membandingkan status secepat mungkin; dot di
+  // kiri memisahkan "data observasi" dari "tag marketing".
   const aktif = status === "aktif"
   return (
     <span className="inline-flex items-center gap-1.5 text-xs">
@@ -64,6 +67,23 @@ function StatusMark({ status }: { status: "aktif" | "keluar" }) {
       <span className={aktif ? "text-foreground" : "text-muted-foreground"}>
         {aktif ? "Aktif" : "Keluar"}
       </span>
+    </span>
+  )
+}
+
+function NisCell({ nis }: { nis: string | null }) {
+  if (nis) {
+    return (
+      <span className="font-mono text-xs tabular-nums text-muted-foreground">
+        {nis}
+      </span>
+    )
+  }
+  // Bukan em dash (R-02 + DESIGN.md keputusan): lebih jujur sebagai
+  // "data belum diisi" daripada simbol tipografi mati.
+  return (
+    <span className="inline-flex h-5 items-center rounded-sm border border-dashed border-border px-1.5 text-[11px] text-muted-foreground">
+      Tanpa NIS
     </span>
   )
 }
@@ -213,12 +233,14 @@ export function SiswaTableClient({
                   <TableCell>
                     <span className="text-sm font-medium text-foreground">{item.name}</span>
                   </TableCell>
-                  <TableCell className="font-mono text-xs tabular-nums text-muted-foreground">
-                    {item.nis ?? "—"}
+                  <TableCell>
+                    <NisCell nis={item.nis} />
                   </TableCell>
                   <TableCell className="text-sm text-foreground">
                     {kelasById.get(item.classroomId)?.name ?? (
-                      <span className="text-muted-foreground">—</span>
+                      <span className="text-sm text-muted-foreground">
+                        Tanpa kelas
+                      </span>
                     )}
                   </TableCell>
                   <TableCell className="text-xs text-muted-foreground capitalize">
@@ -238,8 +260,13 @@ export function SiswaTableClient({
               <TableRow className="hover:bg-transparent">
                 <TableCell colSpan={7} className="h-40">
                   <div className="flex flex-col items-center justify-center gap-2 text-center">
-                    <UsersIcon className="size-7 text-muted-foreground/35" />
-                    <p className="text-sm text-muted-foreground">Tidak ada data yang cocok.</p>
+                    <UsersIcon
+                      className="size-7 text-muted-foreground/60"
+                      aria-hidden
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      Tidak ada siswa yang cocok dengan filter.
+                    </p>
                   </div>
                 </TableCell>
               </TableRow>
@@ -261,18 +288,28 @@ export function SiswaTableClient({
                     <h3 className="truncate text-sm font-medium text-foreground">{item.name}</h3>
                   </div>
                   <p className="pl-5 font-mono text-xs text-muted-foreground">
-                    {item.nis ?? "—"}
-                    <span className="mx-1.5 text-border">·</span>
-                    <span className="font-sans">
-                      {item.jenisKelamin === "laki-laki" ? "L" : "P"}
-                    </span>
+                    {item.nis ?? (
+                      <span className="font-sans text-muted-foreground">
+                        Tanpa NIS
+                      </span>
+                    )}
+                    {item.nis ? (
+                      <>
+                        <span className="mx-1.5 text-border">·</span>
+                        <span className="font-sans">
+                          {item.jenisKelamin === "laki-laki" ? "L" : "P"}
+                        </span>
+                      </>
+                    ) : null}
                   </p>
                 </div>
                 <StatusMark status={item.status} />
               </div>
               <div className="flex items-center justify-between pl-5">
                 <span className="text-xs text-muted-foreground">
-                  {kelasById.get(item.classroomId)?.name ?? "Tanpa kelas"}
+                  {kelasById.get(item.classroomId)?.name ?? (
+                    <span className="text-muted-foreground">Tanpa kelas</span>
+                  )}
                 </span>
                 <SiswaActions siswa={item} classrooms={daftarKelas} />
               </div>
@@ -280,8 +317,13 @@ export function SiswaTableClient({
           ))
         ) : (
           <div className="flex flex-col items-center gap-2 py-14 text-center">
-            <UsersIcon className="size-7 text-muted-foreground/35" />
-            <p className="text-sm text-muted-foreground">Tidak ada data yang cocok.</p>
+            <UsersIcon
+              className="size-7 text-muted-foreground/60"
+              aria-hidden
+            />
+            <p className="text-sm text-muted-foreground">
+              Tidak ada siswa yang cocok dengan filter.
+            </p>
           </div>
         )}
       </div>

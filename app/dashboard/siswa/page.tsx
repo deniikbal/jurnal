@@ -7,6 +7,45 @@ export const metadata: Metadata = {
   title: "Siswa",
 }
 
+function StatCard({
+  label,
+  value,
+  emphasis = false,
+}: {
+  label: string
+  value: number | string
+  emphasis?: boolean
+}) {
+  return (
+    <div
+      className={
+        emphasis
+          ? "rounded-md border border-primary/20 bg-primary/5 px-4 py-3"
+          : "rounded-md border border-border bg-card px-4 py-3"
+      }
+    >
+      <p
+        className={
+          emphasis
+            ? "text-[11px] font-medium tracking-wide text-primary uppercase"
+            : "text-[11px] font-medium tracking-wide text-muted-foreground uppercase"
+        }
+      >
+        {label}
+      </p>
+      <p
+        className={
+          emphasis
+            ? "mt-1 font-mono text-2xl font-semibold tabular-nums text-primary"
+            : "mt-1 font-mono text-xl font-semibold tabular-nums text-foreground"
+        }
+      >
+        {value}
+      </p>
+    </div>
+  )
+}
+
 export default async function SiswaPage() {
   const [daftarSiswa, daftarKelas] = await Promise.all([
     getSiswaForCurrentUser(),
@@ -23,31 +62,27 @@ export default async function SiswaPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Siswa</h1>
-          <p className="text-sm text-muted-foreground">
-            Daftar siswa per kelas — NIS, jenis kelamin, dan status keaktifan.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3 text-sm">
-          <span className="text-muted-foreground">
-            Total <span className="font-medium text-foreground">{totalSiswa}</span>
-          </span>
-          <span className="text-border">/</span>
-          <span className="text-muted-foreground">
-            Aktif <span className="font-medium text-foreground">{totalAktif}</span>
-          </span>
-          <span className="text-border">/</span>
-          <span className="text-muted-foreground">
-            L/P{" "}
-            <span className="font-medium text-foreground">
-              {totalLaki}/{totalPerempuan}
-            </span>
-          </span>
-        </div>
+      <div className="flex flex-col gap-1.5">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+          Siswa
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Daftar siswa per kelas: NIS, jenis kelamin, dan status keaktifan.
+        </p>
       </div>
+
+      <dl className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <StatCard label="Total Siswa" value={totalSiswa} emphasis />
+        <StatCard label="Aktif" value={totalAktif} />
+        <StatCard label="Laki-laki" value={totalLaki} />
+        <StatCard label="Perempuan" value={totalPerempuan} />
+      </dl>
+
+      {totalKeluar > 0 ? (
+        <p className="text-xs text-muted-foreground">
+          {totalKeluar} siswa berstatus keluar tidak ditampilkan di ringkasan.
+        </p>
+      ) : null}
 
       <SiswaTableClient
         daftarSiswa={daftarSiswa}

@@ -1,7 +1,13 @@
 "use client"
 
 import { useActionState, useEffect, useMemo, useState } from "react"
-import { PencilIcon, PlusIcon, SearchIcon, Trash2Icon } from "lucide-react"
+import {
+  AlertTriangleIcon,
+  PencilIcon,
+  PlusIcon,
+  SearchIcon,
+  Trash2Icon,
+} from "lucide-react"
 import { toast } from "sonner"
 
 import {
@@ -372,11 +378,12 @@ function AssessmentForm({
 
   function isDinilai(studentId: string) {
     const v = scores[studentId]
-    return v !== undefined && v !== "" && Number(v) > 0
+    // "Dinilai" = nilai numeric > 0. 0 dianggap "belum dinilai" karena
+    // di praktik sekolah, 0 sering = siswa tidak ikut / kosong. User tetap
+    // bisa input 0, nilai 0 akan tersimpan di DB; hanya counter/filter
+    // yang memperlakukannya sebagai "belum".
+    return v !== undefined && v.trim() !== "" && Number(v) > 0
   }
-
-  const sudahDinilai = students.filter((s) => isDinilai(s.id)).length
-  const belumDinilai = students.filter((s) => !isDinilai(s.id)).length
 
   const query = searchQuery.trim().toLowerCase()
 
@@ -385,6 +392,12 @@ function AssessmentForm({
     const matchSearch = !query || s.name.toLowerCase().includes(query)
     return matchStatus && matchSearch
   })
+
+  const sudahDinilai = students.filter((s) => isDinilai(s.id)).length
+  const belumDinilai = students.length - sudahDinilai
+  const siswaTersembunyi = students.length - filteredStudents.length
+  const isEdit = Boolean(assessment)
+  const akanDiinsertNol = isEdit ? 0 : belumDinilai
 
   useEffect(() => {
     if (!state.message) return
@@ -407,16 +420,37 @@ function AssessmentForm({
       <input type="hidden" name="gradeWeightId" value={selectedWeightId} />
       {/* Siswa yang difilter (tidak visible) tidak dikirim — server skip key tsb
           di mode edit agar nilai DB tidak tertimpa. Mode tambah: server insert
-          default 0 untuk siswa tanpa key. */}
+          default 0 untuk siswa tanpa key (lihat warning banner di bawah). */}
 
       <DialogHeader>
         <DialogTitle>
-          {assessment ? "Edit Penilaian" : "Tambah Penilaian"} — {classroomName}
+          {assessment ? "Edit Penilaian" : "Tambah Penilaian"} · {classroomName}
         </DialogTitle>
         <DialogDescription>
           {subjectName} • Jam {schedule.jamKe} • {schedule.startTime}–{schedule.endTime}
         </DialogDescription>
       </DialogHeader>
+
+      {!assessment && (akanDiinsertNol > 0 || siswaTersembunyi > 0) ? (
+        <div
+          role="status"
+          className="flex items-start gap-2.5 rounded-sm border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-xs text-amber-900 dark:text-amber-200"
+        >
+          <AlertTriangleIcon className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+          <div className="space-y-0.5">
+            <p className="font-medium">
+              {akanDiinsertNol} siswa belum punya nilai dan akan disimpan
+              sebagai 0.
+            </p>
+            {siswaTersembunyi > 0 ? (
+              <p className="text-amber-800/80 dark:text-amber-300/80">
+                {siswaTersembunyi} siswa disembunyikan oleh filter. Reset
+                filter sebelum simpan kalau ingin menilai mereka.
+              </p>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
 
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="grid gap-1.5">
@@ -602,8 +636,15 @@ function AssessmentForm({
         <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>
           Kembali
         </Button>
-        <Button type="submit" disabled={isPending || !selectedWeightId || !students.length}>
-          {isPending ? "Menyimpan..." : "Simpan Penilaian"}
+        <Button
+          type="submit"
+          disabled={isPending || !selectedWeightId || !students.length}
+        >
+          {isPending
+            ? "Menyimpan..."
+            : assessment
+              ? `Simpan (${sudahDinilai} nilai)`
+              : `Simpan ${sudahDinilai}/${students.length} nilai`}
         </Button>
       </DialogFooter>
     </form>
@@ -678,7 +719,7 @@ function AssessmentSummary({
                 if (!a) {
                   return (
                     <TableCell key={key} className="text-center text-muted-foreground">
-                      —
+                      Belum
                     </TableCell>
                   )
                 }

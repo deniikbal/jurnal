@@ -184,8 +184,13 @@ export function SubjectTableClient({ subjects }: SubjectTableClientProps) {
               <TableRow className="hover:bg-transparent">
                 <TableCell colSpan={5} className="h-40">
                   <div className="flex flex-col items-center justify-center gap-2 text-center">
-                    <BookOpenIcon className="size-7 text-muted-foreground/35" />
-                    <p className="text-sm text-muted-foreground">Tidak ada data yang cocok.</p>
+                    <BookOpenIcon
+                      className="size-7 text-muted-foreground/60"
+                      aria-hidden
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      Tidak ada mapel yang cocok dengan filter.
+                    </p>
                   </div>
                 </TableCell>
               </TableRow>
@@ -217,8 +222,13 @@ export function SubjectTableClient({ subjects }: SubjectTableClientProps) {
           ))
         ) : (
           <div className="flex flex-col items-center gap-2 py-14 text-center">
-            <BookOpenIcon className="size-7 text-muted-foreground/35" />
-            <p className="text-sm text-muted-foreground">Tidak ada data yang cocok.</p>
+            <BookOpenIcon
+              className="size-7 text-muted-foreground/60"
+              aria-hidden
+            />
+            <p className="text-sm text-muted-foreground">
+              Tidak ada mapel yang cocok dengan filter.
+            </p>
           </div>
         )}
       </div>

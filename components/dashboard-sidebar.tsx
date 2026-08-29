@@ -7,6 +7,7 @@ import {
   BookOpenTextIcon,
   CalendarDaysIcon,
   ClipboardCheckIcon,
+  ClipboardListIcon,
   GraduationCapIcon,
   LayoutDashboardIcon,
   PercentIcon,
@@ -53,6 +54,11 @@ const mainMenu = [
     title: "Bobot Nilai",
     url: "/dashboard/bobot-nilai",
     icon: PercentIcon,
+  },
+  {
+    title: "Penilaian",
+    url: "/dashboard/penilaian",
+    icon: ClipboardListIcon,
   },
   {
     title: "Jadwal",
