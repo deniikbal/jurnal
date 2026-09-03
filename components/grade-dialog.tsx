@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useMemo, useState } from "react"
 import {
   AlertTriangleIcon,
+  DownloadIcon,
   PencilIcon,
   PlusIcon,
   SearchIcon,
@@ -72,6 +73,7 @@ type StudentItem = {
 type GradeDialogProps = {
   schedule: {
     id: string
+    classroomId: string
     jamKe: number
     startTime: string
     endTime: string
@@ -169,6 +171,7 @@ export function GradeDialog({
             </div>
             {view.type === "list" ? (
               <AssessmentList
+                classroomId={schedule.classroomId}
                 weights={weights}
                 weightById={weightById}
                 assessments={assessments}
@@ -195,6 +198,7 @@ export function GradeDialog({
 }
 
 function AssessmentList({
+  classroomId,
   weights,
   weightById,
   assessments,
@@ -204,6 +208,7 @@ function AssessmentList({
   onEdit,
   onDeleted,
 }: {
+  classroomId: string
   weights: GradeWeightOption[]
   weightById: Map<string, GradeWeightOption>
   assessments: AssessmentItem[]
@@ -238,9 +243,15 @@ function AssessmentList({
         <>
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
-              Daftar penilaian (mis. Tugas 1, Tugas 2, UH 1, ...).
+              Daftar penilaian.
             </p>
             <div className="flex items-center gap-2">
+              <Button asChild size="sm" variant="outline">
+                <a href={`/api/nilai/template?classroomId=${encodeURIComponent(classroomId)}`}>
+                  <DownloadIcon />
+                  Template Excel
+                </a>
+              </Button>
               <GradeImportDialog
                 assessments={assessments.map((a) => ({
                   id: a.id,

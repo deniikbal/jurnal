@@ -96,7 +96,7 @@ export function GradeImportDialog({ assessments }: GradeImportDialogProps) {
             <DialogDescription className="text-xs sm:text-sm">
               {done && state.rows
                 ? `${state.imported} berhasil · ${state.skipped} dilewati`
-                : "Upload file .xls atau .xlsx. Kolom: A (NIS), B (Nama), C (Nilai). Baris 1 (header) dilewati."}
+                : "Upload file .xls atau .xlsx. Kolom: A (NIS), B (Nama), C (Nilai). Baris 1 (header) dilewati. Unduh template dulu, tinggal isi kolom Nilai."}
             </DialogDescription>
           </DialogHeader>
 
