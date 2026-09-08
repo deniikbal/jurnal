@@ -45,58 +45,70 @@ export const getCurrentUser = cache(async () => {
   return user
 })
 
+// ponytail: 1 retry on transient network/reset errors (Neon HTTP drops keep-alive connections)
+async function withDbRetry<T>(fn: () => Promise<T>): Promise<T> {
+  try {
+    return await fn()
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error)
+    const transient = /ECONNRESET|terminated|fetch failed|socket hang up/i.test(msg)
+    if (!transient) throw error
+    return await fn()
+  }
+}
+
 export async function getKelasForCurrentUser() {
   const session = await verifySession()
 
-  return db.select().from(classroom).where(eq(classroom.userId, session.userId))
+  return withDbRetry(() => db.select().from(classroom).where(eq(classroom.userId, session.userId)))
 }
 
 export async function getSiswaForCurrentUser() {
   const session = await verifySession()
 
-  return db.select().from(siswa).where(eq(siswa.userId, session.userId))
+  return withDbRetry(() => db.select().from(siswa).where(eq(siswa.userId, session.userId)))
 }
 
 export async function getSubjectsForCurrentUser() {
   const session = await verifySession()
 
-  return db.select().from(subject).where(eq(subject.userId, session.userId))
+  return withDbRetry(() => db.select().from(subject).where(eq(subject.userId, session.userId)))
 }
 
 export async function getGradeWeightsForCurrentUser() {
   const session = await verifySession()
 
-  return db.select().from(gradeWeight).where(eq(gradeWeight.userId, session.userId))
+  return withDbRetry(() => db.select().from(gradeWeight).where(eq(gradeWeight.userId, session.userId)))
 }
 
 export async function getSchedulesForCurrentUser() {
   const session = await verifySession()
 
-  return db.select().from(schedule).where(eq(schedule.userId, session.userId))
+  return withDbRetry(() => db.select().from(schedule).where(eq(schedule.userId, session.userId)))
 }
 
 export async function getAttendancesForCurrentUser() {
   const session = await verifySession()
 
-  return db.select().from(attendance).where(eq(attendance.userId, session.userId))
+  return withDbRetry(() => db.select().from(attendance).where(eq(attendance.userId, session.userId)))
 }
 
 export async function getJournalsForCurrentUser() {
   const session = await verifySession()
 
-  return db.select().from(journal).where(eq(journal.userId, session.userId))
+  return withDbRetry(() => db.select().from(journal).where(eq(journal.userId, session.userId)))
 }
 
 export async function getGradesForCurrentUser() {
   const session = await verifySession()
 
-  return db.select().from(grade).where(eq(grade.userId, session.userId))
+  return withDbRetry(() => db.select().from(grade).where(eq(grade.userId, session.userId)))
 }
 
 export async function getAssessmentsForCurrentUser() {
   const session = await verifySession()
 
-  return db.select().from(assessment).where(eq(assessment.userId, session.userId))
+  return withDbRetry(() => db.select().from(assessment).where(eq(assessment.userId, session.userId)))
 }
 
 export async function getBiodataSiswaForCurrentUser() {
