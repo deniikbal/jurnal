@@ -19,13 +19,6 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import {
   Table,
   TableBody,
   TableCell,
@@ -42,21 +35,14 @@ const initialState: GradeImportState = {
   skipped: 0,
 }
 
-type AssessmentOption = {
-  id: string
-  title: string
-  gradeWeightName: string
-}
-
 type GradeImportDialogProps = {
-  assessments: AssessmentOption[]
+  assessment: { id: string; title: string; gradeWeightName: string }
 }
 
-export function GradeImportDialog({ assessments }: GradeImportDialogProps) {
+export function GradeImportDialog({ assessment }: GradeImportDialogProps) {
   const [open, setOpen] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
   const [state, formAction, isPending] = useActionState(importGrades, initialState)
-  const [selectedAssessment, setSelectedAssessment] = useState("")
   const done = state.success || (!state.success && state.message && !isPending)
 
   useEffect(() => {
@@ -70,16 +56,14 @@ export function GradeImportDialog({ assessments }: GradeImportDialogProps) {
 
   function handleClose() {
     setOpen(false)
-    setSelectedAssessment("")
     formRef.current?.reset()
   }
 
   return (
     <Dialog open={open} onOpenChange={(next) => { if (!next) handleClose(); else setOpen(true) }}>
       <DialogTrigger asChild>
-        <Button type="button" size="sm" variant="outline">
+        <Button type="button" size="icon" variant="ghost" aria-label="Import Excel">
           <UploadIcon />
-          Import Excel
         </Button>
       </DialogTrigger>
       <DialogContent
@@ -89,6 +73,7 @@ export function GradeImportDialog({ assessments }: GradeImportDialogProps) {
         )}
       >
         <form ref={formRef} action={formAction} className="space-y-4">
+          <input type="hidden" name="assessmentId" value={assessment.id} />
           <DialogHeader>
             <DialogTitle className="text-base sm:text-lg">
               {done && state.rows ? "Hasil Import Nilai" : "Import Nilai dari Excel"}
@@ -96,36 +81,12 @@ export function GradeImportDialog({ assessments }: GradeImportDialogProps) {
             <DialogDescription className="text-xs sm:text-sm">
               {done && state.rows
                 ? `${state.imported} berhasil · ${state.skipped} dilewati`
-                : "Upload file .xls atau .xlsx. Kolom: A (No), B (NIS), C (Nama), D (Nilai). Baris 1 (header) dilewati. Unduh template dulu, tinggal isi kolom Nilai."}
+                : `Untuk penilaian "${assessment.title}" (${assessment.gradeWeightName}). Upload file .xls atau .xlsx. Kolom: A (No), B (NIS), C (Nama), D (Nilai). Baris 1 (header) dilewati.`}
             </DialogDescription>
           </DialogHeader>
 
           {(!done || !state.rows) ? (
             <>
-              <input type="hidden" name="assessmentId" value={selectedAssessment} />
-
-              <div className="grid gap-1.5">
-                <Label htmlFor="assessmentId" className="text-xs sm:text-sm">Penilaian</Label>
-                <Select value={selectedAssessment} onValueChange={setSelectedAssessment}>
-                  <SelectTrigger id="assessmentId" className="w-full">
-                    <SelectValue placeholder="Pilih penilaian" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {assessments.length > 0 ? (
-                      assessments.map((a) => (
-                        <SelectItem key={a.id} value={a.id}>
-                          {a.title} ({a.gradeWeightName})
-                        </SelectItem>
-                      ))
-                    ) : (
-                      <SelectItem value="-" disabled>
-                        Belum ada penilaian
-                      </SelectItem>
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
-
               <div className="grid gap-1.5">
                 <Label htmlFor="file" className="text-xs sm:text-sm">File Excel</Label>
                 <Input
@@ -147,7 +108,7 @@ export function GradeImportDialog({ assessments }: GradeImportDialogProps) {
                 </DialogClose>
                 <Button
                   type="submit"
-                  disabled={isPending || !selectedAssessment}
+                  disabled={isPending}
                   className="w-full sm:w-auto text-xs gap-1.5"
                 >
                   {isPending ? "Memproses..." : "Import"}
