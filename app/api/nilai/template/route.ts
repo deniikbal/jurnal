@@ -5,8 +5,8 @@ import { verifySession } from "@/lib/dal"
 import { db } from "@/lib/db"
 import { classroom, siswa } from "@/lib/db/schema"
 
-// Template import nilai: kolom A (NIS), B (Nama), C (Nilai) sesuai aturan
-// importGrades di lib/grade-actions.ts. Baris 1 = header, dilewati saat import.
+// Template import nilai: kolom A (No), B (NIS), C (Nama), D (Nilai) sesuai
+// aturan importGrades di lib/grade-actions.ts. Baris 1 = header, dilewati saat import.
 export async function GET(request: Request) {
   const session = await verifySession()
   const classroomId = new URL(request.url).searchParams.get("classroomId")?.trim()
@@ -36,10 +36,10 @@ export async function GET(request: Request) {
 
   const rows = students
     .toSorted((a, b) => a.name.localeCompare(b.name, "id"))
-    .map((s) => ({ NIS: s.nis ?? "", Nama: s.name, Nilai: "" }))
+    .map((s, i) => ({ No: i + 1, NIS: s.nis ?? "", Nama: s.name, Nilai: "" }))
 
   const ws = XLSX.utils.json_to_sheet(rows)
-  ws["!cols"] = [{ wch: 14 }, { wch: 28 }, { wch: 10 }]
+  ws["!cols"] = [{ wch: 6 }, { wch: 14 }, { wch: 28 }, { wch: 10 }]
 
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, "Nilai")

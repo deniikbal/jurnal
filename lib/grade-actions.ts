@@ -681,36 +681,44 @@ export async function importGrades(
   )
 
   const rows: GradeImportRow[] = []
-  const errors: string[] = []
   const toInsert: { siswaId: string; score: number }[] = []
+  let skippedCount = 0
 
   for (const [index, row] of dataRows.entries()) {
     const rowNumber = index + 2
-    const nis = String(row[0] ?? "").trim()
-    const nama = String(row[1] ?? "").trim()
-    const nilaiRaw = String(row[2] ?? "").trim()
+    // Format Excel: A (No), B (NIS), C (Nama), D (Nilai)
+    const nis = String(row[1] ?? "").trim()
+    const nama = String(row[2] ?? "").trim()
+    const nilaiRaw = String(row[3] ?? "").trim()
 
     let matchedStudent: (typeof students)[number] | undefined
     let reason: string | undefined
 
-    if (nis) {
-      matchedStudent = siswaByNis.get(nis.toLowerCase())
-      if (!matchedStudent) {
-        reason = `NIS "${nis}" tidak ditemukan`
-        errors.push(`Baris ${rowNumber}: ${reason}`)
-      }
-    } else if (nama) {
-      matchedStudent = siswaByName.get(nama.toLowerCase())
-      if (!matchedStudent) {
-        reason = `nama "${nama}" tidak ditemukan`
-        errors.push(`Baris ${rowNumber}: ${reason}`)
-      }
-    } else {
-      reason = "NIS dan Nama kosong"
-      errors.push(`Baris ${rowNumber}: ${reason}`)
+    const nisKey = nis ? nis.toLowerCase() : ""
+    const namaKey = nama ? nama.toLowerCase() : ""
+
+    if (nisKey) {
+      matchedStudent = siswaByNis.get(nisKey)
+    }
+    if (!matchedStudent && namaKey) {
+      matchedStudent = siswaByNis.get(namaKey)
+    }
+    if (!matchedStudent && nisKey) {
+      matchedStudent = siswaByName.get(nisKey)
+    }
+    if (!matchedStudent && namaKey) {
+      matchedStudent = siswaByName.get(namaKey)
     }
 
-    if (!matchedStudent || reason) {
+    if (!matchedStudent) {
+      const hasAny = nisKey || namaKey
+      reason = hasAny
+        ? "nama/NIS tidak ditemukan di kelas"
+        : "NIS dan nama kosong"
+    }
+
+    if (!matchedStudent) {
+      skippedCount += 1
       rows.push({
         name: nama || "(kosong)",
         nis: nis || null,
@@ -733,12 +741,14 @@ export async function importGrades(
 
   if (!toInsert.length) {
     return {
-      success: false,
-      message: "Tidak ada data nilai valid. Periksa kembali file atau data siswa.",
+      success: true,
+      message:
+        skippedCount > 0
+          ? `Tidak ada nilai yang cocok dari file (${skippedCount} baris dilewati)`
+          : "Tidak ada baris data pada file Excel",
       imported: 0,
-      skipped: errors.length,
+      skipped: skippedCount,
       rows,
-      errors,
     }
   }
 
@@ -762,13 +772,16 @@ export async function importGrades(
 
   revalidatePath("/dashboard/jurnal")
 
+  const parts = [`${toInsert.length} nilai berhasil diimport`]
+  if (skippedCount > 0) {
+    parts.push(`${skippedCount} baris dilewati (nama/NIS tidak cocok)`)
+  }
   return {
     success: true,
-    message: `${toInsert.length} nilai berhasil diimport`,
+    message: parts.join(", "),
     imported: toInsert.length,
-    skipped: errors.length,
+    skipped: skippedCount,
     rows,
-    errors,
   }
 }
 

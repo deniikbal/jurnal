@@ -96,7 +96,7 @@ export function GradeImportDialog({ assessments }: GradeImportDialogProps) {
             <DialogDescription className="text-xs sm:text-sm">
               {done && state.rows
                 ? `${state.imported} berhasil · ${state.skipped} dilewati`
-                : "Upload file .xls atau .xlsx. Kolom: A (NIS), B (Nama), C (Nilai). Baris 1 (header) dilewati. Unduh template dulu, tinggal isi kolom Nilai."}
+                : "Upload file .xls atau .xlsx. Kolom: A (No), B (NIS), C (Nama), D (Nilai). Baris 1 (header) dilewati. Unduh template dulu, tinggal isi kolom Nilai."}
             </DialogDescription>
           </DialogHeader>
 
@@ -198,11 +198,21 @@ export function GradeImportDialog({ assessments }: GradeImportDialogProps) {
                 </Table>
               </div>
 
-              {state.errors && state.errors.length > 0 && (
-                <div className="max-h-32 overflow-y-auto rounded-sm border border-destructive/30 bg-destructive/5 p-3 text-xs text-destructive">
-                  <p className="mb-1 font-medium">Baris yang dilewati:</p>
+              {state.skipped > 0 && (
+                <div className="max-h-32 overflow-y-auto rounded-sm border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
+                  <p className="mb-1 font-medium text-foreground">
+                    {state.skipped} baris dilewati (nama/NIS tidak cocok dengan siswa di kelas):
+                  </p>
                   <ul className="list-inside list-disc space-y-0.5">
-                    {state.errors.map((err, i) => <li key={i}>{err}</li>)}
+                    {state.rows
+                      ?.filter((r) => !r.matched)
+                      .map((row, i) => (
+                        <li key={i}>
+                          {row.name}
+                          {row.nis ? ` (NIS: ${row.nis})` : ""}
+                          {row.reason ? ` — ${row.reason}` : ""}
+                        </li>
+                      ))}
                   </ul>
                 </div>
               )}
