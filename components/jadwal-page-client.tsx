@@ -2,25 +2,25 @@
 
 import { useMemo, useState } from "react"
 import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
   BookOpenIcon,
   CalendarDaysIcon,
   ClockIcon,
   GraduationCapIcon,
+  HashIcon,
+  LayersIcon,
   PlusIcon,
+  TimerIcon,
 } from "lucide-react"
 
 import { ScheduleActions } from "@/components/schedule-actions"
 import { ScheduleCreateDialog } from "@/components/schedule-create-dialog"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
 
 const PAGE_SIZE = 12
 const days = ["senin", "selasa", "rabu", "kamis", "jumat"] as const
-const weekdayNames = [
-  "minggu", "senin", "selasa", "rabu", "kamis", "jumat", "sabtu",
-] as const
 
 function labelDay(d: string) {
   return d.charAt(0).toUpperCase() + d.slice(1)
@@ -111,9 +111,15 @@ export function JadwalPageClient({
     const bestCount = countByDay.get(best) ?? 0
     return count > bestCount ? d : best
   }, days[0])
+  const peakCount = countByDay.get(peakDay) ?? 0
+  const activeDayCount = days.filter((d) => (countByDay.get(d) ?? 0) > 0).length
+  const totalJam = schedules.reduce((acc, s) => acc + Math.max(0, s.jamKe), 0)
+  const uniqueMapel = new Set(schedules.map((s) => s.subjectId)).size
+  const uniqueKelas = new Set(schedules.map((s) => s.classroomId)).size
   const maxDayCount = Math.max(...days.map((d) => countByDay.get(d) ?? 0), 1)
-  const uniqueMapel = new Set(filtered.map((s) => s.subjectId)).size
-  const uniqueKelas = new Set(filtered.map((s) => s.classroomId)).size
+
+  const filteredUniqueMapel = new Set(filtered.map((s) => s.subjectId)).size
+  const filteredUniqueKelas = new Set(filtered.map((s) => s.classroomId)).size
 
   function handleDayChange(d: string) {
     setDay(d)
@@ -121,49 +127,142 @@ export function JadwalPageClient({
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
-      <div className="flex flex-col gap-4 border-b border-border/70 pb-5 sm:flex-row sm:items-end sm:justify-between">
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
-            <CalendarDaysIcon className="size-3.5" />
-            Agenda mengajar
-          </div>
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-            Jadwal Pelajaran
-          </h1>
-          <p className="max-w-xl text-sm text-muted-foreground">
-            Susun slot per hari dengan alur seperti agenda — ringkas di desktop,
-            nyaman dibaca di mobile.
-          </p>
-        </div>
-
-        <div className="flex flex-col gap-2 sm:items-end">
-          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-            <span className="rounded-sm border bg-muted/40 px-2 py-1 font-medium text-foreground">
-              {schedules.length} total slot
+    <div className="flex flex-col gap-8">
+      <section className="relative border-4 border-foreground bg-primary p-6 text-primary-foreground shadow-[6px_6px_0px_0px_var(--foreground)] sm:p-8">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div className="space-y-3">
+            <span className="inline-flex items-center gap-2 border-2 border-foreground bg-background px-2.5 py-1 text-[11px] font-bold tracking-wider text-foreground uppercase">
+              <CalendarDaysIcon className="size-3" />
+              Agenda Mingguan
             </span>
-            <span className="rounded-sm border px-2 py-1">
-              Puncak: {labelDay(peakDay)}
-            </span>
+            <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
+              Jadwal Pelajaran
+            </h1>
+            <p className="max-w-lg text-sm font-medium text-primary-foreground/85">
+              Susun slot per hari — ringkas di desktop, nyaman dibaca di mobile.
+            </p>
           </div>
-          <ScheduleCreateDialog
-            subjects={subjectsAsOptions}
-            classrooms={classrooms}
-            triggerClassName="w-full sm:w-auto gap-1.5 text-xs sm:text-sm"
-          />
+          <div className="flex flex-wrap gap-3">
+            <div className="inline-flex items-center gap-2 border-2 border-foreground bg-background px-3 py-2 text-foreground">
+              <span className="size-3 bg-foreground" aria-hidden />
+              <span className="text-[11px] font-bold tracking-wider uppercase">
+                Total Slot
+              </span>
+              <span className="border-2 border-foreground bg-foreground px-2 py-0.5 text-xs font-extrabold tabular-nums text-background">
+                {schedules.length}
+              </span>
+            </div>
+            <div className="inline-flex items-center gap-2 border-2 border-foreground bg-background px-3 py-2 text-foreground">
+              <TimerIcon className="size-3.5" />
+              <span className="text-[11px] font-bold tracking-wider uppercase">
+                Hari Aktif
+              </span>
+              <span className="border-2 border-foreground bg-foreground px-2 py-0.5 text-xs font-extrabold tabular-nums text-background">
+                {activeDayCount}/5
+              </span>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
 
-      <div className="grid gap-5 lg:grid-cols-[220px_minmax(0,1fr)] xl:grid-cols-[240px_minmax(0,1fr)]">
-        <aside className="space-y-4 lg:sticky lg:top-20 lg:self-start">
-          <div className="rounded-sm border bg-card">
-            <div className="border-b px-4 py-3">
-              <p className="text-xs font-semibold tracking-wide text-foreground">
-                Minggu ini
-              </p>
-              <p className="mt-0.5 text-[11px] text-muted-foreground">
-                Pilih hari untuk melihat agenda
-              </p>
+      <section>
+        <div className="mb-4">
+          <h2 className="inline-block border-b-4 border-foreground pb-1 text-sm font-extrabold tracking-wider text-foreground uppercase">
+            Ringkasan
+          </h2>
+        </div>
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="border-2 border-foreground bg-primary p-5 text-primary-foreground shadow-[4px_4px_0px_0px_var(--foreground)] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_0px_var(--foreground)]">
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1">
+                <p className="text-[11px] font-bold tracking-wider text-primary-foreground/80 uppercase">
+                  Total Slot
+                </p>
+                <p className="text-5xl font-extrabold tabular-nums leading-none">
+                  {schedules.length}
+                </p>
+              </div>
+              <div className="flex size-10 items-center justify-center border-2 border-foreground bg-background text-foreground">
+                <LayersIcon className="size-4" />
+              </div>
+            </div>
+            <p className="mt-4 text-xs font-bold tracking-wider text-primary-foreground/80 uppercase">
+              {uniqueMapel} mapel &middot; {uniqueKelas} kelas
+            </p>
+          </div>
+
+          <div className="border-2 border-foreground bg-secondary p-5 text-secondary-foreground shadow-[4px_4px_0px_0px_var(--foreground)] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_0px_var(--foreground)]">
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1">
+                <p className="text-[11px] font-bold tracking-wider text-secondary-foreground/80 uppercase">
+                  Puncak Hari
+                </p>
+                <p className="text-5xl font-extrabold leading-none">
+                  {labelDay(peakDay)}
+                </p>
+              </div>
+              <div className="flex size-10 items-center justify-center border-2 border-foreground bg-background text-foreground">
+                <CalendarDaysIcon className="size-4" />
+              </div>
+            </div>
+            <p className="mt-4 text-xs font-bold tracking-wider uppercase text-secondary-foreground/80">
+              <span className="inline-block border-2 border-foreground bg-background px-1.5 py-0.5 font-extrabold tabular-nums text-foreground">
+                {peakCount}
+              </span>{" "}
+              slot di hari ini
+            </p>
+          </div>
+
+          <div className="border-2 border-foreground bg-accent p-5 text-accent-foreground shadow-[4px_4px_0px_0px_var(--foreground)] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_0px_var(--foreground)]">
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1">
+                <p className="text-[11px] font-bold tracking-wider text-accent-foreground/80 uppercase">
+                  Mapel Terjadwal
+                </p>
+                <p className="text-5xl font-extrabold tabular-nums leading-none">
+                  {uniqueMapel}
+                </p>
+              </div>
+              <div className="flex size-10 items-center justify-center border-2 border-foreground bg-background text-foreground">
+                <BookOpenIcon className="size-4" />
+              </div>
+            </div>
+            <p className="mt-4 text-xs font-bold tracking-wider uppercase text-accent-foreground/80">
+              dari {subjects.length} mapel tersedia
+            </p>
+          </div>
+
+          <div className="border-2 border-foreground bg-card p-5 text-foreground shadow-[4px_4px_0px_0px_var(--foreground)] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_0px_var(--foreground)]">
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1">
+                <p className="text-[11px] font-bold tracking-wider text-muted-foreground uppercase">
+                  Total Jam Ke
+                </p>
+                <p className="text-5xl font-extrabold tabular-nums leading-none">
+                  {totalJam}
+                </p>
+              </div>
+              <div className="flex size-10 items-center justify-center border-2 border-foreground bg-foreground text-background">
+                <HashIcon className="size-4" />
+              </div>
+            </div>
+            <p className="mt-4 text-xs font-bold tracking-wider uppercase text-muted-foreground">
+              {classrooms.length} kelas siap dipakai
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)] xl:grid-cols-[260px_minmax(0,1fr)]">
+        <aside className="space-y-5 lg:sticky lg:top-20 lg:self-start">
+          <div className="border-2 border-foreground bg-card shadow-[4px_4px_0px_0px_var(--foreground)]">
+            <div className="flex items-center justify-between border-b-2 border-foreground bg-secondary px-4 py-3 text-secondary-foreground">
+              <span className="text-xs font-extrabold tracking-wider uppercase">
+                Minggu Ini
+              </span>
+              <span className="border-2 border-foreground bg-background px-1.5 py-0.5 text-[10px] font-extrabold tracking-wider text-foreground uppercase">
+                Pilih Hari
+              </span>
             </div>
 
             <div className="flex gap-2 overflow-x-auto p-3 lg:hidden">
@@ -177,23 +276,23 @@ export function JadwalPageClient({
                     type="button"
                     onClick={() => handleDayChange(d)}
                     className={cn(
-                      "min-w-[72px] shrink-0 rounded-sm border px-3 py-2.5 text-center transition-colors cursor-pointer",
+                      "min-w-[72px] shrink-0 cursor-pointer border-2 px-3 py-2 text-center transition-all",
                       active
-                        ? "border-primary/40 bg-primary text-primary-foreground shadow-sm"
-                        : "bg-background hover:bg-muted/60"
+                        ? "border-foreground bg-foreground text-background shadow-[3px_3px_0px_0px_var(--foreground)]"
+                        : "border-foreground bg-background text-foreground hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_0px_var(--foreground)]",
                     )}
                   >
-                    <div className="text-[10px] font-semibold uppercase tracking-wide opacity-80">
+                    <div className="text-[10px] font-bold tracking-wider uppercase">
                       {shortDay(d)}
                     </div>
-                    <div className="mt-1 text-lg font-semibold tabular-nums leading-none">
+                    <div className="mt-1 text-lg font-extrabold tabular-nums leading-none">
                       {count}
                     </div>
                     {isToday && (
                       <div
                         className={cn(
-                          "mt-1.5 text-[9px] font-medium uppercase tracking-wide",
-                          active ? "opacity-90" : "text-primary"
+                          "mt-1.5 text-[9px] font-bold tracking-wider uppercase",
+                          active ? "text-background" : "text-primary",
                         )}
                       >
                         hari ini
@@ -217,38 +316,38 @@ export function JadwalPageClient({
                     type="button"
                     onClick={() => handleDayChange(d)}
                     className={cn(
-                      "group mb-1 flex w-full items-center gap-3 rounded-sm px-3 py-2.5 text-left transition-colors last:mb-0 cursor-pointer",
+                      "group mb-2 flex w-full cursor-pointer items-center gap-3 border-2 px-3 py-2.5 text-left transition-all last:mb-0",
                       active
-                        ? "bg-primary text-primary-foreground"
-                        : "hover:bg-muted/70"
+                        ? "border-foreground bg-foreground text-background shadow-[3px_3px_0px_0px_var(--foreground)]"
+                        : "border-foreground bg-background text-foreground hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_0px_var(--foreground)]",
                     )}
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">{labelDay(d)}</span>
+                        <span className="text-sm font-extrabold">{labelDay(d)}</span>
                         {isToday && (
                           <span
                             className={cn(
-                              "rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide",
+                              "border-2 border-foreground px-1.5 py-0.5 text-[9px] font-bold tracking-wider uppercase",
                               active
-                                ? "bg-primary-foreground/15 text-primary-foreground"
-                                : "bg-primary/10 text-primary"
+                                ? "bg-background text-foreground"
+                                : "bg-primary text-primary-foreground",
                             )}
                           >
-                            Hari ini
+                            Hari Ini
                           </span>
                         )}
                       </div>
                       <div
                         className={cn(
-                          "mt-1.5 h-1 overflow-hidden rounded-full",
-                          active ? "bg-primary-foreground/20" : "bg-muted"
+                          "mt-2 h-2 border-2 border-foreground",
+                          active ? "bg-background" : "bg-muted",
                         )}
                       >
                         <div
                           className={cn(
-                            "h-full rounded-full transition-all",
-                            active ? "bg-primary-foreground/80" : "bg-primary/60"
+                            "h-full border-r-2 border-foreground",
+                            active ? "bg-primary" : "bg-primary",
                           )}
                           style={{ width: `${density}%` }}
                         />
@@ -256,8 +355,10 @@ export function JadwalPageClient({
                     </div>
                     <span
                       className={cn(
-                        "tabular-nums text-sm font-semibold",
-                        active ? "text-primary-foreground" : "text-muted-foreground"
+                        "border-2 border-foreground px-1.5 py-0.5 text-xs font-extrabold tabular-nums",
+                        active
+                          ? "bg-background text-foreground"
+                          : "bg-foreground text-background",
                       )}
                     >
                       {count}
@@ -268,35 +369,53 @@ export function JadwalPageClient({
             </div>
           </div>
 
-          <div className="hidden rounded-sm border bg-card p-4 lg:block">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-              Ringkasan {labelDay(day)}
-            </p>
-            <div className="mt-3 space-y-3">
-              <div className="flex items-center justify-between gap-3 text-sm">
-                <span className="text-muted-foreground">Slot</span>
-                <span className="font-semibold tabular-nums">{filtered.length}</span>
+          <div className="hidden border-2 border-foreground bg-card shadow-[4px_4px_0px_0px_var(--foreground)] lg:block">
+            <div className="border-b-2 border-foreground bg-accent px-4 py-3 text-accent-foreground">
+              <span className="text-xs font-extrabold tracking-wider uppercase">
+                Ringkasan {labelDay(day)}
+              </span>
+            </div>
+            <div className="space-y-3 p-4 text-sm">
+              <div className="flex items-center justify-between gap-3">
+                <span className="font-bold tracking-wider text-muted-foreground uppercase">
+                  Slot
+                </span>
+                <span className="border-2 border-foreground bg-foreground px-2 py-0.5 text-xs font-extrabold tabular-nums text-background">
+                  {filtered.length}
+                </span>
               </div>
-              <Separator />
-              <div className="flex items-center justify-between gap-3 text-sm">
-                <span className="text-muted-foreground">Mapel</span>
-                <span className="font-semibold tabular-nums">{uniqueMapel}</span>
+              <div className="border-t-2 border-foreground" />
+              <div className="flex items-center justify-between gap-3">
+                <span className="font-bold tracking-wider text-muted-foreground uppercase">
+                  Mapel
+                </span>
+                <span className="text-sm font-extrabold tabular-nums">
+                  {filteredUniqueMapel}
+                </span>
               </div>
-              <div className="flex items-center justify-between gap-3 text-sm">
-                <span className="text-muted-foreground">Kelas</span>
-                <span className="font-semibold tabular-nums">{uniqueKelas}</span>
+              <div className="flex items-center justify-between gap-3">
+                <span className="font-bold tracking-wider text-muted-foreground uppercase">
+                  Kelas
+                </span>
+                <span className="text-sm font-extrabold tabular-nums">
+                  {filteredUniqueKelas}
+                </span>
               </div>
-              <Separator />
-              <div className="space-y-1.5 text-sm">
+              <div className="border-t-2 border-foreground" />
+              <div className="space-y-1.5">
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-muted-foreground">Mulai</span>
-                  <span className="font-mono text-xs font-medium">
+                  <span className="font-bold tracking-wider text-muted-foreground uppercase">
+                    Mulai
+                  </span>
+                  <span className="border-2 border-foreground bg-background px-1.5 py-0.5 font-mono text-xs font-extrabold text-foreground">
                     {firstSlot?.startTime ?? "—"}
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-muted-foreground">Selesai</span>
-                  <span className="font-mono text-xs font-medium">
+                  <span className="font-bold tracking-wider text-muted-foreground uppercase">
+                    Selesai
+                  </span>
+                  <span className="border-2 border-foreground bg-background px-1.5 py-0.5 font-mono text-xs font-extrabold text-foreground">
                     {lastSlot?.endTime ?? "—"}
                   </span>
                 </div>
@@ -306,38 +425,35 @@ export function JadwalPageClient({
         </aside>
 
         <section className="min-w-0">
-          <div className="overflow-hidden rounded-sm border bg-card">
-            <div className="flex flex-col gap-3 border-b px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+          <div className="border-2 border-foreground bg-card shadow-[4px_4px_0px_0px_var(--foreground)]">
+            <div className="flex flex-col gap-3 border-b-2 border-foreground px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
               <div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <h2 className="text-base font-semibold tracking-tight sm:text-lg">
+                  <h2 className="text-base font-extrabold tracking-tight uppercase sm:text-lg">
                     {labelDay(day)}
                   </h2>
                   {day === today && (
-                    <Badge
-                      variant="secondary"
-                      className="border-primary/20 bg-primary/10 text-[10px] text-primary"
-                    >
-                      Hari ini
-                    </Badge>
+                    <span className="border-2 border-foreground bg-primary px-2 py-0.5 text-[10px] font-extrabold tracking-wider text-primary-foreground uppercase">
+                      Hari Ini
+                    </span>
                   )}
                 </div>
-                <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
+                <p className="mt-1 text-xs font-medium text-muted-foreground sm:text-sm">
                   {filtered.length > 0
-                    ? `${filtered.length} slot · ${uniqueMapel} mapel · ${uniqueKelas} kelas`
+                    ? `${filtered.length} slot · ${filteredUniqueMapel} mapel · ${filteredUniqueKelas} kelas`
                     : "Belum ada slot untuk hari ini"}
                 </p>
               </div>
 
               {filtered.length > 0 && (
-                <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                  <span className="inline-flex items-center gap-1.5 rounded-sm border px-2.5 py-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 border-2 border-foreground bg-secondary px-2.5 py-1.5 text-secondary-foreground">
                     <ClockIcon className="size-3.5" />
-                    <span className="font-mono tabular-nums text-foreground">
+                    <span className="font-mono text-xs font-extrabold tabular-nums">
                       {firstSlot?.startTime ?? "—"}
                     </span>
                     <span>→</span>
-                    <span className="font-mono tabular-nums text-foreground">
+                    <span className="font-mono text-xs font-extrabold tabular-nums">
                       {lastSlot?.endTime ?? "—"}
                     </span>
                   </span>
@@ -347,9 +463,9 @@ export function JadwalPageClient({
 
             {paginated.length > 0 ? (
               <div className="relative">
-                <div className="pointer-events-none absolute top-6 bottom-6 left-[2.15rem] hidden w-px bg-border/80 sm:block" />
+                <div className="pointer-events-none absolute top-6 bottom-6 left-[2.4rem] hidden w-0.5 bg-foreground/80 sm:block" />
 
-                <div className="divide-y sm:divide-y-0">
+                <div>
                   {paginated.map((item, index) => {
                     const subject = subjectById.get(item.subjectId)
                     const classroom = classroomById.get(item.classroomId)
@@ -360,22 +476,22 @@ export function JadwalPageClient({
                       <article
                         key={item.id}
                         className={cn(
-                          "group relative grid grid-cols-1 gap-3 px-4 py-4 transition-colors hover:bg-muted/25 sm:grid-cols-[7.5rem_minmax(0,1fr)_auto] sm:gap-4 sm:px-5 sm:py-4",
-                          !isLast && "sm:pb-5"
+                          "group relative grid grid-cols-1 gap-3 px-4 py-4 sm:grid-cols-[8rem_minmax(0,1fr)_auto] sm:gap-4 sm:px-5 sm:py-5",
+                          !isLast && "border-b-2 border-foreground",
                         )}
                       >
                         <div className="relative flex items-center gap-3 sm:flex-col sm:items-stretch sm:gap-2 sm:pt-0.5">
-                          <div className="relative z-10 flex size-8 shrink-0 items-center justify-center rounded-full border bg-card text-xs font-semibold tabular-nums text-foreground shadow-xs">
+                          <div className="relative z-10 flex size-9 shrink-0 items-center justify-center border-2 border-foreground bg-primary text-xs font-extrabold tabular-nums text-primary-foreground shadow-[2px_2px_0px_0px_var(--foreground)]">
                             {item.jamKe}
                           </div>
 
-                          <div className="min-w-0 flex-1 rounded-sm border bg-muted/30 px-3 py-2 sm:bg-transparent sm:border-0 sm:px-0 sm:py-0">
-                            <p className="text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+                          <div className="min-w-0 flex-1 sm:flex-none">
+                            <p className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase">
                               Jam ke-{item.jamKe}
                             </p>
-                            <p className="mt-0.5 text-sm font-semibold tabular-nums tracking-tight text-foreground">
+                            <p className="mt-0.5 text-sm font-extrabold tabular-nums tracking-tight text-foreground">
                               {item.startTime}
-                              <span className="mx-1.5 font-normal text-muted-foreground/70">
+                              <span className="mx-1.5 font-bold text-muted-foreground/70">
                                 –
                               </span>
                               <span className="text-muted-foreground">
@@ -385,15 +501,15 @@ export function JadwalPageClient({
                           </div>
                         </div>
 
-                        <div className="min-w-0 rounded-sm border bg-background/80 p-3.5 shadow-2xs transition-colors group-hover:border-border group-hover:bg-card sm:p-4">
+                        <div className="min-w-0 border-2 border-foreground bg-background p-3.5 shadow-[3px_3px_0px_0px_var(--foreground)] transition-all group-hover:-translate-x-0.5 group-hover:-translate-y-0.5 group-hover:shadow-[5px_5px_0px_0px_var(--foreground)] sm:p-4">
                           <div className="flex items-start justify-between gap-3">
                             <div className="min-w-0 space-y-2">
                               <div className="flex flex-wrap items-center gap-2">
-                                <h3 className="truncate text-sm font-semibold tracking-tight sm:text-[15px]">
+                                <h3 className="truncate text-sm font-extrabold tracking-tight sm:text-[15px]">
                                   {subject?.name ?? "Mapel tidak ditemukan"}
                                 </h3>
                                 {subject?.kode && (
-                                  <span className="rounded-sm border bg-muted/40 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+                                  <span className="border-2 border-foreground bg-secondary px-1.5 py-0.5 font-mono text-[10px] font-extrabold tracking-wider text-secondary-foreground uppercase">
                                     {subject.kode}
                                   </span>
                                 )}
@@ -402,19 +518,19 @@ export function JadwalPageClient({
                               <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                                 <span className="inline-flex items-center gap-1.5">
                                   <GraduationCapIcon className="size-3.5 shrink-0" />
-                                  <span className="font-medium text-foreground/90">
+                                  <span className="font-extrabold text-foreground/90">
                                     {classroom?.name ?? "—"}
                                   </span>
                                 </span>
-                                <span className="text-border">·</span>
+                                <span className="text-foreground">·</span>
                                 <span className="inline-flex items-center gap-1.5">
                                   <ClockIcon className="size-3.5 shrink-0" />
                                   <span className="tabular-nums">
                                     {formatRange(item.startTime, item.endTime)}
                                   </span>
                                 </span>
-                                <span className="hidden text-border sm:inline">·</span>
-                                <span className="hidden tabular-nums sm:inline">
+                                <span className="hidden text-foreground sm:inline">·</span>
+                                <span className="hidden border-2 border-foreground bg-background px-1.5 py-0.5 text-[10px] font-extrabold tracking-wider text-foreground tabular-nums uppercase sm:inline">
                                   Slot #{absoluteIndex}
                                 </span>
                               </div>
@@ -431,7 +547,7 @@ export function JadwalPageClient({
                         </div>
 
                         <div className="hidden items-center sm:flex">
-                          <div className="opacity-60 transition-opacity group-hover:opacity-100">
+                          <div className="opacity-70 transition-opacity group-hover:opacity-100">
                             <ScheduleActions
                               item={item}
                               subjects={subjectsAsOptions}
@@ -446,14 +562,14 @@ export function JadwalPageClient({
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center gap-4 px-6 py-16 text-center">
-                <div className="flex size-14 items-center justify-center rounded-full border border-dashed bg-muted/30">
-                  <BookOpenIcon className="size-6 text-muted-foreground/60" />
+                <div className="flex size-14 items-center justify-center border-2 border-foreground bg-muted shadow-[3px_3px_0px_0px_var(--foreground)]">
+                  <BookOpenIcon className="size-6 text-muted-foreground" />
                 </div>
                 <div className="space-y-1.5">
-                  <p className="text-sm font-semibold">
+                  <p className="text-sm font-extrabold tracking-wider text-foreground uppercase">
                     Agenda {labelDay(day)} masih kosong
                   </p>
-                  <p className="mx-auto max-w-sm text-xs text-muted-foreground sm:text-sm">
+                  <p className="mx-auto max-w-sm text-xs font-medium text-muted-foreground sm:text-sm">
                     Tambahkan slot pertama untuk hari ini. Setelah terisi, jadwal
                     akan tampil sebagai timeline per jam.
                   </p>
@@ -461,28 +577,29 @@ export function JadwalPageClient({
                 <ScheduleCreateDialog
                   subjects={subjectsAsOptions}
                   classrooms={classrooms}
-                  triggerClassName="gap-1.5 text-xs sm:text-sm"
+                  triggerClassName="gap-1.5 text-xs font-extrabold tracking-wider uppercase sm:text-sm"
                 />
               </div>
             )}
 
             {totalPages > 1 && (
-              <div className="border-t px-4 py-3 sm:px-5">
+              <div className="border-t-2 border-foreground px-4 py-3 sm:px-5">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-center text-[11px] text-muted-foreground sm:text-left sm:text-xs">
+                  <p className="text-center text-[11px] font-bold tracking-wider text-muted-foreground uppercase sm:text-left sm:text-xs">
                     Menampilkan {startIdx + 1}–
                     {Math.min(startIdx + PAGE_SIZE, filtered.length)} dari{" "}
                     {filtered.length} slot
                   </p>
-                  <nav className="flex items-center gap-1" aria-label="pagination">
+                  <nav className="flex items-center gap-1.5" aria-label="pagination">
                     <Button
-                      variant="ghost"
-                      size="sm"
+                      variant="outline"
+                      size="icon"
                       disabled={safePage === 0}
                       onClick={() => setPage((p) => Math.max(p - 1, 0))}
-                      className="text-xs"
+                      className="size-8 border-2"
+                      aria-label="Halaman sebelumnya"
                     >
-                      Prev
+                      <ArrowLeftIcon className="size-3.5" />
                     </Button>
                     {Array.from({ length: totalPages }, (_, i) => i + 1)
                       .filter(
@@ -494,26 +611,34 @@ export function JadwalPageClient({
                       .map((p, idx, arr) => (
                         <span key={p} className="flex items-center">
                           {idx > 0 && arr[idx - 1] !== p - 1 && (
-                            <span className="px-1 text-xs text-muted-foreground">…</span>
+                            <span className="px-1 text-xs font-bold text-foreground">
+                              …
+                            </span>
                           )}
-                          <Button
-                            variant={p === safePage + 1 ? "default" : "ghost"}
-                            size="sm"
+                          <button
+                            type="button"
                             onClick={() => setPage(p - 1)}
-                            className="text-xs min-w-[32px]"
+                            aria-current={p === safePage + 1 ? "page" : undefined}
+                            className={cn(
+                              "inline-flex size-8 items-center justify-center border-2 border-foreground text-xs font-extrabold tabular-nums transition-all",
+                              p === safePage + 1
+                                ? "bg-foreground text-background shadow-[2px_2px_0px_0px_var(--foreground)]"
+                                : "bg-background text-foreground hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[2px_2px_0px_0px_var(--foreground)]",
+                            )}
                           >
                             {p}
-                          </Button>
+                          </button>
                         </span>
                       ))}
                     <Button
-                      variant="ghost"
-                      size="sm"
+                      variant="outline"
+                      size="icon"
                       disabled={safePage === totalPages - 1}
                       onClick={() => setPage((p) => Math.min(p + 1, totalPages - 1))}
-                      className="text-xs"
+                      className="size-8 border-2"
+                      aria-label="Halaman berikutnya"
                     >
-                      Next
+                      <ArrowRightIcon className="size-3.5" />
                     </Button>
                   </nav>
                 </div>
@@ -521,13 +646,13 @@ export function JadwalPageClient({
             )}
           </div>
 
-          <div className="mt-3 flex flex-col gap-2 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-            <p className="inline-flex items-center gap-1.5">
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <p className="inline-flex items-center gap-1.5 border-2 border-foreground bg-muted px-3 py-2 text-xs font-bold tracking-wider text-foreground uppercase">
               <PlusIcon className="size-3.5" />
-              Tip: urutan otomatis mengikuti jam ke & waktu mulai.
+              Tip: urutan otomatis mengikuti jam ke &amp; waktu mulai.
             </p>
-            <p className="tabular-nums">
-              {subjects.length} mapel · {classrooms.length} kelas siap dipakai
+            <p className="border-2 border-foreground bg-foreground px-3 py-2 text-xs font-bold tracking-wider text-background uppercase tabular-nums">
+              {subjects.length} mapel &middot; {classrooms.length} kelas siap dipakai
             </p>
           </div>
         </section>

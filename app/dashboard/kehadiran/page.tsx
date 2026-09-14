@@ -1,13 +1,12 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import { CalendarDaysIcon, ClipboardCheckIcon } from "lucide-react"
 
 import { AttendanceDialog } from "@/components/attendance-dialog"
 import { AttendanceReportFilter } from "@/components/attendance-report-filter"
 import { KehadiranFilter } from "@/components/kehadiran-filter"
 import { KehadiranReportTable } from "@/components/kehadiran/kehadiran-report-table"
 import { KehadiranStats } from "@/components/kehadiran/kehadiran-stats"
-import { Card, CardContent } from "@/components/ui/card"
-import { CalendarDaysIcon } from "lucide-react"
 import {
   getAttendancesForCurrentUser,
   getKelasForCurrentUser,
@@ -222,36 +221,44 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
     month: reportMonth,
   })
 
-  const tabLinkClass = (active: boolean) =>
-    `-mb-px border-b-2 pb-2.5 text-sm transition-colors ${
-      active
-        ? "border-foreground font-medium text-foreground"
-        : "border-transparent text-muted-foreground hover:text-foreground"
-    }`
-
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-end sm:justify-between">
-        <div className="space-y-1">
-          <p className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">
-            Absensi harian
-          </p>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Kehadiran</h1>
-          <p className="max-w-xl text-sm text-muted-foreground">
-            Isi absensi dari jadwal hari ini, atau lihat rekap bulanan per kelas dan mapel.
-          </p>
+    <div className="flex flex-col gap-8">
+      <section className="relative border-4 border-foreground bg-primary p-6 text-primary-foreground shadow-[6px_6px_0px_0px_var(--foreground)] sm:p-8">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div className="space-y-3">
+            <span className="inline-flex items-center gap-2 border-2 border-foreground bg-background px-2.5 py-1 text-[11px] font-bold tracking-wider text-foreground uppercase">
+              <ClipboardCheckIcon className="size-3" />
+              Absensi Harian
+            </span>
+            <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
+              Kehadiran
+            </h1>
+            <p className="max-w-lg text-sm font-medium text-primary-foreground/85">
+              Isi absensi dari jadwal hari ini, atau lihat rekap bulanan per kelas dan mapel.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <div className="inline-flex items-center gap-2 border-2 border-foreground bg-background px-3 py-2 text-foreground">
+              <CalendarDaysIcon className="size-3.5" />
+              <span className="border-2 border-foreground bg-foreground px-2 py-0.5 text-[10px] font-extrabold tracking-wider text-background uppercase">
+                {formatLongDate(date)}
+              </span>
+            </div>
+            <div className="inline-flex items-center gap-2 border-2 border-foreground bg-background px-3 py-2 text-foreground">
+              <span className="size-3 bg-foreground" aria-hidden />
+              <span className="text-[11px] font-bold tracking-wider uppercase">
+                Sesi
+              </span>
+              <span className="border-2 border-foreground bg-foreground px-2 py-0.5 text-xs font-extrabold tabular-nums text-background">
+                {filteredSchedulesToday.length}
+              </span>
+              <span className="text-xs font-bold tracking-wider text-muted-foreground uppercase">
+                · {todayTotal} catatan
+              </span>
+            </div>
+          </div>
         </div>
-
-        <div className="flex flex-col items-start gap-1 sm:items-end">
-          <span className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-            {formatLongDate(date)}
-          </span>
-          <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-            <CalendarDaysIcon className="size-3.5" />
-            {filteredSchedulesToday.length} sesi · {todayTotal} catatan
-          </span>
-        </div>
-      </div>
+      </section>
 
       <KehadiranStats
         filteredCount={filteredSchedulesToday.length}
@@ -263,144 +270,191 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
         }
       />
 
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-border">
-        <Link href={kehadiranHref} className={tabLinkClass(selectedTab === "kehadiran")}>
+      <div className="flex flex-wrap items-center gap-3 border-b-2 border-foreground pb-0">
+        <Link
+          href={kehadiranHref}
+          aria-current={selectedTab === "kehadiran" ? "page" : undefined}
+          className={`-mb-[2px] inline-flex items-center gap-2 border-2 border-foreground px-4 py-2.5 text-xs font-extrabold tracking-wider uppercase transition-all ${
+            selectedTab === "kehadiran"
+              ? "bg-foreground text-background shadow-[3px_3px_0px_0px_var(--foreground)]"
+              : "bg-background text-foreground hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_0px_var(--foreground)]"
+          }`}
+        >
+          <ClipboardCheckIcon className="size-3.5" />
           Kehadiran
         </Link>
-        <Link href={laporanHref} className={tabLinkClass(selectedTab === "laporan")}>
+        <Link
+          href={laporanHref}
+          aria-current={selectedTab === "laporan" ? "page" : undefined}
+          className={`-mb-[2px] inline-flex items-center gap-2 border-2 border-foreground px-4 py-2.5 text-xs font-extrabold tracking-wider uppercase transition-all ${
+            selectedTab === "laporan"
+              ? "bg-foreground text-background shadow-[3px_3px_0px_0px_var(--foreground)]"
+              : "bg-background text-foreground hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_0px_var(--foreground)]"
+          }`}
+        >
+          <CalendarDaysIcon className="size-3.5" />
           Laporan
         </Link>
       </div>
 
       {selectedTab === "kehadiran" ? (
-        <Card>
-          <CardContent className="p-0">
-            <div className="flex flex-col gap-3 border-b border-border px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-              <div>
-                <h2 className="text-sm font-semibold text-foreground">Jadwal hari ini</h2>
-                <p className="text-xs text-muted-foreground">
-                  {labelDay(selectedDay)} · {date}
-                  {selectedClassroomId !== "all" &&
-                    ` · ${classroomById.get(selectedClassroomId)?.name ?? "Kelas"}`}
-                  {selectedSubjectId !== "all" &&
-                    ` · ${subjectById.get(selectedSubjectId)?.name ?? "Mapel"}`}
+        <section className="border-2 border-foreground bg-card shadow-[4px_4px_0px_0px_var(--foreground)]">
+          <div className="flex flex-col gap-3 border-b-2 border-foreground px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+            <div>
+              <h2 className="text-sm font-extrabold tracking-wider text-foreground uppercase">
+                Jadwal Hari Ini
+              </h2>
+              <p className="mt-0.5 text-xs font-medium text-muted-foreground">
+                {labelDay(selectedDay)} · {date}
+                {selectedClassroomId !== "all" &&
+                  ` · ${classroomById.get(selectedClassroomId)?.name ?? "Kelas"}`}
+                {selectedSubjectId !== "all" &&
+                  ` · ${subjectById.get(selectedSubjectId)?.name ?? "Mapel"}`}
+              </p>
+            </div>
+            <KehadiranFilter
+              classroomId={selectedClassroomId}
+              subjectId={selectedSubjectId}
+              classrooms={classrooms}
+              subjects={subjects}
+            />
+          </div>
+
+          <div>
+            {filteredSchedulesToday.length > 0 ? (
+              filteredSchedulesToday.map((schedule, idx) => {
+                const subject = subjectById.get(schedule.subjectId)
+                const classroom = classroomById.get(schedule.classroomId)
+                const classStudents = (
+                  studentsByClassroom.get(schedule.classroomId) ?? []
+                ).toSorted((a, b) =>
+                  a.name.localeCompare(b.name, "id-ID", {
+                    numeric: true,
+                    sensitivity: "base",
+                  }),
+                )
+                const scheduleAttendances = attendanceBySchedule.get(schedule.id) ?? []
+                const statuses = Object.fromEntries(
+                  scheduleAttendances.map((item) => [item.siswaId, item.status]),
+                )
+                const isFilled = scheduleAttendances.length > 0
+                const isLast = idx === filteredSchedulesToday.length - 1
+
+                return (
+                  <div
+                    key={schedule.id}
+                    className={`flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5 ${
+                      isLast ? "" : "border-b-2 border-foreground"
+                    }`}
+                  >
+                    <div className="flex min-w-0 items-start gap-3">
+                      <span
+                        className={`flex size-10 shrink-0 items-center justify-center border-2 border-foreground text-xs font-extrabold tabular-nums shadow-[2px_2px_0px_0px_var(--foreground)] ${
+                          isFilled
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-background text-foreground"
+                        }`}
+                      >
+                        {schedule.jamKe}
+                      </span>
+                      <div className="min-w-0 space-y-1.5">
+                        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                          <h3 className="text-sm font-extrabold tracking-tight text-foreground">
+                            {subject?.name ?? "Mapel tidak ditemukan"}
+                          </h3>
+                          <span className="border-2 border-foreground bg-muted px-1.5 py-0.5 text-[10px] font-extrabold tracking-wider text-foreground uppercase">
+                            Jam ke-{schedule.jamKe}
+                          </span>
+                          <span
+                            className={`inline-flex items-center gap-1.5 border-2 border-foreground px-1.5 py-0.5 text-[10px] font-extrabold tracking-wider uppercase ${
+                              isFilled
+                                ? "bg-secondary text-secondary-foreground"
+                                : "bg-background text-muted-foreground"
+                            }`}
+                          >
+                            <span
+                              className={`size-1.5 shrink-0 ${isFilled ? "bg-foreground" : "bg-muted-foreground"}`}
+                              aria-hidden
+                            />
+                            {isFilled ? "Sudah Diisi" : "Belum Diisi"}
+                          </span>
+                        </div>
+                        <p className="text-xs font-medium text-muted-foreground">
+                          <span className="font-extrabold text-foreground/90">
+                            {classroom?.name ?? "Kelas tidak ditemukan"}
+                          </span>
+                          <span className="mx-1.5 text-foreground">·</span>
+                          <span className="tabular-nums">{schedule.startTime}–{schedule.endTime}</span>
+                          <span className="mx-1.5 text-foreground">·</span>
+                          <span className="inline-flex items-center gap-1">
+                            <span className="border-2 border-foreground bg-foreground px-1 py-0.5 text-[10px] font-extrabold tabular-nums text-background">
+                              {classStudents.length}
+                            </span>
+                            siswa aktif
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                    <div className="shrink-0 self-end sm:self-center">
+                      <AttendanceDialog
+                        date={date}
+                        schedule={schedule}
+                        subjectName={subject?.name ?? "Mapel tidak ditemukan"}
+                        classroomName={classroom?.name ?? "Kelas tidak ditemukan"}
+                        students={classStudents}
+                        statuses={statuses}
+                      />
+                    </div>
+                  </div>
+                )
+              })
+            ) : (
+              <div className="px-4 py-14 text-center sm:px-5">
+                <p className="text-sm font-bold tracking-wider text-muted-foreground uppercase">
+                  Tidak ada jadwal untuk {labelDay(selectedDay)}
+                  {selectedClassroomId !== "all" || selectedSubjectId !== "all"
+                    ? " dengan filter ini"
+                    : ""}
+                  .
                 </p>
               </div>
-              <KehadiranFilter
+            )}
+          </div>
+        </section>
+      ) : (
+        <div className="flex flex-col gap-5">
+          <section className="border-2 border-foreground bg-card shadow-[4px_4px_0px_0px_var(--foreground)]">
+            <div className="flex flex-col gap-3 border-b-2 border-foreground px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+              <div>
+                <h2 className="text-sm font-extrabold tracking-wider text-foreground uppercase">
+                  Filter Laporan
+                </h2>
+                <p className="mt-0.5 text-xs font-medium text-muted-foreground">
+                  Pilih bulan, kelas, dan mapel untuk membatasi data.
+                </p>
+              </div>
+              <AttendanceReportFilter
+                month={reportMonth}
+                currentMonth={currentMonth()}
                 classroomId={selectedClassroomId}
                 subjectId={selectedSubjectId}
                 classrooms={classrooms}
                 subjects={subjects}
               />
             </div>
-
-            <div className="divide-y divide-border">
-              {filteredSchedulesToday.length > 0 ? (
-                filteredSchedulesToday.map((schedule) => {
-                  const subject = subjectById.get(schedule.subjectId)
-                  const classroom = classroomById.get(schedule.classroomId)
-                  const classStudents = (
-                    studentsByClassroom.get(schedule.classroomId) ?? []
-                  ).toSorted((a, b) =>
-                    a.name.localeCompare(b.name, "id-ID", {
-                      numeric: true,
-                      sensitivity: "base",
-                    }),
-                  )
-                  const scheduleAttendances = attendanceBySchedule.get(schedule.id) ?? []
-                  const statuses = Object.fromEntries(
-                    scheduleAttendances.map((item) => [item.siswaId, item.status]),
-                  )
-                  const isFilled = scheduleAttendances.length > 0
-
-                  return (
-                    <div
-                      key={schedule.id}
-                      className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5"
-                    >
-                      <div className="min-w-0 space-y-1">
-                        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                          <h3 className="text-sm font-medium text-foreground">
-                            {subject?.name ?? "Mapel tidak ditemukan"}
-                          </h3>
-                          <span className="text-xs tabular-nums text-muted-foreground">
-                            Jam ke-{schedule.jamKe}
-                          </span>
-                          <span className="inline-flex items-center gap-1.5 text-xs">
-                            <span
-                              className={`size-1.5 shrink-0 rounded-full ${
-                                isFilled
-                                  ? "bg-emerald-600 dark:bg-emerald-400"
-                                  : "bg-stone-400"
-                              }`}
-                              aria-hidden
-                            />
-                            <span
-                              className={
-                                isFilled ? "text-foreground" : "text-muted-foreground"
-                              }
-                            >
-                              {isFilled ? "Sudah diisi" : "Belum diisi"}
-                            </span>
-                          </span>
-                        </div>
-                        <p className="text-xs text-muted-foreground">
-                          {classroom?.name ?? "Kelas tidak ditemukan"}
-                          <span className="mx-1.5 text-border">·</span>
-                          {schedule.startTime}–{schedule.endTime}
-                          <span className="mx-1.5 text-border">·</span>
-                          {classStudents.length} siswa aktif
-                        </p>
-                      </div>
-                      <div className="shrink-0 self-end sm:self-center">
-                        <AttendanceDialog
-                          date={date}
-                          schedule={schedule}
-                          subjectName={subject?.name ?? "Mapel tidak ditemukan"}
-                          classroomName={classroom?.name ?? "Kelas tidak ditemukan"}
-                          students={classStudents}
-                          statuses={statuses}
-                        />
-                      </div>
-                    </div>
-                  )
-                })
-              ) : (
-                <div className="px-4 py-14 text-center sm:px-5">
-                  <p className="text-sm text-muted-foreground">
-                    Tidak ada jadwal untuk {labelDay(selectedDay)}
-                    {selectedClassroomId !== "all" || selectedSubjectId !== "all"
-                      ? " dengan filter ini"
-                      : ""}
-                    .
-                  </p>
-                </div>
-              )}
+            <div className="flex flex-wrap items-center gap-2 px-4 py-3 sm:px-5">
+              <span className="inline-flex items-center gap-2 border-2 border-foreground bg-accent px-2.5 py-1 text-[11px] font-bold tracking-wider text-accent-foreground uppercase">
+                <CalendarDaysIcon className="size-3" />
+                Periode
+              </span>
+              <span className="border-2 border-foreground bg-foreground px-2.5 py-1 text-xs font-extrabold tracking-wider text-background uppercase tabular-nums">
+                {labelMonth(reportMonth)}
+              </span>
+              <span className="border-2 border-foreground bg-background px-2.5 py-1 text-xs font-bold tracking-wider text-foreground uppercase tabular-nums">
+                {reportRows.length} sesi tercatat
+              </span>
             </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="flex flex-col gap-4">
-          <Card>
-            <CardContent className="p-0">
-              <div className="flex flex-col gap-3 border-b border-border px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-                <div>
-                  <h2 className="text-sm font-semibold text-foreground">Filter laporan</h2>
-                  <p className="text-xs text-muted-foreground">
-                    Pilih bulan, kelas, dan mapel untuk membatasi data.
-                  </p>
-                </div>
-                <AttendanceReportFilter
-                  month={reportMonth}
-                  currentMonth={currentMonth()}
-                  classroomId={selectedClassroomId}
-                  subjectId={selectedSubjectId}
-                  classrooms={classrooms}
-                  subjects={subjects}
-                />
-              </div>
-            </CardContent>
-          </Card>
+          </section>
 
           <KehadiranReportTable
             monthLabel={labelMonth(reportMonth)}
