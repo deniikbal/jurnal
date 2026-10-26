@@ -19,6 +19,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { GradeImportDialog } from "@/components/grade-import-dialog"
+import { GradeImportBulkDialog } from "@/components/grade-import-bulk-dialog"
 import {
   Dialog,
   DialogContent,
@@ -307,6 +308,15 @@ function AssessmentList({
                               <PencilIcon />
                             </Button>
                             <GradeImportDialog
+                              assessment={{
+                                id: item.id,
+                                title: item.title,
+                                gradeWeightName:
+                                  weightById.get(item.gradeWeightId)?.name ??
+                                  item.gradeWeightName,
+                              }}
+                            />
+                            <GradeImportBulkDialog
                               assessment={{
                                 id: item.id,
                                 title: item.title,

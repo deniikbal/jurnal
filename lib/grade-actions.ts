@@ -801,3 +801,171 @@ export async function importGrades(
 // `drizzle-orm/neon-http` ke `drizzle-orm/neon-serverless`, dan ganti
 // `neon()` dengan `Pool` dari `@neondatabase/serverless`. Tidak perlu
 // ubah schema atau query. Estimasi effort: 1-2 jam + test.
+
+// --- Bulk Import (Opsi A) ---
+// Import nilai dari 1 file Excel ke semua assessment yang title + gradeWeightId
+// sama. Match siswa by NIS lintas kelas.
+
+export type BulkImportRow = {
+  nis: string
+  name: string
+  score: number
+  classroomName: string
+  matched: boolean
+  reason?: string
+}
+
+export type BulkImportState = {
+  success: boolean
+  message: string
+  imported: number
+  skipped: number
+  rows?: BulkImportRow[]
+}
+
+const bulkImportError = (message: string): BulkImportState => ({
+  success: false, message, imported: 0, skipped: 0,
+})
+
+export async function importGradesBulk(
+  _prev: BulkImportState,
+  formData: FormData,
+): Promise<BulkImportState> {
+  const session = await verifySession()
+  const refAssessmentId = String(formData.get("refAssessmentId") ?? "").trim()
+  const file = formData.get("file")
+
+  if (!refAssessmentId) return bulkImportError("Penilaian referensi harus dipilih")
+  if (!(file instanceof File) || file.size === 0) return bulkImportError("File belum dipilih")
+  const fname = file.name.toLowerCase()
+  if (!fname.endsWith(".xls") && !fname.endsWith(".xlsx"))
+    return bulkImportError("Format file harus .xls atau .xlsx")
+
+  let rawRows: unknown[][]
+  try {
+    const buf = Buffer.from(await file.arrayBuffer())
+    const wb = XLSX.read(buf, { type: "buffer" })
+    const sheet = wb.Sheets[wb.SheetNames[0]]
+    if (!sheet) return bulkImportError("File Excel tidak memiliki sheet")
+    rawRows = XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1, defval: "" })
+  } catch {
+    return bulkImportError("Gagal membaca file Excel")
+  }
+
+  const dataRows = rawRows.slice(1).filter((r) => r.some((c) => c !== ""))
+  if (!dataRows.length) return bulkImportError("File Excel tidak berisi data")
+
+  // Ambil assessment referensi
+  const [ref] = await db
+    .select({ title: assessment.title, gradeWeightId: assessment.gradeWeightId })
+    .from(assessment)
+    .where(and(eq(assessment.id, refAssessmentId), eq(assessment.userId, session.userId)))
+    .limit(1)
+
+  if (!ref) return bulkImportError("Penilaian referensi tidak ditemukan")
+
+  // Semua assessment dengan title + gradeWeightId sama
+  const siblings = await db
+    .select({
+      id: assessment.id,
+      classroomId: assessment.classroomId,
+      classroomName: assessment.classroomName,
+    })
+    .from(assessment)
+    .where(
+      and(
+        eq(assessment.title, ref.title),
+        eq(assessment.gradeWeightId, ref.gradeWeightId),
+        eq(assessment.userId, session.userId),
+      ),
+    )
+
+  if (!siblings.length) return bulkImportError("Tidak ada penilaian yang cocok")
+
+  const classroomIds = [...new Set(siblings.map((s) => s.classroomId))]
+
+  const allStudents = await db
+    .select({ id: siswa.id, name: siswa.name, nis: siswa.nis, classroomId: siswa.classroomId })
+    .from(siswa)
+    .where(
+      and(
+        inArray(siswa.classroomId, classroomIds),
+        eq(siswa.userId, session.userId),
+        eq(siswa.status, "aktif"),
+      ),
+    )
+
+  const siswByNis = new Map(
+    allStudents.filter((s) => s.nis).map((s) => [s.nis!.toLowerCase(), s]),
+  )
+  const assessmentByClassroom = new Map(siblings.map((s) => [s.classroomId, s.id]))
+  const classroomNameById = new Map(siblings.map((s) => [s.classroomId, s.classroomName]))
+
+  const rows: BulkImportRow[] = []
+  const toInsert: { assessmentId: string; siswaId: string; score: number }[] = []
+  let skippedCount = 0
+
+  for (const row of dataRows) {
+    const nis = String(row[1] ?? "").trim()
+    const nama = String(row[2] ?? "").trim()
+    const nilaiRaw = String(row[3] ?? "").trim()
+
+    const student = nis ? siswByNis.get(nis.toLowerCase()) : undefined
+    const classroomName = student ? (classroomNameById.get(student.classroomId) ?? "-") : "-"
+    const assessmentId = student ? assessmentByClassroom.get(student.classroomId) : undefined
+
+    if (!student || !assessmentId) {
+      skippedCount++
+      rows.push({
+        nis: nis || "-",
+        name: nama || "(kosong)",
+        score: 0,
+        classroomName,
+        matched: false,
+        reason: !student ? "NIS tidak ditemukan di kelas manapun" : "kelas siswa tidak memiliki penilaian ini",
+      })
+      continue
+    }
+
+    const score = Math.min(Math.max(Math.round(Number(nilaiRaw)) || 0, 0), 100)
+    rows.push({ nis: student.nis!, name: student.name, score, classroomName, matched: true })
+    toInsert.push({ assessmentId, siswaId: student.id, score })
+  }
+
+  if (!toInsert.length) {
+    return {
+      success: true,
+      message: `Tidak ada nilai yang cocok (${skippedCount} dilewati)`,
+      imported: 0,
+      skipped: skippedCount,
+      rows,
+    }
+  }
+
+  await db
+    .insert(grade)
+    .values(
+      toInsert.map((r) => ({
+        assessmentId: r.assessmentId,
+        siswaId: r.siswaId,
+        score: r.score,
+        userId: session.userId,
+      })),
+    )
+    .onConflictDoUpdate({
+      target: [grade.assessmentId, grade.siswaId],
+      set: { score: sql`excluded.score`, updatedAt: new Date() },
+    })
+
+  revalidatePath("/dashboard/jurnal")
+
+  const parts = [`${toInsert.length} nilai berhasil diimport ke ${siblings.length} kelas`]
+  if (skippedCount > 0) parts.push(`${skippedCount} baris dilewati`)
+  return {
+    success: true,
+    message: parts.join(", "),
+    imported: toInsert.length,
+    skipped: skippedCount,
+    rows,
+  }
+}

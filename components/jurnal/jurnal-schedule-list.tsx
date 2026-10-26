@@ -4,6 +4,7 @@ import { AttendanceDialog } from "@/components/attendance-dialog"
 import { GradeDialog } from "@/components/grade-dialog"
 import { JournalDialog } from "@/components/journal-dialog"
 import { Card, CardContent } from "@/components/ui/card"
+import { useMemo } from "react"
 import type {
   Assessment,
   Attendance,
@@ -107,43 +108,65 @@ export function JurnalScheduleList({
             const subject = subjectById.get(schedule.subjectId)
             const classroom = classroomById.get(schedule.classroomId)
             const journal = journalBySchedule.get(schedule.id)
-            const classStudents = (studentsByClassroom.get(schedule.classroomId) ?? [])
-              .slice()
-              .sort((a, b) => collator.compare(a.name, b.name))
             const scheduleAttendances = attendanceBySchedule.get(schedule.id) ?? []
-            const attendanceStatuses = Object.fromEntries(
-              scheduleAttendances.map((a) => [a.siswaId, a.status]),
-            )
             const scheduleWeights = weightsBySubject.get(schedule.subjectId) ?? []
-            const scheduleAssessments = (
-              assessmentsByKey.get(`${schedule.classroomId}:${schedule.subjectId}`) ?? []
-            )
-              .slice()
-              .sort(
-                (a, b) =>
-                  (a.date ?? "").localeCompare(b.date ?? "") ||
-                  collator.compare(a.title, b.title),
-              )
-            const scheduleScoresByAssessment = Object.fromEntries(
-              scheduleAssessments.map((a) => [
-                a.id,
-                scoresByAssessment.get(a.id) ?? {},
-              ]),
-            )
 
-            const subjectClassrooms = classrooms.filter((c) =>
-              schedules.some(
-                (s) => s.subjectId === schedule.subjectId && s.classroomId === c.id,
-              ),
+            const subjectClassrooms = useMemo(
+              () =>
+                classrooms.filter((c) =>
+                  schedules.some(
+                    (s) => s.subjectId === schedule.subjectId && s.classroomId === c.id,
+                  ),
+                ),
+              [classrooms, schedules, schedule.subjectId, schedule.classroomId],
             )
-            const allSubjectAssessments = assessments.filter(
-              (a) => a.subjectId === schedule.subjectId,
-            )
-            const studentCountsByClassroom: Record<string, number> = {}
-            for (const c of subjectClassrooms) {
-              studentCountsByClassroom[c.id] = (studentsByClassroom.get(c.id) ?? []).length
-            }
+            const studentCountsByClassroom = useMemo(() => {
+              const counts: Record<string, number> = {}
+              for (const c of subjectClassrooms) {
+                counts[c.id] = (studentsByClassroom.get(c.id) ?? []).length
+              }
+              return counts
+            }, [subjectClassrooms, studentsByClassroom])
             const isFilled = !!journal
+
+            const classStudents = useMemo(
+              () =>
+                (studentsByClassroom.get(schedule.classroomId) ?? [])
+                  .slice()
+                  .sort((a, b) => collator.compare(a.name, b.name)),
+              [studentsByClassroom, schedule.classroomId, collator],
+            )
+            const attendanceStatuses = useMemo(
+              () =>
+                Object.fromEntries(
+                  scheduleAttendances.map((a) => [a.siswaId, a.status]),
+                ),
+              [scheduleAttendances],
+            )
+            const scheduleAssessments = useMemo(
+              () =>
+                (
+                  assessmentsByKey.get(`${schedule.classroomId}:${schedule.subjectId}`) ?? []
+                )
+                  .slice()
+                  .sort(
+                    (a, b) =>
+                      (a.date ?? "").localeCompare(b.date ?? "") ||
+                      collator.compare(a.title, b.title),
+                  ),
+              [assessmentsByKey, schedule.classroomId, schedule.subjectId, collator],
+            )
+            const scheduleScoresByAssessment = useMemo(
+              () =>
+                Object.fromEntries(
+                  scheduleAssessments.map((a) => [a.id, scoresByAssessment.get(a.id) ?? {}]),
+                ),
+              [scheduleAssessments, scoresByAssessment],
+            )
+            const allSubjectAssessments = useMemo(
+              () => assessments.filter((a) => a.subjectId === schedule.subjectId),
+              [assessments, schedule.subjectId],
+            )
 
             return (
               <li
