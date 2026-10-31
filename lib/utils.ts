@@ -1,9 +1,4 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
-}
+export { cn } from "cn"
 
 /** URL-friendly slug from a display name, e.g. "XII IPA 1" -> "xii-ipa-1" */
 export function toSlug(input: string) {

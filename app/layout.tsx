@@ -1,23 +1,23 @@
 import type { Metadata } from "next"
-import { DM_Sans, IBM_Plex_Mono } from "next/font/google"
+import { Poppins, Roboto_Mono } from "next/font/google"
 
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
 
-// Body: DM Sans. Humanist sans, jelas di ukuran kecil, tidak berkarakter
-// "techy". Cocok untuk aplikasi internal yang dipakai guru tiap hari
-// (DESIGN.md: modern profesional, simple).
-// Mono: IBM Plex Mono. Dipakai untuk NIS, kode mapel, dan jam. Karakter
-// slab-nya membantu scanning angka dibanding Geist/JetBrains Mono yang
-// terlalu "developer aesthetic" untuk konteks sekolah.
-const fontSans = DM_Sans({
+// Sans: Poppins, sesuai preset shadcn (b7BFgTjiC) yang menetapkan
+// --font-sans: Poppins di globals.css. Dimuat lewat next/font supaya
+// variabel --font-sans di html menimpa fallback di :root.
+// Mono: Roboto Mono, dipakai untuk NIS, kode mapel, dan jam.
+const fontSans = Poppins({
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-sans",
 })
 
-const fontMono = IBM_Plex_Mono({
+const fontMono = Roboto_Mono({
   subsets: ["latin"],
   weight: ["400", "500", "700"],
   variable: "--font-mono",
@@ -40,7 +40,12 @@ export default function RootLayout({
     <html
       lang="id"
       suppressHydrationWarning
-      className={`${fontSans.variable} ${fontMono.variable} antialiased`}
+      className={cn(
+        "antialiased",
+        fontSans.variable,
+        fontMono.variable,
+        "font-sans"
+      )}
     >
       <body>
         <ThemeProvider>

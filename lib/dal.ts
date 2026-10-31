@@ -7,6 +7,7 @@ import { headers } from "next/headers"
 
 import { auth } from "@/auth"
 import { db } from "@/lib/db"
+import { isTransientDbError } from "@/lib/db/errors"
 import { assessment, attendance, biodataSiswa, classroom, grade, gradeWeight, journal, schedule, siswa, subject, users } from "@/lib/db/schema"
 
 export const verifySession = cache(async () => {
@@ -45,16 +46,24 @@ export const getCurrentUser = cache(async () => {
   return user
 })
 
-// ponytail: 1 retry on transient network/reset errors (Neon HTTP drops keep-alive connections)
-async function withDbRetry<T>(fn: () => Promise<T>): Promise<T> {
-  try {
-    return await fn()
-  } catch (error) {
-    const msg = error instanceof Error ? error.message : String(error)
-    const transient = /ECONNRESET|terminated|fetch failed|socket hang up/i.test(msg)
-    if (!transient) throw error
-    return await fn()
+// Neon HTTP memutus koneksi keep-alive sesekali. Error aslinya dibungkus
+// DrizzleQueryError, jadi deteksi dilakukan lewat rantai `cause` — lihat
+// lib/db/errors.ts.
+async function withDbRetry<T>(fn: () => Promise<T>, retries = 2): Promise<T> {
+  let lastError: unknown
+
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      return await fn()
+    } catch (error) {
+      lastError = error
+      if (attempt === retries || !isTransientDbError(error)) break
+      // Jeda pendek supaya koneksi Neon sempat pulih sebelum dicoba lagi.
+      await new Promise((resolve) => setTimeout(resolve, 120 * (attempt + 1)))
+    }
   }
+
+  throw lastError
 }
 
 export async function getKelasForCurrentUser() {

@@ -44,8 +44,8 @@ export function KehadiranFilter({
 
   return (
     <div
-      className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row data-[pending=true]:opacity-70"
-      data-pending={isPending}
+      className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row data-pending:opacity-70"
+      data-pending={isPending || undefined}
     >
       <Select value={classroomId} onValueChange={(value) => updateParam("classroomId", value)}>
         <SelectTrigger className="h-9 w-full text-sm shadow-none sm:w-40" aria-label="Filter kelas">

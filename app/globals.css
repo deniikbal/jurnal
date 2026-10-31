@@ -1,116 +1,144 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
 
+/* ==========================================================================
+   Jurnal — design tokens
+   Basis: shadcn preset b7BFgTjiC (style radix-nova, baseColor mist,
+   radius 0.45rem, Poppins / Roboto Mono).
+
+   Prinsip (lihat DESIGN.md): tenang, padat, cepat di-scan. Netral untuk
+   permukaan, satu warna aksen untuk aksi. Tanpa gradient, tanpa glow,
+   tanpa bayangan dramatis.
+   ========================================================================== */
+
 :root {
-  --radius: 0.5rem;
-  --background: oklch(0.9809 0.0025 228.7836);
-  --foreground: oklch(0.3211 0 0);
-  --card: oklch(1.0000 0 0);
-  --card-foreground: oklch(0.3211 0 0);
-  --popover: oklch(1.0000 0 0);
-  --popover-foreground: oklch(0.3211 0 0);
-  --primary: oklch(0.8677 0.0735 7.0855);
-  --primary-foreground: oklch(0 0 0);
-  --secondary: oklch(0.8148 0.0819 225.7537);
-  --secondary-foreground: oklch(0 0 0);
-  --muted: oklch(0.8828 0.0285 98.1033);
-  --muted-foreground: oklch(0.5382 0 0);
-  --accent: oklch(0.9680 0.2110 109.7692);
-  --accent-foreground: oklch(0 0 0);
-  --destructive: oklch(0.6368 0.2078 25.3313);
-  --border: oklch(0.8699 0 0);
-  --input: oklch(0.8699 0 0);
-  --ring: oklch(0.8677 0.0735 7.0855);
-  --chart-1: oklch(0.8677 0.0735 7.0855);
-  --chart-2: oklch(0.8148 0.0819 225.7537);
-  --chart-3: oklch(0.9680 0.2110 109.7692);
-  --chart-4: oklch(0.8027 0.1355 349.2347);
-  --chart-5: oklch(0.7395 0.2268 142.8504);
-  --sidebar: oklch(0.9809 0.0025 228.7836);
-  --sidebar-foreground: oklch(0.3211 0 0);
-  --sidebar-primary: oklch(0.8677 0.0735 7.0855);
-  --sidebar-primary-foreground: oklch(0 0 0);
-  --sidebar-accent: oklch(0.9680 0.2110 109.7692);
-  --sidebar-accent-foreground: oklch(0 0 0);
-  --sidebar-border: oklch(0.8699 0 0);
-  --sidebar-ring: oklch(0.8677 0.0735 7.0855);
-  --destructive-foreground: oklch(1.0000 0 0);
+  /* Satu sumber radius. Jangan didefinisikan ulang di .dark atau @theme. */
+  --radius: 0.45rem;
+
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.148 0.004 228.8);
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.148 0.004 228.8);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.148 0.004 228.8);
+
+  --primary: oklch(0.87 0.23 127);
+  --primary-foreground: oklch(0.24 0.07 128);
+  --secondary: oklch(0.975 0.028 126);
+  --secondary-foreground: oklch(0.34 0.08 128);
+  --muted: oklch(0.968 0.008 122);
+  --muted-foreground: oklch(0.53 0.016 125);
+  --accent: oklch(0.975 0.075 127);
+  --accent-foreground: oklch(0.27 0.08 128);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(1 0 0);
+
+  --border: oklch(0.928 0.022 124);
+  --input: oklch(0.928 0.022 124);
+  --ring: oklch(0.87 0.23 127);
+
+  /* Lime adalah satu-satunya warna aksi. Token turunan ini dipakai untuk
+     aksen halus (chip, indikator, wash) supaya tidak mengarang opacity. */
+  --brand: oklch(0.87 0.23 127);
+  --brand-soft: oklch(0.973 0.085 127);
+  --brand-ink: oklch(0.35 0.09 128);
+
+  /* Chart: ramp netral, dipakai apa adanya supaya grafik tidak "berwarna
+     tanpa alasan". */
+  --chart-1: oklch(0.82 0.22 127);
+  --chart-2: oklch(0.9 0.17 128);
+  --chart-3: oklch(0.62 0.12 178);
+  --chart-4: oklch(0.56 0.024 125);
+  --chart-5: oklch(0.94 0.11 127);
+
+  --sidebar: oklch(0.988 0.012 124);
+  --sidebar-foreground: oklch(0.148 0.004 228.8);
+  --sidebar-primary: oklch(0.87 0.23 127);
+  --sidebar-primary-foreground: oklch(0.24 0.07 128);
+  --sidebar-accent: oklch(0.965 0.07 127);
+  --sidebar-accent-foreground: oklch(0.3 0.08 128);
+  --sidebar-border: oklch(0.928 0.022 124);
+  --sidebar-ring: oklch(0.87 0.23 127);
+
   --font-sans: Poppins, sans-serif;
-  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   --font-mono: Roboto Mono, monospace;
+  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+
   --shadow-color: oklch(0 0 0);
-  --shadow-opacity: 0.1;
+  --shadow-opacity: 0.08;
   --shadow-blur: 3px;
   --shadow-spread: 0px;
   --shadow-offset-x: 0;
   --shadow-offset-y: 1px;
+  --shadow-2xs: 0 1px 2px 0px hsl(0 0% 0% / 0.04);
+  --shadow-xs: 0 1px 2px 0px hsl(0 0% 0% / 0.05);
+  --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.06), 0 1px 2px -1px hsl(0 0% 0% / 0.06);
+  --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.07), 0 1px 2px -1px hsl(0 0% 0% / 0.07);
+  --shadow-md: 0 2px 4px -1px hsl(0 0% 0% / 0.07), 0 1px 3px -1px hsl(0 0% 0% / 0.05);
+  --shadow-lg: 0 4px 8px -2px hsl(0 0% 0% / 0.08), 0 2px 4px -2px hsl(0 0% 0% / 0.05);
+  --shadow-xl: 0 8px 16px -4px hsl(0 0% 0% / 0.09), 0 4px 8px -4px hsl(0 0% 0% / 0.05);
+  --shadow-2xl: 0 16px 32px -8px hsl(0 0% 0% / 0.14);
+
   --letter-spacing: 0em;
-  --spacing: 0.25rem;
-  --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-  --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-  --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 1px 2px -1px hsl(0 0% 0% / 0.10);
-  --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 1px 2px -1px hsl(0 0% 0% / 0.10);
-  --shadow-md: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 2px 4px -1px hsl(0 0% 0% / 0.10);
-  --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 4px 6px -1px hsl(0 0% 0% / 0.10);
-  --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 8px 10px -1px hsl(0 0% 0% / 0.10);
-  --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
   --tracking-normal: 0em;
+  --spacing: 0.25rem;
 }
 
 .dark {
-  --background: oklch(0.2303 0.0125 264.2926);
-  --foreground: oklch(0.9219 0 0);
-  --card: oklch(0.3210 0.0078 223.6661);
-  --card-foreground: oklch(0.9219 0 0);
-  --popover: oklch(0.3210 0.0078 223.6661);
-  --popover-foreground: oklch(0.9219 0 0);
-  --primary: oklch(0.8027 0.1355 349.2347);
-  --primary-foreground: oklch(0 0 0);
-  --secondary: oklch(0.7395 0.2268 142.8504);
-  --secondary-foreground: oklch(0 0 0);
-  --muted: oklch(0.3867 0 0);
-  --muted-foreground: oklch(0.7155 0 0);
-  --accent: oklch(0.8148 0.0819 225.7537);
-  --accent-foreground: oklch(0 0 0);
-  --destructive: oklch(0.6368 0.2078 25.3313);
-  --border: oklch(0.3867 0 0);
-  --input: oklch(0.3867 0 0);
-  --ring: oklch(0.8027 0.1355 349.2347);
-  --chart-1: oklch(0.8027 0.1355 349.2347);
-  --chart-2: oklch(0.7395 0.2268 142.8504);
-  --chart-3: oklch(0.8148 0.0819 225.7537);
-  --chart-4: oklch(0.9680 0.2110 109.7692);
-  --chart-5: oklch(0.8652 0.1768 90.3816);
-  --sidebar: oklch(0.2303 0.0125 264.2926);
-  --sidebar-foreground: oklch(0.9219 0 0);
-  --sidebar-primary: oklch(0.8027 0.1355 349.2347);
-  --sidebar-primary-foreground: oklch(0 0 0);
-  --sidebar-accent: oklch(0.8148 0.0819 225.7537);
-  --sidebar-accent-foreground: oklch(0 0 0);
-  --sidebar-border: oklch(0.3867 0 0);
-  --sidebar-ring: oklch(0.8027 0.1355 349.2347);
-  --destructive-foreground: oklch(1.0000 0 0);
-  --radius: 0.5rem;
-  --font-sans: Poppins, sans-serif;
-  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-  --font-mono: Roboto Mono, monospace;
-  --shadow-color: oklch(0 0 0);
-  --shadow-opacity: 0.1;
-  --shadow-blur: 3px;
-  --shadow-spread: 0px;
-  --shadow-offset-x: 0;
-  --shadow-offset-y: 1px;
-  --letter-spacing: 0em;
-  --spacing: 0.25rem;
-  --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-  --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-  --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 1px 2px -1px hsl(0 0% 0% / 0.10);
-  --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 1px 2px -1px hsl(0 0% 0% / 0.10);
-  --shadow-md: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 2px 4px -1px hsl(0 0% 0% / 0.10);
-  --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 4px 6px -1px hsl(0 0% 0% / 0.10);
-  --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 8px 10px -1px hsl(0 0% 0% / 0.10);
-  --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+  --background: oklch(0.148 0.004 228.8);
+  --foreground: oklch(0.987 0.002 197.1);
+
+  --card: oklch(0.218 0.008 223.9);
+  --card-foreground: oklch(0.987 0.002 197.1);
+  --popover: oklch(0.218 0.008 223.9);
+  --popover-foreground: oklch(0.987 0.002 197.1);
+
+  --primary: oklch(0.84 0.21 126);
+  --primary-foreground: oklch(0.2 0.06 127);
+  --secondary: oklch(0.278 0.014 126);
+  --secondary-foreground: oklch(0.94 0.06 126);
+  --muted: oklch(0.272 0.01 124);
+  --muted-foreground: oklch(0.75 0.016 124);
+  --accent: oklch(0.3 0.05 126);
+  --accent-foreground: oklch(0.94 0.09 126);
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.148 0.004 228.8);
+
+  --border: oklch(1 0 0 / 11%);
+  --input: oklch(1 0 0 / 16%);
+  --ring: oklch(0.84 0.21 126);
+
+  --brand: oklch(0.84 0.21 126);
+  --brand-soft: oklch(0.34 0.08 126);
+  --brand-ink: oklch(0.94 0.09 126);
+
+  --chart-1: oklch(0.84 0.21 126);
+  --chart-2: oklch(0.72 0.16 128);
+  --chart-3: oklch(0.76 0.12 178);
+  --chart-4: oklch(0.75 0.024 124);
+  --chart-5: oklch(0.45 0.08 126);
+
+  --sidebar: oklch(0.205 0.012 126);
+  --sidebar-foreground: oklch(0.97 0.01 120);
+  --sidebar-primary: oklch(0.84 0.21 126);
+  --sidebar-primary-foreground: oklch(0.2 0.06 127);
+  --sidebar-accent: oklch(0.3 0.05 126);
+  --sidebar-accent-foreground: oklch(0.94 0.09 126);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.84 0.21 126);
+
+  --shadow-2xs: 0 1px 2px 0px hsl(0 0% 0% / 0.20);
+  --shadow-xs: 0 1px 2px 0px hsl(0 0% 0% / 0.24);
+  --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.28), 0 1px 2px -1px hsl(0 0% 0% / 0.24);
+  --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.30), 0 1px 2px -1px hsl(0 0% 0% / 0.24);
+  --shadow-md: 0 2px 4px -1px hsl(0 0% 0% / 0.32), 0 1px 3px -1px hsl(0 0% 0% / 0.24);
+  --shadow-lg: 0 4px 8px -2px hsl(0 0% 0% / 0.36), 0 2px 4px -2px hsl(0 0% 0% / 0.24);
+  --shadow-xl: 0 8px 16px -4px hsl(0 0% 0% / 0.40), 0 4px 8px -4px hsl(0 0% 0% / 0.24);
+  --shadow-2xl: 0 16px 32px -8px hsl(0 0% 0% / 0.50);
 }
 
 @theme inline {
@@ -118,6 +146,10 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -133,14 +165,17 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -149,134 +184,166 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  --font-sans: Poppins, sans-serif;
-  --font-mono: Roboto Mono, monospace;
-  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-  --radius: 0.5rem;
+
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --font-serif: var(--font-serif);
+  --font-heading: var(--font-sans);
+
   --tracking-tighter: calc(var(--tracking-normal) - 0.05em);
   --tracking-tight: calc(var(--tracking-normal) - 0.025em);
   --tracking-wide: calc(var(--tracking-normal) + 0.025em);
   --tracking-wider: calc(var(--tracking-normal) + 0.05em);
   --tracking-widest: calc(var(--tracking-normal) + 0.1em);
   --tracking-normal: var(--tracking-normal);
-  --shadow-2xl: var(--shadow-2xl);
-  --shadow-xl: var(--shadow-xl);
-  --shadow-lg: var(--shadow-lg);
-  --shadow-md: var(--shadow-md);
-  --shadow: var(--shadow);
-  --shadow-sm: var(--shadow-sm);
-  --shadow-xs: var(--shadow-xs);
+
   --shadow-2xs: var(--shadow-2xs);
-  --spacing: var(--spacing);
-  --letter-spacing: var(--letter-spacing);
-  --shadow-offset-y: var(--shadow-offset-y);
-  --shadow-offset-x: var(--shadow-offset-x);
-  --shadow-spread: var(--shadow-spread);
-  --shadow-blur: var(--shadow-blur);
-  --shadow-opacity: var(--shadow-opacity);
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow: var(--shadow);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
+  --shadow-2xl: var(--shadow-2xl);
   --color-shadow-color: var(--shadow-color);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --color-brand: var(--brand);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-ink: var(--brand-ink);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
+  html {
+    @apply font-sans;
+    -webkit-tap-highlight-color: transparent;
+  }
+
   body {
     @apply bg-background text-foreground;
     letter-spacing: var(--tracking-normal);
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Angka yang harus di-scan sejajar: NIS, jam, tanggal, nilai. */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Header tabel: huruf besar kecil, bukan blok warna. */
+  .th-label {
+    @apply text-[11px] font-medium tracking-wide text-muted-foreground uppercase;
   }
 }
 
+/* ==========================================================================
+   Identitas mapel — kode warna
+
+   Alasan (bukan dekorasi): guru memindai daftar sesi untuk menemukan mapel
+   tertentu. Warna memberi identitas mapel yang stabil, jadi mata bisa
+   melompat ke baris yang dituju tanpa membaca setiap label.
+
+   Enam hue dengan lightness & chroma seragam supaya terbaca sebagai satu
+   sistem, bukan pelangi. Chroma dijaga <= 0.13: cukup untuk dibedakan,
+   tidak sampai neon. Warna ini HANYA muncul di penanda mapel, tidak dipakai
+   untuk chrome UI (tombol, border, background halaman).
+   ========================================================================== */
+
+:root {
+  --subject-1: oklch(0.55 0.13 255);
+  --subject-2: oklch(0.56 0.1 195);
+  --subject-3: oklch(0.62 0.12 75);
+  --subject-4: oklch(0.57 0.13 20);
+  --subject-5: oklch(0.55 0.13 300);
+  --subject-6: oklch(0.55 0.11 150);
+}
+
+.dark {
+  --subject-1: oklch(0.76 0.1 255);
+  --subject-2: oklch(0.77 0.08 195);
+  --subject-3: oklch(0.8 0.1 80);
+  --subject-4: oklch(0.75 0.1 22);
+  --subject-5: oklch(0.76 0.1 300);
+  --subject-6: oklch(0.77 0.09 150);
+}
+
+.tone-1 { --tone: var(--subject-1); }
+.tone-2 { --tone: var(--subject-2); }
+.tone-3 { --tone: var(--subject-3); }
+.tone-4 { --tone: var(--subject-4); }
+.tone-5 { --tone: var(--subject-5); }
+.tone-6 { --tone: var(--subject-6); }
+
 @layer components {
-  /* Candyland button variants */
-  .btn-candyland {
-    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2 text-sm font-medium transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none;
-    box-shadow: 0 2px 4px 0px var(--shadow-color);
-  }
-  .btn-candyland-default {
-    @apply bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-primary/50;
-  }
-  .btn-candyland-outline {
-    @apply border border-input bg-background hover:bg-accent hover:text-accent-foreground focus-visible:ring-accent/50 dark:border-input dark:bg-input/30 dark:hover:bg-input/50;
-  }
-  .btn-candyland-secondary {
-    @apply bg-secondary text-secondary-foreground hover:bg-secondary/80 focus-visible:ring-secondary/50;
-  }
-  .btn-candyland-ghost {
-    @apply hover:bg-accent hover:text-accent-foreground focus-visible:ring-accent/50 dark:hover:bg-accent/50;
-  }
-  .btn-candyland-destructive {
-    @apply bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40;
+  /* Elevasi: dipakai hanya pada kartu yang memang bisa diaksi, supaya
+     bidang halaman tetap datar dan kartu terbaca sebagai objek terpisah.
+     Dua lapis (kontak + sebar) supaya offsetnya jelas tapi tepinya lembut. */
+  .surface {
+    box-shadow:
+      0 1px 2px 0 oklch(0.148 0.004 228.8 / 0.06),
+      0 6px 16px -4px oklch(0.148 0.004 228.8 / 0.1);
   }
 
-  /* Candyland card */
-  .card-candyland {
-    @apply rounded-3xl bg-card p-6 shadow-sm ring-1 ring-foreground/5 transition-all duration-300 hover:shadow-md border border-border;
-    box-shadow: 0 4px 6px -1px var(--shadow-color);
+  /* Wash lime untuk blok ringkasan (hero). Hanya latar, tanpa glow. */
+  .brand-wash {
+    background-color: color-mix(in oklch, var(--brand) 14%, var(--card));
+    border: 1px solid color-mix(in oklch, var(--brand) 34%, var(--border));
   }
 
-  /* Candyland input */
-  .input-candyland {
-    @apply rounded-lg border border-input bg-background px-4 py-2.5 text-base shadow-sm focus-visible:border-ring focus-visible:ring-[2px] focus-visible:ring-ring/50 transition-all duration-200 outline-none;
+  .dark .brand-wash {
+    background-color: color-mix(in oklch, var(--brand) 10%, var(--card));
+    border-color: color-mix(in oklch, var(--brand) 22%, var(--border));
   }
 
-  /* Candyland dialog */
-  .dialog-candyland {
-    @apply rounded-2xl bg-popover p-6 shadow-lg ring-1 ring-foreground/10 border border-border outline-none transition-all duration-300;
+  /* Meter progres: track netral, isi lime. */
+  .brand-meter {
+    background-color: color-mix(in oklch, var(--brand) 22%, var(--muted));
   }
 
-  /* Candyland sheet */
-  .sheet-candyland {
-    @apply rounded-t-3xl bg-background p-6 shadow-xl ring-1 ring-foreground/10 border-t border-border outline-none;
+  .brand-meter > span {
+    background-color: var(--brand);
   }
 
-  /* Candyland tabs */
-  .tabs-candyland {
-    @apply inline-flex items-center justify-center gap-1 rounded-2xl bg-muted p-1 text-sm font-medium;
-  }
-  .tabs-candyland-trigger {
-    @apply rounded-xl px-3 py-1.5 text-sm font-medium transition-colors data-[state=active]:bg-background data-[state=active]:text-foreground shadow-sm;
+  .surface-hover {
+    transition: box-shadow 160ms ease, transform 160ms ease;
   }
 
-  /* Candyland select */
-  .select-candyland {
-    @apply rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:border-ring focus-visible:ring-[2px] focus-visible:ring-ring/50 transition-all duration-200 outline-none;
+  .surface-hover:hover {
+    box-shadow:
+      0 2px 4px 0 oklch(0.148 0.004 228.8 / 0.07),
+      0 12px 28px -8px oklch(0.148 0.004 228.8 / 0.14);
   }
 
-  /* Candyland toggle */
-  .toggle-candyland {
-    @apply inline-flex shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent bg-transparent px-2 py-1 text-xs font-semibold transition-colors duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input;
-  }
-  .toggle-candyland-thumb {
-    @apply pointer-events-none block rounded-full bg-background shadow-sm ring-0 transition-transform duration-200 data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0;
+  .dark .surface {
+    box-shadow:
+      0 1px 2px 0 oklch(0 0 0 / 0.4),
+      0 6px 16px -4px oklch(0 0 0 / 0.45);
   }
 
-  /* Candyland table */
-  .table-candyland {
-    @apply w-full caption-bottom text-sm;
-  }
-  .table-candyland-caption {
-    @apply text-foreground;
-  }
-  .table-candyland-thead {
-    @apply text-muted-foreground;
-  }
-  .table-candyland-tr {
-    @apply border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted;
-  }
-  .table-candyland-th {
-    @apply h-4 px-3 text-left align-middle font-medium text-muted-foreground;
-  }
-  .table-candyland-td {
-    @apply h-4 px-3 align-middle;
+  .dark .surface-hover:hover {
+    box-shadow:
+      0 2px 4px 0 oklch(0 0 0 / 0.5),
+      0 12px 28px -8px oklch(0 0 0 / 0.55);
   }
 
-  /* Candyland textarea */
-  .textarea-candyland {
-    @apply rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:border-ring focus-visible:ring-[2px] focus-visible:ring-ring/50 transition-all duration-200 outline-none resize-none;
+  /* Penanda mapel: garis tepi, chip kode, dan wash saat hover. */
+  .subject-edge {
+    border-left: 3px solid var(--tone, var(--border));
+  }
+
+  .subject-chip {
+    background-color: color-mix(in oklch, var(--tone, var(--muted)) 14%, var(--card));
+    color: color-mix(in oklch, var(--tone, var(--foreground)) 62%, var(--foreground));
+  }
+
+  .subject-dot {
+    background-color: var(--tone, var(--muted-foreground));
+  }
+
+  .subject-wash:hover {
+    background-color: color-mix(in oklch, var(--tone, var(--muted)) 5%, var(--card));
   }
 }

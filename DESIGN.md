@@ -26,35 +26,71 @@
 
 ## Palette
 
-- **Primary (biru dongker)**: `oklch(0.42 0.13 265)` di light,
-  `oklch(0.7 0.14 265)` di dark. Dipakai di primary button, focus ring,
-  link aktif, dan satu aksen fokus per layar.
-- **Foreground**: `oklch(0.18 0.02 260)` (light) /
-  `oklch(0.96 0.01 260)` (dark). Untuk teks utama.
-- **Muted**: `oklch(0.5 0.02 260)` untuk label sekunder dan metadata.
-- **Netral**: putih, hitam, dan abu-abu netral untuk background dan
-  border. **Bukan** bagian palette aktif (R-29).
-- **Aksen destruktif**: `oklch(0.577 0.18 25)` hanya untuk tombol hapus
-  dan state error.
-- **Aksen status**: emerald (aktif) dan stone (keluar) — dipakai sebagai
-  dot kecil, bukan sebagai blok warna. Bukan bagian palette utama.
+Basis: shadcn preset `b7BFgTjiC` (baseColor **mist**). Token didefinisikan
+di `app/globals.css` dan itu satu-satunya sumber warna.
+
+- **Primary (grafit)**: `oklch(0.218 0.008 223.9)` di light,
+  `oklch(0.925 0.005 214.3)` di dark. Dipakai di tombol utama, focus
+  ring, link aktif, dan satu aksen fokus per layar.
+- **Foreground**: `oklch(0.148 0.004 228.8)` (light) /
+  `oklch(0.987 0.002 197.1)` (dark). Untuk teks utama.
+- **Muted**: `oklch(0.963 0.002 197.1)` untuk permukaan sekunder;
+  `--muted-foreground` `oklch(0.56 0.021 213.5)` untuk label dan metadata.
+- **Border**: `oklch(0.925 0.005 214.3)`. Kartu memakai
+  `ring-1 ring-foreground/10`, bukan border tebal.
+- **Aksen destruktif**: `oklch(0.577 0.245 27.325)` hanya untuk tombol
+  hapus dan state error.
+- **Aksen status**: emerald (hadir/aktif), amber (sakit), sky (izin),
+  rose (alfa/keluar) — dipakai sebagai dot 6px, bukan blok warna. Bukan
+  bagian palette utama.
 
 Palette aktif maksimum: 2-3 core (primary + foreground + muted) + 1
-accent (primary biru dongker). Sesuai R-29.
+accent. Sesuai R-29.
+
+**Larangan**: `bg-secondary` / `bg-accent` bukan warna aksen. Di preset
+mist keduanya nyaris putih, jadi jangan dipakai untuk membedakan kartu.
+Bedakan lewat hierarki tipografi dan ring, bukan blok warna.
+
+### Kode warna mapel
+
+Enam hue tetap (`--subject-1` … `--subject-6` di `app/globals.css`) untuk
+memberi identitas visual pada tiap mata pelajaran.
+
+- **Tujuan**: guru memindai daftar sesi untuk menemukan satu mapel. Warna
+  membuat baris bisa dikenali sebelum labelnya dibaca.
+- **Batas**: warna ini **hanya** muncul sebagai penanda mapel — garis tepi
+  3px, chip kode, dan wash saat hover. Tidak dipakai untuk tombol, border
+  umum, background halaman, atau heading.
+- **Kenapa tidak melanggar R-29**: ini pengkodean data (kategorikal),
+  sederajat dengan warna seri pada grafik, bukan accent dekoratif. Chrome
+  UI tetap netral: primary + foreground + muted.
+- **Kenapa tidak jadi pelangi**: keenam hue disamakan lightness (±0.55
+  light / ±0.77 dark) dan chroma dibatasi ≤ 0.13, jadi terbaca sebagai
+  satu sistem. Tidak ada neon, tidak ada pastel, tidak ada gradient.
+- **Penentuan warna**: turunan hash dari `subject.id` (`lib/subject-tone.ts`),
+  bukan urutan array — supaya warna tidak berpindah saat daftar diurutkan
+  atau difilter.
+
+### Elevasi
+
+- Bidang halaman datar. Hanya kartu yang bisa diaksi yang terangkat,
+  lewat kelas `.surface` (dua lapis: shadow kontak tipis + sebar lembut).
+- `.surface-hover` menambah elevasi saat hover. Alasan: menandai bahwa
+  baris/kartu itu target aksi, bukan sekadar wadah.
+- Tidak ada offset shadow keras. Tidak ada glow.
 
 ## Typography
 
-- **Sans (body)**: DM Sans. Humanist sans, jelas di ukuran kecil, tidak
-  berkarakter "techy". Cocok untuk aplikasi internal yang dipakai guru
-  tiap hari.
-- **Mono (data)**: IBM Plex Mono. Dipakai untuk NIS, kode mapel, dan
-  field numerik. Karakter slab-nya membantu scanning angka dibanding
-  Geist/JetBrains Mono yang terlalu "developer aesthetic" untuk konteks
-  sekolah.
+- **Sans (body)**: Poppins, sesuai preset. Dimuat lewat `next/font` di
+  `app/layout.tsx` sebagai `--font-sans`.
+- **Mono (data)**: Roboto Mono (`--font-mono`). Dipakai untuk NIS, kode
+  mapel, jam, dan field numerik. Selalu `tabular-nums` supaya kolom angka
+  sejajar.
 - **Ukuran body**: 14px. **Ukuran kecil** (label, caption): 11-12px.
   Huruf besar dengan tracking lebar hanya dipakai untuk header kolom
-  tabel (`uppercase tracking-wide`).
+  tabel (`uppercase tracking-wide`), tidak untuk judul section.
 - **Hierarki**: ditegakkan lewat size + weight, bukan lewat warna.
+  Judul halaman `text-2xl font-semibold tracking-tight`.
 
 ## Motions
 
@@ -95,8 +131,13 @@ accent (primary biru dongker). Sesuai R-29.
 
 - **Em dash `—`**: tidak dipakai di copy user-facing. Kalau butuh
   placeholder data (NIS kosong), pakai chip "Tanpa NIS".
-- **Tombol pill**: tidak dipakai. Radius tombol, input, dan card pakai
-  `--radius: 0.5rem` (8px) atau `0.25rem` (4px) sesuai hierarki.
+- **Tombol pill**: tidak dipakai. Radius mengikuti `--radius: 0.45rem`
+  (preset): kartu `rounded-xl`, tombol/input `rounded-lg`, elemen kecil
+  `rounded-md`.
+- **Offset shadow (neo-brutalist)**: tidak dipakai. Tidak ada bayangan
+  keras 6px, tidak ada border tebal `border-2` berwarna foreground, tidak
+  ada `hover:-translate`. Permukaan dibedakan lewat `ring-1
+  ring-foreground/10`.
 - **Glassmorphism**: 0. Tidak ada `backdrop-blur`.
 - **Glow / shadow dramatis**: 0. Hanya shadow tipis untuk pop-up
   dialog.

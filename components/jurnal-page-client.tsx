@@ -1,16 +1,13 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo, useState, type ReactNode } from "react"
 import {
   BookOpenIcon,
-  CalendarIcon,
-  CheckCircle2Icon,
   ChevronLeftIcon,
   ChevronRightIcon,
   ClipboardListIcon,
   GraduationCapIcon,
   PenLineIcon,
-  UsersIcon,
 } from "lucide-react"
 
 import { GradeRecap } from "@/components/grade-recap"
@@ -99,7 +96,7 @@ export function JurnalPageClient({
   const [tab, setTab] = useState<"input" | "laporan" | "rekap">("input")
 
   const selectedDay = getDayName(date)
-  const todayDate = useMemo(today, [])
+  const todayDate = useMemo(() => today(), [])
   const weekStart = useMemo(() => startOfWeek(date), [date])
   const weekDays = useMemo(
     () => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)),
@@ -130,16 +127,6 @@ export function JurnalPageClient({
       ? Math.round((filledSchedules / schedulesToday.length) * 100)
       : 0
 
-  const studentsByClassroom = useMemo(() => {
-    const map = new Map<string, Student[]>()
-    for (const s of students.filter((s) => s.status === "aktif")) {
-      const list = map.get(s.classroomId) ?? []
-      list.push(s)
-      map.set(s.classroomId, list)
-    }
-    return map
-  }, [students])
-
   const attendancesOnDate = useMemo(
     () => attendances.filter((a) => a.date === date),
     [attendances, date],
@@ -155,73 +142,105 @@ export function JurnalPageClient({
     attendanceSummary.hadir + attendanceSummary.sakit +
     attendanceSummary.izin + attendanceSummary.alfa
 
+  const pendingSessions = schedulesToday.length - filledSchedules
+
   return (
-    <div className="flex flex-col gap-6 px-4 py-6 sm:px-6">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 py-2">
 
       {/* Header */}
-      <div className="space-y-1">
-        <div className="flex items-center gap-2 text-muted-foreground text-sm">
-          <BookOpenIcon className="size-4" />
-          <span>Jurnal Mengajar</span>
+      <header className="flex flex-col gap-1">
+        <div className="flex items-center gap-1.5 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+          <BookOpenIcon className="size-3.5" />
+          Jurnal Mengajar
         </div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          {formatLongDate(date)}
-        </h1>
-      </div>
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+            {formatLongDate(date)}
+          </h1>
+          <span className="text-xs text-muted-foreground">
+            {pendingSessions > 0 ? (
+              <>
+                <span className="font-medium text-foreground tabular-nums">{pendingSessions}</span>{" "}
+                sesi belum diisi
+              </>
+            ) : schedulesToday.length > 0 ? (
+              "Semua sesi hari ini sudah diisi"
+            ) : (
+              "Tidak ada sesi mengajar"
+            )}
+          </span>
+        </div>
+      </header>
 
-      {/* Stats row */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="rounded-xl border bg-card p-4 space-y-1">
-          <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-            <CalendarIcon className="size-3.5" /> Sesi hari ini
-          </p>
-          <p className="text-2xl font-semibold tabular-nums">{schedulesToday.length}</p>
-          <p className="text-xs text-muted-foreground">{filledSchedules} sudah diisi</p>
-        </div>
-        <div className="rounded-xl border bg-card p-4 space-y-1">
-          <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-            <CheckCircle2Icon className="size-3.5" /> Progres
-          </p>
-          <p className="text-2xl font-semibold tabular-nums">{fillRate}%</p>
-          <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-            <div
-              className={cn("h-full rounded-full transition-all", fillRate === 100 ? "bg-emerald-500" : "bg-primary")}
-              style={{ width: `${fillRate}%` }}
-            />
-          </div>
-        </div>
-        <div className="rounded-xl border bg-card p-4 space-y-1">
-          <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-            <UsersIcon className="size-3.5" /> Kehadiran
-          </p>
-          <p className="text-2xl font-semibold tabular-nums">{attendanceSummary.hadir}</p>
-          {attendanceTotal > 0 ? (
-            <p className="text-xs text-muted-foreground">
-              dari {attendanceTotal} siswa
-            </p>
-          ) : (
-            <p className="text-xs text-muted-foreground">belum dicatat</p>
-          )}
-        </div>
-      </div>
+      {/* Ringkasan hari ini */}
+      <section className="brand-wash grid gap-px overflow-hidden rounded-xl sm:grid-cols-3">
+        <RingkasanCell
+          label="Sesi"
+          value={schedulesToday.length}
+          hint={`${filledSchedules} sudah diisi`}
+        />
+        <RingkasanCell
+          label="Progres jurnal"
+          value={`${fillRate}%`}
+          hint={
+            <span className="brand-meter block h-1.5 overflow-hidden rounded-full">
+              <span
+                className="block h-full rounded-full transition-all"
+                style={{ width: `${fillRate}%` }}
+              />
+            </span>
+          }
+        />
+        <RingkasanCell
+          label="Kehadiran"
+          value={
+            attendanceTotal > 0
+              ? `${Math.round((attendanceSummary.hadir / attendanceTotal) * 100)}%`
+              : "—"
+          }
+          hint={
+            attendanceTotal > 0
+              ? `${attendanceSummary.hadir}/${attendanceTotal} hadir · ${attendanceSummary.alfa} alfa`
+              : "belum dicatat"
+          }
+        />
+      </section>
 
-      {/* Week date picker */}
-      <div className="rounded-xl border bg-card p-4 space-y-3">
-        <div className="flex items-center justify-between gap-3">
-          <span className="text-sm font-medium text-foreground">Pilih tanggal</span>
+      {/* Date picker */}
+      <div className="surface rounded-xl bg-card p-2.5 ring-1 ring-foreground/10 sm:p-3">
+        <div className="mb-2 flex items-center justify-between gap-2 px-1">
           <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-foreground">Pilih tanggal</span>
             <button
               type="button"
-              onClick={() => setDate((d) => addDays(startOfWeek(d), -7))}
-              className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+              onClick={() => setDate(todayDate)}
+              disabled={date === todayDate}
+              className="rounded-md px-1.5 py-0.5 text-[11px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:invisible"
+            >
+              Hari ini
+            </button>
+          </div>
+          <div className="flex items-center gap-1">
+            <Input
+              id="manual-date"
+              type="date"
+              value={date}
+              onChange={(e) => { if (e.target.value) setDate(e.target.value) }}
+              className="h-7 w-auto border-0 bg-transparent p-0 text-xs shadow-none focus-visible:ring-0"
+              aria-label="Pilih tanggal manual"
+            />
+            <button
+              type="button"
+              onClick={() => setDate(addDays(startOfWeek(date), -7))}
+              className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               aria-label="Minggu sebelumnya"
             >
               <ChevronLeftIcon className="size-4" />
             </button>
             <button
               type="button"
-              onClick={() => setDate((d) => addDays(startOfWeek(d), 7))}
-              className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+              onClick={() => setDate(addDays(startOfWeek(date), 7))}
+              className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               aria-label="Minggu berikutnya"
             >
               <ChevronRightIcon className="size-4" />
@@ -235,7 +254,8 @@ export function JurnalPageClient({
             const daySessions = schedules.filter((s) => s.day === dayName).length
             const dayJournals = journals.filter((j) => j.date === dayDate).length
             const isActive = dayDate === date
-            const isToday = dayDate === todayDate
+            const isTodayWeek = dayDate === todayDate
+            const complete = daySessions > 0 && dayJournals >= daySessions
             return (
               <button
                 key={dayDate}
@@ -243,37 +263,33 @@ export function JurnalPageClient({
                 onClick={() => setDate(dayDate)}
                 aria-pressed={isActive}
                 className={cn(
-                  "relative flex flex-col items-center gap-0.5 rounded-lg px-1 py-2 text-center transition-colors",
+                  "relative flex flex-col items-center gap-1 rounded-lg py-2 transition-colors",
                   isActive
-                    ? "bg-foreground text-background"
-                    : "hover:bg-muted text-foreground",
+                    ? "bg-primary text-primary-foreground"
+                    : "text-foreground hover:bg-accent",
                 )}
               >
-                {isToday && !isActive && (
-                  <span className="absolute top-1.5 right-1.5 size-1.5 rounded-full bg-primary" />
-                )}
-                <span className="text-[10px] font-medium">{dayLabel[dayName]}</span>
-                <span className="text-sm font-semibold tabular-nums">{Number(dayDate.slice(8))}</span>
-                <span className={cn("text-[10px]", isActive ? "text-background/70" : "text-muted-foreground")}>
-                  {daySessions > 0 ? `${dayJournals}/${daySessions}` : "—"}
+                <span className="text-[10px] font-medium opacity-70">{dayLabel[dayName]}</span>
+                <span className="text-sm font-semibold tabular-nums">
+                  {Number(dayDate.slice(8))}
                 </span>
+                <span
+                  className={cn(
+                    "size-1.5 rounded-full",
+                    daySessions === 0
+                      ? "opacity-0"
+                      : complete
+                        ? isActive ? "bg-primary-foreground" : "bg-primary"
+                        : isActive ? "bg-primary-foreground/40" : "bg-foreground/20",
+                  )}
+                  aria-hidden
+                />
+                {isTodayWeek && !isActive ? (
+                  <span className="absolute inset-x-3 bottom-0.5 h-px bg-primary" aria-hidden />
+                ) : null}
               </button>
             )
           })}
-        </div>
-
-        <div className="flex items-center gap-2 pt-1 border-t">
-          <label className="text-xs text-muted-foreground" htmlFor="manual-date">
-            Tanggal lain
-          </label>
-          <Input
-            id="manual-date"
-            type="date"
-            value={date}
-            onChange={(e) => { if (e.target.value) setDate(e.target.value) }}
-            className="h-8 w-auto text-xs border-0 shadow-none bg-transparent focus-visible:ring-0 p-0"
-            aria-label="Pilih tanggal manual"
-          />
         </div>
       </div>
 
@@ -283,24 +299,24 @@ export function JurnalPageClient({
         onValueChange={(v) => setTab(v as typeof tab)}
         className="space-y-4"
       >
-        <TabsList className="h-9 bg-muted/50 p-1 rounded-lg">
+        <TabsList className="h-8 w-fit rounded-lg bg-muted p-0.5">
           <TabsTrigger
             value="input"
-            className="rounded-md text-xs gap-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+            className="gap-1.5 rounded-md px-2.5 text-xs data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
             <PenLineIcon className="size-3.5" />
             Input Jurnal
           </TabsTrigger>
           <TabsTrigger
             value="laporan"
-            className="rounded-md text-xs gap-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+            className="gap-1.5 rounded-md px-2.5 text-xs data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
             <ClipboardListIcon className="size-3.5" />
             Laporan
           </TabsTrigger>
           <TabsTrigger
             value="rekap"
-            className="rounded-md text-xs gap-1.5 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+            className="gap-1.5 rounded-md px-2.5 text-xs data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm"
           >
             <GraduationCapIcon className="size-3.5" />
             Rekap Nilai
@@ -337,6 +353,28 @@ export function JurnalPageClient({
           />
         </TabsContent>
       </Tabs>
+    </div>
+  )
+}
+
+function RingkasanCell({
+  label,
+  value,
+  hint,
+}: {
+  label: string
+  value: ReactNode
+  hint: ReactNode
+}) {
+  return (
+    <div className="flex flex-col gap-1.5 bg-card/60 px-4 py-3 first:rounded-l-xl last:rounded-r-xl">
+      <span className="text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+        {label}
+      </span>
+      <span className="text-xl font-semibold tracking-tight tabular-nums text-brand-ink">
+        {value}
+      </span>
+      <span className="block text-[11px] leading-snug text-muted-foreground">{hint}</span>
     </div>
   )
 }
