@@ -14,7 +14,9 @@ import {
 
 function average(values: (number | null)[]): number | null {
   const filled = values.filter((v): v is number => v !== null)
-  return filled.length ? filled.reduce((s, v) => s + v, 0) / filled.length : null
+  return filled.length
+    ? filled.reduce((s, v) => s + v, 0) / filled.length
+    : null
 }
 
 function round1(n: number) {
@@ -25,7 +27,10 @@ function roundOrDash(value: number | null | undefined) {
   return value === null || value === undefined ? "—" : round1(value)
 }
 
-const collator = new Intl.Collator("id-ID", { numeric: true, sensitivity: "base" })
+const collator = new Intl.Collator("id-ID", {
+  numeric: true,
+  sensitivity: "base",
+})
 
 const HEADER_FILL = "FF305496"
 const FOOTER_FILL = "FFD9E2F3"
@@ -67,8 +72,12 @@ export async function GET() {
     gradesByAssessment.set(g.assessmentId, map)
   }
 
-  const sortedClassrooms = classrooms.toSorted((a, b) => collator.compare(a.name, b.name))
-  const sortedSubjects = subjects.toSorted((a, b) => collator.compare(a.name, b.name))
+  const sortedClassrooms = classrooms.toSorted((a, b) =>
+    collator.compare(a.name, b.name)
+  )
+  const sortedSubjects = subjects.toSorted((a, b) =>
+    collator.compare(a.name, b.name)
+  )
 
   const wb = new ExcelJS.Workbook()
   const usedSheetNames = new Map<string, number>()
@@ -89,7 +98,9 @@ export async function GET() {
       .toSorted((a, b) => collator.compare(a.name, b.name))
 
     for (const sub of sortedSubjects) {
-      const subjectAssessments = classAssessments.filter((a) => a.subjectId === sub.id)
+      const subjectAssessments = classAssessments.filter(
+        (a) => a.subjectId === sub.id
+      )
       if (!subjectAssessments.length) continue
 
       const subjectWeights = weights
@@ -102,7 +113,8 @@ export async function GET() {
           .filter((a) => a.gradeWeightId === weight.id)
           .toSorted(
             (a, b) =>
-              (a.date ?? "").localeCompare(b.date ?? "") || collator.compare(a.title, b.title),
+              (a.date ?? "").localeCompare(b.date ?? "") ||
+              collator.compare(a.title, b.title)
           ),
       }))
 
@@ -143,7 +155,7 @@ export async function GET() {
           col.assessments.map((a) => {
             const score = gradesByAssessment.get(a.id)?.get(student.id) ?? 0
             return score > 0 ? score : null
-          }),
+          })
         )
         const colAvgs = values.map((v) => average(v))
         const filledPairs = columns
@@ -175,16 +187,21 @@ export async function GET() {
       })
 
       // Footer rata-rata kelas per kolom
-      const classColAvgs = columns.map((_, ci) => average(rows.map((r) => r.colAvgs[ci])))
+      const classColAvgs = columns.map((_, ci) =>
+        average(rows.map((r) => r.colAvgs[ci]))
+      )
       const classPerAssessmentAvgs = columns.map((col, ci) =>
-        col.assessments.map((_, ai) => average(rows.map((r) => r.values[ci][ai]))),
+        col.assessments.map((_, ai) =>
+          average(rows.map((r) => r.values[ci][ai]))
+        )
       )
       const classFinal = average(rows.map((r) => r.final))
 
       if (rows.length) {
         const footer: (string | number)[] = ["", "", "Rata-rata kelas"]
         for (let i = 0; i < columns.length; i++) {
-          for (const avg of classPerAssessmentAvgs[i]) footer.push(roundOrDash(avg))
+          for (const avg of classPerAssessmentAvgs[i])
+            footer.push(roundOrDash(avg))
           footer.push(roundOrDash(classColAvgs[i]))
         }
         footer.push(roundOrDash(classFinal))
@@ -199,7 +216,8 @@ export async function GET() {
       for (const dataRow of dataRows) {
         const excelRow = ws.addRow(dataRow)
         excelRow.eachCell((cell) => {
-          if (typeof cell.value === "number" && Number(cell.col) >= 4) cell.numFmt = "0.0"
+          if (typeof cell.value === "number" && Number(cell.col) >= 4)
+            cell.numFmt = "0.0"
         })
       }
 
@@ -220,15 +238,26 @@ export async function GET() {
       ws.mergeCells(1, 1, 2, 1)
       ws.mergeCells(1, 2, 2, 2)
       ws.mergeCells(1, 3, 2, 3)
-      const finalCol = 3 + columns.reduce((sum, col) => sum + col.assessments.length + 1, 0) + 1
+      const finalCol =
+        3 +
+        columns.reduce((sum, col) => sum + col.assessments.length + 1, 0) +
+        1
       ws.mergeCells(1, finalCol, 2, finalCol)
 
       // Style header (2 baris): tebal, putih, latar biru, border
       for (const rowNumber of [1, 2]) {
         ws.getRow(rowNumber).eachCell((cell) => {
           cell.font = { bold: true, color: { argb: "FFFFFFFF" } }
-          cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: HEADER_FILL } }
-          cell.alignment = { horizontal: "center", vertical: "middle", wrapText: true }
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: HEADER_FILL },
+          }
+          cell.alignment = {
+            horizontal: "center",
+            vertical: "middle",
+            wrapText: true,
+          }
           cell.border = borderAll()
         })
       }
@@ -245,7 +274,11 @@ export async function GET() {
       if (rows.length) {
         ws.getRow(lastRowNumber).eachCell((cell) => {
           cell.font = { bold: true }
-          cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: FOOTER_FILL } }
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: FOOTER_FILL },
+          }
           cell.alignment = { vertical: "middle" }
         })
       }
@@ -256,7 +289,8 @@ export async function GET() {
 
   return new Response(buf, {
     headers: {
-      "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "Content-Type":
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       "Content-Disposition": `attachment; filename=rekap-nilai-${new Date().toISOString().slice(0, 10)}.xlsx`,
     },
   })

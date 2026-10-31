@@ -1,10 +1,13 @@
-import Link from "next/link"
+import { CalendarRangeIcon, TrendingUpIcon } from "lucide-react"
 import {
-  ArrowLeftIcon,
-  ArrowRightIcon,
-  CalendarRangeIcon,
-  TrendingUpIcon,
-} from "lucide-react"
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination"
 import {
   Table,
   TableBody,
@@ -14,6 +17,13 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
+import { pageRange } from "@/components/data-pagination"
 import { cn } from "@/lib/utils"
 
 type ReportRow = {
@@ -77,7 +87,15 @@ function labelDay(day: string) {
 }
 
 function getDayName(date: string) {
-  const dayMap = ["minggu", "senin", "selasa", "rabu", "kamis", "jumat", "sabtu"]
+  const dayMap = [
+    "minggu",
+    "senin",
+    "selasa",
+    "rabu",
+    "kamis",
+    "jumat",
+    "sabtu",
+  ]
   return dayMap[new Date(`${date}T12:00:00+07:00`).getUTCDay()]
 }
 
@@ -88,7 +106,13 @@ type Props = {
   totalPages: number
   safePage: number
   pageSize: number
-  monthSummary: { hadir: number; sakit: number; izin: number; alfa: number; total: number }
+  monthSummary: {
+    hadir: number
+    sakit: number
+    izin: number
+    alfa: number
+    total: number
+  }
   buildHref: (params: { page: number }) => string
   selectedClassroomId: string
   selectedSubjectId: string
@@ -106,14 +130,17 @@ export function KehadiranReportTable({
   buildHref,
 }: Props) {
   const attendanceRate =
-    monthSummary.total > 0 ? Math.round((monthSummary.hadir / monthSummary.total) * 100) : 0
+    monthSummary.total > 0
+      ? Math.round((monthSummary.hadir / monthSummary.total) * 100)
+      : 0
 
   return (
     <section className="overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10">
       <div className="flex flex-col gap-1 border-b px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-sm font-medium text-foreground">Laporan bulanan</h2>
         <p className="text-xs text-muted-foreground">
-          {monthLabel} · <span className="tabular-nums">{rows.length}</span> sesi tercatat
+          {monthLabel} · <span className="tabular-nums">{rows.length}</span>{" "}
+          sesi tercatat
         </p>
       </div>
 
@@ -127,7 +154,7 @@ export function KehadiranReportTable({
               <p className="text-[11px] tracking-wide text-muted-foreground uppercase">
                 Tingkat kehadiran
               </p>
-              <p className="text-xl font-semibold tabular-nums text-foreground">
+              <p className="text-xl font-semibold text-foreground tabular-nums">
                 {attendanceRate}%
               </p>
             </div>
@@ -178,19 +205,23 @@ export function KehadiranReportTable({
             {rows.length > 0 ? (
               pagedRows.map((row, index) => (
                 <TableRow key={row.id}>
-                  <TableCell className="pl-4 text-xs tabular-nums text-muted-foreground">
+                  <TableCell className="pl-4 text-xs text-muted-foreground tabular-nums">
                     {(safePage - 1) * pageSize + index + 1}
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-col">
-                      <span className="text-xs tabular-nums text-foreground">{row.date}</span>
+                      <span className="text-xs text-foreground tabular-nums">
+                        {row.date}
+                      </span>
                       <span className="text-[11px] text-muted-foreground">
                         {labelDay(row.day || getDayName(row.date))}
                       </span>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <span className="text-sm text-foreground">{row.subjectName}</span>
+                    <span className="text-sm text-foreground">
+                      {row.subjectName}
+                    </span>
                     {row.subjectKode ? (
                       <span className="ml-1.5 font-mono text-[11px] text-muted-foreground">
                         {row.subjectKode}
@@ -202,24 +233,24 @@ export function KehadiranReportTable({
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-col">
-                      <span className="text-xs tabular-nums text-foreground">
+                      <span className="text-xs text-foreground tabular-nums">
                         Jam {row.jamKe}
                       </span>
-                      <span className="text-[11px] tabular-nums text-muted-foreground">
+                      <span className="text-[11px] text-muted-foreground tabular-nums">
                         {row.startTime}–{row.endTime}
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-center text-xs tabular-nums text-foreground">
+                  <TableCell className="text-center text-xs text-foreground tabular-nums">
                     {row.hadir}
                   </TableCell>
-                  <TableCell className="text-center text-xs tabular-nums text-muted-foreground">
+                  <TableCell className="text-center text-xs text-muted-foreground tabular-nums">
                     {row.sakit}
                   </TableCell>
-                  <TableCell className="text-center text-xs tabular-nums text-muted-foreground">
+                  <TableCell className="text-center text-xs text-muted-foreground tabular-nums">
                     {row.izin}
                   </TableCell>
-                  <TableCell className="text-center text-xs tabular-nums text-rose-600 dark:text-rose-400">
+                  <TableCell className="text-center text-xs text-rose-600 tabular-nums dark:text-rose-400">
                     {row.alfa}
                   </TableCell>
                   <TableCell className="pr-4">
@@ -236,10 +267,17 @@ export function KehadiranReportTable({
               ))
             ) : (
               <TableRow className="hover:bg-transparent">
-                <TableCell colSpan={10} className="h-40 text-center">
-                  <p className="text-sm text-muted-foreground">
-                    Belum ada data kehadiran pada bulan ini.
-                  </p>
+                <TableCell colSpan={10} className="h-40">
+                  <Empty>
+                    <EmptyHeader>
+                      <EmptyMedia variant="icon">
+                        <CalendarRangeIcon />
+                      </EmptyMedia>
+                      <EmptyTitle>
+                        Belum ada data kehadiran pada bulan ini.
+                      </EmptyTitle>
+                    </EmptyHeader>
+                  </Empty>
                 </TableCell>
               </TableRow>
             )}
@@ -263,7 +301,7 @@ export function KehadiranReportTable({
                       </span>
                     </p>
                   </div>
-                  <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">
+                  <span className="shrink-0 text-[11px] text-muted-foreground tabular-nums">
                     {row.date}
                   </span>
                 </div>
@@ -275,21 +313,42 @@ export function KehadiranReportTable({
                 />
                 <dl className="grid grid-cols-5 gap-2 text-center">
                   {[
-                    { label: "H", value: row.hadir, className: "text-foreground" },
-                    { label: "S", value: row.sakit, className: "text-muted-foreground" },
-                    { label: "I", value: row.izin, className: "text-muted-foreground" },
+                    {
+                      label: "H",
+                      value: row.hadir,
+                      className: "text-foreground",
+                    },
+                    {
+                      label: "S",
+                      value: row.sakit,
+                      className: "text-muted-foreground",
+                    },
+                    {
+                      label: "I",
+                      value: row.izin,
+                      className: "text-muted-foreground",
+                    },
                     {
                       label: "A",
                       value: row.alfa,
                       className: "text-rose-600 dark:text-rose-400",
                     },
-                    { label: "Tot", value: row.total, className: "text-foreground" },
+                    {
+                      label: "Tot",
+                      value: row.total,
+                      className: "text-foreground",
+                    },
                   ].map((cell) => (
-                    <div key={cell.label} className="rounded-md bg-muted/60 py-1">
+                    <div
+                      key={cell.label}
+                      className="rounded-md bg-muted/60 py-1"
+                    >
                       <dt className="text-[10px] tracking-wide text-muted-foreground uppercase">
                         {cell.label}
                       </dt>
-                      <dd className={cn("text-xs tabular-nums", cell.className)}>
+                      <dd
+                        className={cn("text-xs tabular-nums", cell.className)}
+                      >
                         {cell.value}
                       </dd>
                     </div>
@@ -299,11 +358,14 @@ export function KehadiranReportTable({
             ))}
           </div>
         ) : (
-          <div className="px-4 py-14 text-center">
-            <p className="text-sm text-muted-foreground">
-              Belum ada data kehadiran pada bulan ini.
-            </p>
-          </div>
+          <Empty className="mx-4 border">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <CalendarRangeIcon />
+              </EmptyMedia>
+              <EmptyTitle>Belum ada data kehadiran pada bulan ini.</EmptyTitle>
+            </EmptyHeader>
+          </Empty>
         )}
       </div>
 
@@ -313,67 +375,53 @@ export function KehadiranReportTable({
             Halaman <span className="tabular-nums">{safePage}</span> dari{" "}
             <span className="tabular-nums">{totalPages}</span>
           </p>
-          <nav className="flex items-center justify-center gap-1" aria-label="pagination">
-            <Link
-              href={buildHref({ page: safePage - 1 })}
-              aria-disabled={safePage <= 1}
-              tabIndex={safePage <= 1 ? -1 : 0}
-              className={cn(
-                "inline-flex size-7 items-center justify-center rounded-md border text-foreground transition-colors",
-                safePage <= 1
-                  ? "pointer-events-none opacity-40"
-                  : "hover:bg-muted"
-              )}
-              aria-label="Halaman sebelumnya"
-            >
-              <ArrowLeftIcon className="size-3.5" />
-            </Link>
-            {(() => {
-              const pages: (number | "ellipsis")[] = []
-              for (let p = 1; p <= totalPages; p++) {
-                if (p === 1 || p === totalPages || Math.abs(p - safePage) <= 1) {
-                  pages.push(p)
-                } else if (pages[pages.length - 1] !== "ellipsis") {
-                  pages.push("ellipsis")
-                }
-              }
-              return pages.map((p, idx) =>
-                p === "ellipsis" ? (
-                  <span key={`ellipsis-${idx}`} className="px-1 text-xs text-muted-foreground">
-                    …
-                  </span>
+          <Pagination className="justify-center sm:mx-0 sm:w-auto sm:justify-end">
+            <PaginationContent className="gap-0.5">
+              <PaginationItem>
+                <PaginationPrevious
+                  text="Sebelumnya"
+                  href={buildHref({ page: safePage - 1 })}
+                  aria-disabled={safePage <= 1}
+                  tabIndex={safePage <= 1 ? -1 : 0}
+                  className={
+                    safePage <= 1
+                      ? "pointer-events-none text-xs opacity-40"
+                      : "text-xs"
+                  }
+                />
+              </PaginationItem>
+              {pageRange(safePage, totalPages).map((item, index) =>
+                item === "ellipsis" ? (
+                  <PaginationItem key={`ellipsis-${index}`}>
+                    <PaginationEllipsis />
+                  </PaginationItem>
                 ) : (
-                  <Link
-                    key={p}
-                    href={buildHref({ page: p })}
-                    aria-current={p === safePage ? "page" : undefined}
-                    className={cn(
-                      "inline-flex size-7 items-center justify-center rounded-md border text-xs tabular-nums transition-colors",
-                      p === safePage
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "text-foreground hover:bg-muted"
-                    )}
-                  >
-                    {p}
-                  </Link>
+                  <PaginationItem key={item}>
+                    <PaginationLink
+                      href={buildHref({ page: item })}
+                      isActive={item === safePage}
+                      className="text-xs tabular-nums"
+                    >
+                      {item}
+                    </PaginationLink>
+                  </PaginationItem>
                 )
-              )
-            })()}
-            <Link
-              href={buildHref({ page: safePage + 1 })}
-              aria-disabled={safePage >= totalPages}
-              tabIndex={safePage >= totalPages ? -1 : 0}
-              className={cn(
-                "inline-flex size-7 items-center justify-center rounded-md border text-foreground transition-colors",
-                safePage >= totalPages
-                  ? "pointer-events-none opacity-40"
-                  : "hover:bg-muted"
               )}
-              aria-label="Halaman berikutnya"
-            >
-              <ArrowRightIcon className="size-3.5" />
-            </Link>
-          </nav>
+              <PaginationItem>
+                <PaginationNext
+                  text="Berikutnya"
+                  href={buildHref({ page: safePage + 1 })}
+                  aria-disabled={safePage >= totalPages}
+                  tabIndex={safePage >= totalPages ? -1 : 0}
+                  className={
+                    safePage >= totalPages
+                      ? "pointer-events-none text-xs opacity-40"
+                      : "text-xs"
+                  }
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
         </div>
       )}
     </section>

@@ -88,7 +88,10 @@ export function SiswaFilter({
           </SelectContent>
         </Select>
 
-        <Select value={status} onValueChange={(value) => onStatusChange?.(value)}>
+        <Select
+          value={status}
+          onValueChange={(value) => onStatusChange?.(value)}
+        >
           <SelectTrigger
             className="!h-9 w-full text-sm lg:w-[8.5rem]"
             aria-label="Filter status"
@@ -102,7 +105,10 @@ export function SiswaFilter({
           </SelectContent>
         </Select>
 
-        <Select value={filter} onValueChange={(value) => onFilterChange?.(value)}>
+        <Select
+          value={filter}
+          onValueChange={(value) => onFilterChange?.(value)}
+        >
           <SelectTrigger
             className="!h-9 w-full text-sm lg:w-[8.5rem]"
             aria-label="Urutkan siswa"

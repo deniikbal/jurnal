@@ -32,12 +32,12 @@ export function BiodataPublicForm() {
 
   const [lookupState, lookupAction, lookupPending] = useActionState(
     lookupSiswaByNis,
-    initialState,
+    initialState
   )
 
   const [saveState, saveAction, savePending] = useActionState(
     saveBiodataPublic,
-    initialState,
+    initialState
   )
 
   useEffect(() => {
@@ -148,8 +148,8 @@ export function BiodataPublicForm() {
             <p className="max-w-md text-sm leading-relaxed text-muted-foreground">
               Data untuk{" "}
               <span className="font-medium text-foreground">{studentName}</span>{" "}
-              (NIS {studentNis}) sudah dicatat. Silakan tutup halaman ini atau isi
-              biodata siswa lain.
+              (NIS {studentNis}) sudah dicatat. Silakan tutup halaman ini atau
+              isi biodata siswa lain.
             </p>
           </div>
           <Button
@@ -169,7 +169,9 @@ export function BiodataPublicForm() {
       {step === "nis" ? (
         <form action={lookupAction} className="space-y-6 border border-border">
           <div className="space-y-1 border-b border-border px-5 py-4 sm:px-6">
-            <h2 className="text-sm font-semibold text-foreground">Verifikasi NIS</h2>
+            <h2 className="text-sm font-semibold text-foreground">
+              Verifikasi NIS
+            </h2>
             <p className="text-xs text-muted-foreground">
               Masukkan NIS yang sama dengan data di sekolah.
             </p>
@@ -208,7 +210,11 @@ export function BiodataPublicForm() {
       ) : null}
 
       {step === "biodata" ? (
-        <form ref={formRef} onSubmit={handleSaveSubmit} className="space-y-0 border border-border">
+        <form
+          ref={formRef}
+          onSubmit={handleSaveSubmit}
+          className="space-y-0 border border-border"
+        >
           <input type="hidden" name="nis" value={studentNis} />
 
           <div className="flex items-start justify-between gap-3 border-b border-border px-5 py-4 sm:px-6">
@@ -219,7 +225,9 @@ export function BiodataPublicForm() {
               <p className="truncate text-sm font-semibold text-foreground">
                 {studentName}
               </p>
-              <p className="font-mono text-xs text-muted-foreground">NIS {studentNis}</p>
+              <p className="font-mono text-xs text-muted-foreground">
+                NIS {studentNis}
+              </p>
             </div>
             <Button
               type="button"
@@ -236,7 +244,9 @@ export function BiodataPublicForm() {
 
           <div className="space-y-5 px-5 py-5 sm:px-6 sm:py-6">
             <div className="space-y-1">
-              <h2 className="text-sm font-semibold text-foreground">Data biodata</h2>
+              <h2 className="text-sm font-semibold text-foreground">
+                Data biodata
+              </h2>
               <p className="text-xs text-muted-foreground">
                 Lengkapi isian di bawah. Nama tidak dapat diubah dari form ini.
               </p>
@@ -268,7 +278,11 @@ export function BiodataPublicForm() {
               Batal
             </Button>
             <Button type="submit" disabled={isBusy} className="shadow-none">
-              {isCompressing ? "Mengompresi foto…" : savePending ? "Menyimpan…" : "Simpan biodata"}
+              {isCompressing
+                ? "Mengompresi foto…"
+                : savePending
+                  ? "Menyimpan…"
+                  : "Simpan biodata"}
             </Button>
           </div>
         </form>
@@ -276,4 +290,3 @@ export function BiodataPublicForm() {
     </div>
   )
 }
-

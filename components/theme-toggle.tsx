@@ -17,7 +17,11 @@ export function ThemeToggle() {
       aria-label={isDark ? "Aktifkan mode terang" : "Aktifkan mode gelap"}
       title={isDark ? "Mode terang" : "Mode gelap"}
     >
-      {isDark ? <SunIcon className="size-4" /> : <MoonIcon className="size-4" />}
+      {isDark ? (
+        <SunIcon className="size-4" />
+      ) : (
+        <MoonIcon className="size-4" />
+      )}
     </Button>
   )
 }

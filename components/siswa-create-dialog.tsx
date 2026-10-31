@@ -39,7 +39,10 @@ type SiswaCreateDialogProps = {
 export function SiswaCreateDialog({ classrooms }: SiswaCreateDialogProps) {
   const [open, setOpen] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
-  const [state, formAction, isPending] = useActionState(createSiswa, initialState)
+  const [state, formAction, isPending] = useActionState(
+    createSiswa,
+    initialState
+  )
 
   useEffect(() => {
     if (!state.message) return
@@ -56,12 +59,16 @@ export function SiswaCreateDialog({ classrooms }: SiswaCreateDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="w-full sm:w-auto text-xs sm:text-sm">Tambah Siswa</Button>
+        <Button className="w-full text-xs sm:w-auto sm:text-sm">
+          Tambah Siswa
+        </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-[calc(100vw-1.5rem)] sm:max-w-md p-4 sm:p-6">
+      <DialogContent className="max-w-[calc(100vw-1.5rem)] p-4 sm:max-w-md sm:p-6">
         <form ref={formRef} action={formAction} className="space-y-4">
           <DialogHeader>
-            <DialogTitle className="text-base sm:text-lg">Tambah Siswa</DialogTitle>
+            <DialogTitle className="text-base sm:text-lg">
+              Tambah Siswa
+            </DialogTitle>
             <DialogDescription className="text-xs sm:text-sm">
               Masukkan data siswa baru untuk akun yang sedang login.
             </DialogDescription>
@@ -69,13 +76,22 @@ export function SiswaCreateDialog({ classrooms }: SiswaCreateDialogProps) {
 
           <SiswaFormFields classrooms={classrooms} disabled={isPending} />
 
-          <DialogFooter className="flex-col-reverse sm:flex-row gap-2 pt-2">
+          <DialogFooter className="flex-col-reverse gap-2 pt-2 sm:flex-row">
             <DialogClose asChild>
-              <Button type="button" variant="outline" disabled={isPending} className="w-full sm:w-auto text-xs">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isPending}
+                className="w-full text-xs sm:w-auto"
+              >
                 Batal
               </Button>
             </DialogClose>
-            <Button type="submit" disabled={isPending || !classrooms.length} className="w-full sm:w-auto text-xs">
+            <Button
+              type="submit"
+              disabled={isPending || !classrooms.length}
+              className="w-full text-xs sm:w-auto"
+            >
               {isPending ? "Menyimpan..." : "Simpan"}
             </Button>
           </DialogFooter>
@@ -133,7 +149,11 @@ export function SiswaFormFields({
           required
         >
           <SelectTrigger id="classroomId" className="w-full">
-            <SelectValue placeholder={classrooms.length ? "Pilih kelas" : "Belum ada kelas"} />
+            <SelectValue
+              placeholder={
+                classrooms.length ? "Pilih kelas" : "Belum ada kelas"
+              }
+            />
           </SelectTrigger>
           <SelectContent>
             {classrooms.map((classroom) => (

@@ -46,7 +46,7 @@ function FormSkeleton() {
               className="flex items-center gap-4 border-b border-border px-4 py-3 last:border-b-0"
             >
               <Skeleton className="h-3 w-5" />
-              <Skeleton className="h-3.5 flex-1 max-w-[16rem]" />
+              <Skeleton className="h-3.5 max-w-[16rem] flex-1" />
               <Skeleton className="h-3.5 w-20" />
               <Skeleton className="h-8 w-20" />
             </div>

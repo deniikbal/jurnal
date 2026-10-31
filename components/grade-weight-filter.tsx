@@ -70,9 +70,15 @@ export function GradeWeightFilter({
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:flex sm:shrink-0">
-        <Select value={subjectId} onValueChange={(value) => onSubjectChange?.(value)}>
-          <SelectTrigger className="!h-9 w-full text-sm lg:w-[10rem]" aria-label="Filter mapel">
+      <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0 sm:grid-cols-4">
+        <Select
+          value={subjectId}
+          onValueChange={(value) => onSubjectChange?.(value)}
+        >
+          <SelectTrigger
+            className="!h-9 w-full text-sm lg:w-[10rem]"
+            aria-label="Filter mapel"
+          >
             <SelectValue placeholder="Mapel" />
           </SelectTrigger>
           <SelectContent>
@@ -85,8 +91,14 @@ export function GradeWeightFilter({
           </SelectContent>
         </Select>
 
-        <Select value={status} onValueChange={(value) => onStatusChange?.(value)}>
-          <SelectTrigger className="!h-9 w-full text-sm lg:w-[8.5rem]" aria-label="Filter status">
+        <Select
+          value={status}
+          onValueChange={(value) => onStatusChange?.(value)}
+        >
+          <SelectTrigger
+            className="!h-9 w-full text-sm lg:w-[8.5rem]"
+            aria-label="Filter status"
+          >
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
@@ -96,8 +108,14 @@ export function GradeWeightFilter({
           </SelectContent>
         </Select>
 
-        <Select value={filter} onValueChange={(value) => onFilterChange?.(value)}>
-          <SelectTrigger className="!h-9 w-full text-sm lg:w-[9.5rem]" aria-label="Urutkan bobot">
+        <Select
+          value={filter}
+          onValueChange={(value) => onFilterChange?.(value)}
+        >
+          <SelectTrigger
+            className="!h-9 w-full text-sm lg:w-[9.5rem]"
+            aria-label="Urutkan bobot"
+          >
             <SelectValue placeholder="Urutan" />
           </SelectTrigger>
           <SelectContent>

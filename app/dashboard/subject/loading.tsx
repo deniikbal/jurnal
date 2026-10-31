@@ -13,7 +13,7 @@ function TableRowSkeleton() {
   return (
     <div className="flex items-center gap-4 px-5 py-3.5">
       <Skeleton className="h-3 w-5 shrink-0" />
-      <Skeleton className="h-3.5 flex-1 max-w-[14rem]" />
+      <Skeleton className="h-3.5 max-w-[14rem] flex-1" />
       <Skeleton className="h-3.5 w-16" />
       <Skeleton className="h-3.5 w-14" />
       <Skeleton className="h-6 w-14" />
@@ -70,7 +70,7 @@ export default function SubjectLoading() {
         <div className="border-b border-border bg-muted/30 px-4 py-3 sm:px-5">
           <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
             <Skeleton className="h-9 flex-1" />
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:flex sm:shrink-0">
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0 sm:grid-cols-3">
               <Skeleton className="h-9 w-full lg:w-[8.5rem]" />
               <Skeleton className="h-9 w-full lg:w-[8.5rem]" />
               <Skeleton className="h-9 w-full lg:w-[5.5rem]" />
@@ -80,10 +80,7 @@ export default function SubjectLoading() {
 
         <div className="hidden sm:block">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div
-              key={i}
-              className="border-b border-border last:border-b-0"
-            >
+            <div key={i} className="border-b border-border last:border-b-0">
               <TableRowSkeleton />
             </div>
           ))}

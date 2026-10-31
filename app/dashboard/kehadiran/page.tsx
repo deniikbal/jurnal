@@ -1,6 +1,16 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { CalendarDaysIcon, ClipboardCheckIcon } from "lucide-react"
+import {
+  CalendarDaysIcon,
+  CalendarOffIcon,
+  ClipboardCheckIcon,
+} from "lucide-react"
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
 
 import { AttendanceDialog } from "@/components/attendance-dialog"
 import { AttendanceReportFilter } from "@/components/attendance-report-filter"
@@ -87,16 +97,21 @@ function buildHref(params: {
   if (params.subjectId && params.subjectId !== "all") {
     search.set("subjectId", params.subjectId)
   }
-  if (params.month && params.month !== currentMonth()) search.set("month", params.month)
+  if (params.month && params.month !== currentMonth())
+    search.set("month", params.month)
   if (params.page && params.page > 1) search.set("page", String(params.page))
   const query = search.toString()
   return query ? `/dashboard/kehadiran?${query}` : "/dashboard/kehadiran"
 }
 
-export default async function KehadiranPage({ searchParams }: KehadiranPageProps) {
+export default async function KehadiranPage({
+  searchParams,
+}: KehadiranPageProps) {
   const params = await searchParams
   const date = today()
-  const reportMonth = isValidMonth(params.month) ? params.month! : currentMonth()
+  const reportMonth = isValidMonth(params.month)
+    ? params.month!
+    : currentMonth()
   const selectedTab = params.tab === "laporan" ? "laporan" : "kehadiran"
   const selectedClassroomId = params.classroomId ?? "all"
   const selectedSubjectId = params.subjectId ?? "all"
@@ -104,13 +119,14 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
   const currentPage = Math.max(1, parseInt(params.page ?? "1", 10) || 1)
   const selectedDay = getDayName(date)
 
-  const [schedules, subjects, classrooms, students, attendances] = await Promise.all([
-    getSchedulesForCurrentUser(),
-    getSubjectsForCurrentUser(),
-    getKelasForCurrentUser(),
-    getSiswaForCurrentUser(),
-    getAttendancesForCurrentUser(),
-  ])
+  const [schedules, subjects, classrooms, students, attendances] =
+    await Promise.all([
+      getSchedulesForCurrentUser(),
+      getSubjectsForCurrentUser(),
+      getKelasForCurrentUser(),
+      getSiswaForCurrentUser(),
+      getAttendancesForCurrentUser(),
+    ])
 
   const subjectById = new Map(subjects.map((item) => [item.id, item]))
   const classroomById = new Map(classrooms.map((item) => [item.id, item]))
@@ -127,8 +143,9 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
     .sort((a, b) => a.jamKe - b.jamKe || a.startTime.localeCompare(b.startTime))
   const filteredSchedulesToday = schedulesToday.filter(
     (item) =>
-      (selectedClassroomId === "all" || item.classroomId === selectedClassroomId) &&
-      (selectedSubjectId === "all" || item.subjectId === selectedSubjectId),
+      (selectedClassroomId === "all" ||
+        item.classroomId === selectedClassroomId) &&
+      (selectedSubjectId === "all" || item.subjectId === selectedSubjectId)
   )
   const attendancesToday = attendances.filter((item) => item.date === date)
   const attendanceBySchedule = new Map<string, typeof attendancesToday>()
@@ -146,9 +163,12 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
     alfa: attendancesToday.filter((i) => i.status === "alfa").length,
   }
   const todayTotal =
-    todaySummary.hadir + todaySummary.sakit + todaySummary.izin + todaySummary.alfa
+    todaySummary.hadir +
+    todaySummary.sakit +
+    todaySummary.izin +
+    todaySummary.alfa
   const filledSchedulesToday = filteredSchedulesToday.filter((s) =>
-    attendanceBySchedule.has(s.id),
+    attendanceBySchedule.has(s.id)
   ).length
   const todayFillRate =
     filteredSchedulesToday.length > 0
@@ -158,10 +178,14 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
   const reportAttendances = attendances.filter(
     (item) =>
       item.date.startsWith(`${reportMonth}-`) &&
-      (selectedClassroomId === "all" || item.classroomId === selectedClassroomId) &&
-      (selectedSubjectId === "all" || item.subjectId === selectedSubjectId),
+      (selectedClassroomId === "all" ||
+        item.classroomId === selectedClassroomId) &&
+      (selectedSubjectId === "all" || item.subjectId === selectedSubjectId)
   )
-  const reportAttendanceByDateAndSchedule = new Map<string, typeof reportAttendances>()
+  const reportAttendanceByDateAndSchedule = new Map<
+    string,
+    typeof reportAttendances
+  >()
 
   for (const item of reportAttendances) {
     const key = `${item.date}:${item.scheduleId}`
@@ -192,7 +216,9 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
     })
     .sort(
       (a, b) =>
-        a.date.localeCompare(b.date) || a.jamKe - b.jamKe || a.startTime.localeCompare(b.startTime),
+        a.date.localeCompare(b.date) ||
+        a.jamKe - b.jamKe ||
+        a.startTime.localeCompare(b.startTime)
     )
 
   const monthSummary = reportRows.reduce(
@@ -204,12 +230,15 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
       acc.total += row.total
       return acc
     },
-    { hadir: 0, sakit: 0, izin: 0, alfa: 0, total: 0 },
+    { hadir: 0, sakit: 0, izin: 0, alfa: 0, total: 0 }
   )
 
   const totalPages = Math.max(1, Math.ceil(reportRows.length / PAGE_SIZE))
   const safePage = Math.min(currentPage, totalPages)
-  const pagedReportRows = reportRows.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE)
+  const pagedReportRows = reportRows.slice(
+    (safePage - 1) * PAGE_SIZE,
+    safePage * PAGE_SIZE
+  )
 
   const kehadiranHref = buildHref({
     tab: "kehadiran",
@@ -235,12 +264,12 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
               <span className="tabular-nums">{formatLongDate(date)}</span>
             </span>
             <span className="inline-flex items-center gap-2 rounded-lg bg-card px-2.5 py-1.5 text-xs text-muted-foreground ring-1 ring-foreground/10">
-              <span className="tabular-nums text-foreground">
+              <span className="text-foreground tabular-nums">
                 {filteredSchedulesToday.length}
               </span>
               sesi
               <span className="text-border">|</span>
-              <span className="tabular-nums text-foreground">{todayTotal}</span>
+              <span className="text-foreground tabular-nums">{todayTotal}</span>
               catatan
             </span>
           </div>
@@ -253,7 +282,9 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
         fillRate={todayFillRate}
         summary={todaySummary}
         filteredHint={
-          selectedClassroomId !== "all" || selectedSubjectId !== "all" ? "terfilter" : undefined
+          selectedClassroomId !== "all" || selectedSubjectId !== "all"
+            ? "terfilter"
+            : undefined
         }
       />
 
@@ -290,9 +321,12 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
         <section className="overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10">
           <div className="flex flex-col gap-3 border-b px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-sm font-medium text-foreground">Jadwal hari ini</h2>
+              <h2 className="text-sm font-medium text-foreground">
+                Jadwal hari ini
+              </h2>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                {labelDay(selectedDay)} · <span className="tabular-nums">{date}</span>
+                {labelDay(selectedDay)} ·{" "}
+                <span className="tabular-nums">{date}</span>
                 {selectedClassroomId !== "all" &&
                   ` · ${classroomById.get(selectedClassroomId)?.name ?? "Kelas"}`}
                 {selectedSubjectId !== "all" &&
@@ -318,11 +352,12 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
                   a.name.localeCompare(b.name, "id-ID", {
                     numeric: true,
                     sensitivity: "base",
-                  }),
+                  })
                 )
-                const scheduleAttendances = attendanceBySchedule.get(schedule.id) ?? []
+                const scheduleAttendances =
+                  attendanceBySchedule.get(schedule.id) ?? []
                 const statuses = Object.fromEntries(
-                  scheduleAttendances.map((item) => [item.siswaId, item.status]),
+                  scheduleAttendances.map((item) => [item.siswaId, item.status])
                 )
                 const isFilled = scheduleAttendances.length > 0
 
@@ -351,7 +386,9 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
                             <span
                               className={cn(
                                 "size-1.5 shrink-0 rounded-full",
-                                isFilled ? "bg-emerald-500" : "bg-muted-foreground/40"
+                                isFilled
+                                  ? "bg-emerald-500"
+                                  : "bg-muted-foreground/40"
                               )}
                               aria-hidden
                             />
@@ -367,7 +404,10 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
                             {schedule.startTime}–{schedule.endTime}
                           </span>
                           <span className="mx-1.5">·</span>
-                          <span className="tabular-nums">{classStudents.length}</span> siswa aktif
+                          <span className="tabular-nums">
+                            {classStudents.length}
+                          </span>{" "}
+                          siswa aktif
                         </p>
                       </div>
                     </div>
@@ -376,7 +416,9 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
                         date={date}
                         schedule={schedule}
                         subjectName={subject?.name ?? "Mapel tidak ditemukan"}
-                        classroomName={classroom?.name ?? "Kelas tidak ditemukan"}
+                        classroomName={
+                          classroom?.name ?? "Kelas tidak ditemukan"
+                        }
                         students={classStudents}
                         statuses={statuses}
                       />
@@ -385,15 +427,21 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
                 )
               })
             ) : (
-              <div className="px-4 py-14 text-center">
-                <p className="text-sm text-muted-foreground">
-                  Tidak ada jadwal untuk {labelDay(selectedDay)}
-                  {selectedClassroomId !== "all" || selectedSubjectId !== "all"
-                    ? " dengan filter ini"
-                    : ""}
-                  .
-                </p>
-              </div>
+              <Empty className="mx-4 border">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <CalendarOffIcon />
+                  </EmptyMedia>
+                  <EmptyTitle>
+                    Tidak ada jadwal untuk {labelDay(selectedDay)}
+                    {selectedClassroomId !== "all" ||
+                    selectedSubjectId !== "all"
+                      ? " dengan filter ini"
+                      : ""}
+                    .
+                  </EmptyTitle>
+                </EmptyHeader>
+              </Empty>
             )}
           </div>
         </section>
@@ -402,7 +450,9 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
           <section className="overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10">
             <div className="flex flex-col gap-3 border-b px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h2 className="text-sm font-medium text-foreground">Filter laporan</h2>
+                <h2 className="text-sm font-medium text-foreground">
+                  Filter laporan
+                </h2>
                 <p className="mt-0.5 text-xs text-muted-foreground">
                   Pilih bulan, kelas, dan mapel untuk membatasi data.
                 </p>
@@ -418,10 +468,14 @@ export default async function KehadiranPage({ searchParams }: KehadiranPageProps
             </div>
             <div className="flex flex-wrap items-center gap-2 px-4 py-2.5 text-xs text-muted-foreground">
               <CalendarDaysIcon className="size-3.5" />
-              <span className="tabular-nums text-foreground">{labelMonth(reportMonth)}</span>
+              <span className="text-foreground tabular-nums">
+                {labelMonth(reportMonth)}
+              </span>
               <span className="text-border">|</span>
-              <span className="tabular-nums text-foreground">{reportRows.length}</span> sesi
-              tercatat
+              <span className="text-foreground tabular-nums">
+                {reportRows.length}
+              </span>{" "}
+              sesi tercatat
             </div>
           </section>
 

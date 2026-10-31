@@ -21,10 +21,7 @@ export default function JurnalError({
       className="flex flex-col items-center justify-center gap-4 rounded-md border border-border bg-card px-6 py-16 text-center"
       role="alert"
     >
-      <AlertTriangleIcon
-        className="size-8 text-destructive"
-        aria-hidden
-      />
+      <AlertTriangleIcon className="size-8 text-destructive" aria-hidden />
       <div className="space-y-1.5">
         <h1 className="text-base font-semibold text-foreground">
           Gagal memuat halaman jurnal

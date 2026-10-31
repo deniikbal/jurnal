@@ -62,8 +62,11 @@ export function SubjectFilter({
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:flex sm:shrink-0">
-        <Select value={status} onValueChange={(value) => onStatusChange?.(value)}>
+      <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0 sm:grid-cols-3">
+        <Select
+          value={status}
+          onValueChange={(value) => onStatusChange?.(value)}
+        >
           <SelectTrigger
             className="!h-9 w-full text-sm lg:w-[8.5rem]"
             aria-label="Filter status"
@@ -77,7 +80,10 @@ export function SubjectFilter({
           </SelectContent>
         </Select>
 
-        <Select value={filter} onValueChange={(value) => onFilterChange?.(value)}>
+        <Select
+          value={filter}
+          onValueChange={(value) => onFilterChange?.(value)}
+        >
           <SelectTrigger
             className="!h-9 w-full text-sm lg:w-[8.5rem]"
             aria-label="Urutkan mapel"
@@ -97,7 +103,7 @@ export function SubjectFilter({
           variant="outline"
           onClick={handleReset}
           disabled={isDefault}
-          className="h-9 gap-1.5 text-sm shadow-none col-span-2 sm:col-span-1"
+          className="col-span-2 h-9 gap-1.5 text-sm shadow-none sm:col-span-1"
         >
           <RotateCcwIcon className="size-3.5" />
           Reset

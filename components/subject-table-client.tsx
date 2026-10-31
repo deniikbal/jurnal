@@ -7,6 +7,12 @@ import { SubjectActions } from "@/components/subject-actions"
 import { SubjectCreateDialog } from "@/components/subject-create-dialog"
 import { SubjectFilter } from "@/components/subject-filter"
 import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
+import {
   Pagination,
   PaginationContent,
   PaginationItem,
@@ -97,8 +103,10 @@ export function SubjectTableClient({ subjects }: SubjectTableClientProps) {
         return matchSearch && matchStatus
       })
       .sort((a, b) => {
-        if (filter === "terlama") return a.createdAt.getTime() - b.createdAt.getTime()
-        if (filter === "terbaru") return b.createdAt.getTime() - a.createdAt.getTime()
+        if (filter === "terlama")
+          return a.createdAt.getTime() - b.createdAt.getTime()
+        if (filter === "terbaru")
+          return b.createdAt.getTime() - a.createdAt.getTime()
         if (filter === "za") return naturalCollator.compare(b.name, a.name)
         return naturalCollator.compare(a.name, b.name)
       })
@@ -108,13 +116,18 @@ export function SubjectTableClient({ subjects }: SubjectTableClientProps) {
   const totalPages = Math.max(Math.ceil(totalFiltered / PAGE_SIZE), 1)
   const safePage = Math.min(page, totalPages)
   const startIndex = (safePage - 1) * PAGE_SIZE
-  const paginatedSubjects = filteredSubjects.slice(startIndex, startIndex + PAGE_SIZE)
+  const paginatedSubjects = filteredSubjects.slice(
+    startIndex,
+    startIndex + PAGE_SIZE
+  )
 
   return (
     <section className="overflow-hidden rounded-md border border-border bg-card">
       <div className="flex flex-col gap-3 border-b border-border px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
         <div>
-          <h2 className="text-sm font-semibold text-foreground">Daftar mapel</h2>
+          <h2 className="text-sm font-semibold text-foreground">
+            Daftar mapel
+          </h2>
           <p className="text-xs text-muted-foreground">
             {totalFiltered} data
             {search || status !== "all" ? " (terfilter)" : ""}
@@ -161,13 +174,15 @@ export function SubjectTableClient({ subjects }: SubjectTableClientProps) {
             {paginatedSubjects.length > 0 ? (
               paginatedSubjects.map((item, index) => (
                 <TableRow key={item.id} className="group">
-                  <TableCell className="pl-5 text-xs tabular-nums text-muted-foreground">
+                  <TableCell className="pl-5 text-xs text-muted-foreground tabular-nums">
                     {startIndex + index + 1}
                   </TableCell>
                   <TableCell>
-                    <span className="text-sm font-medium text-foreground">{item.name}</span>
+                    <span className="text-sm font-medium text-foreground">
+                      {item.name}
+                    </span>
                   </TableCell>
-                  <TableCell className="font-mono text-xs tabular-nums text-muted-foreground">
+                  <TableCell className="font-mono text-xs text-muted-foreground tabular-nums">
                     {item.kode}
                   </TableCell>
                   <TableCell>
@@ -183,15 +198,16 @@ export function SubjectTableClient({ subjects }: SubjectTableClientProps) {
             ) : (
               <TableRow className="hover:bg-transparent">
                 <TableCell colSpan={5} className="h-40">
-                  <div className="flex flex-col items-center justify-center gap-2 text-center">
-                    <BookOpenIcon
-                      className="size-7 text-muted-foreground/60"
-                      aria-hidden
-                    />
-                    <p className="text-sm text-muted-foreground">
-                      Tidak ada mapel yang cocok dengan filter.
-                    </p>
-                  </div>
+                  <Empty>
+                    <EmptyHeader>
+                      <EmptyMedia variant="icon">
+                        <BookOpenIcon />
+                      </EmptyMedia>
+                      <EmptyTitle>
+                        Tidak ada mapel yang cocok dengan filter.
+                      </EmptyTitle>
+                    </EmptyHeader>
+                  </Empty>
                 </TableCell>
               </TableRow>
             )}
@@ -206,12 +222,16 @@ export function SubjectTableClient({ subjects }: SubjectTableClientProps) {
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0 space-y-0.5">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-[11px] tabular-nums text-muted-foreground">
+                    <span className="text-[11px] text-muted-foreground tabular-nums">
                       {startIndex + index + 1}.
                     </span>
-                    <h3 className="truncate text-sm font-medium text-foreground">{item.name}</h3>
+                    <h3 className="truncate text-sm font-medium text-foreground">
+                      {item.name}
+                    </h3>
                   </div>
-                  <p className="pl-5 font-mono text-xs text-muted-foreground">{item.kode}</p>
+                  <p className="pl-5 font-mono text-xs text-muted-foreground">
+                    {item.kode}
+                  </p>
                 </div>
                 <StatusMark status={item.status} />
               </div>
@@ -221,15 +241,14 @@ export function SubjectTableClient({ subjects }: SubjectTableClientProps) {
             </div>
           ))
         ) : (
-          <div className="flex flex-col items-center gap-2 py-14 text-center">
-            <BookOpenIcon
-              className="size-7 text-muted-foreground/60"
-              aria-hidden
-            />
-            <p className="text-sm text-muted-foreground">
-              Tidak ada mapel yang cocok dengan filter.
-            </p>
-          </div>
+          <Empty className="border">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <BookOpenIcon />
+              </EmptyMedia>
+              <EmptyTitle>Tidak ada mapel yang cocok dengan filter.</EmptyTitle>
+            </EmptyHeader>
+          </Empty>
         )}
       </div>
 
@@ -247,14 +266,24 @@ export function SubjectTableClient({ subjects }: SubjectTableClientProps) {
                 text="Sebelumnya"
                 onClick={() => setPage(Math.max(safePage - 1, 1))}
                 aria-disabled={safePage === 1}
-                className={safePage === 1 ? "pointer-events-none opacity-50 text-xs" : "text-xs"}
+                className={
+                  safePage === 1
+                    ? "pointer-events-none text-xs opacity-50"
+                    : "text-xs"
+                }
               />
             </PaginationItem>
             {Array.from({ length: totalPages }, (_, index) => index + 1)
-              .filter((p) => p === 1 || p === totalPages || Math.abs(p - safePage) <= 1)
+              .filter(
+                (p) =>
+                  p === 1 || p === totalPages || Math.abs(p - safePage) <= 1
+              )
               .map((p) => (
                 <PaginationItem key={p}>
-                  <PaginationLink isActive={p === safePage} onClick={() => setPage(p)}>
+                  <PaginationLink
+                    isActive={p === safePage}
+                    onClick={() => setPage(p)}
+                  >
                     {p}
                   </PaginationLink>
                 </PaginationItem>
@@ -265,7 +294,9 @@ export function SubjectTableClient({ subjects }: SubjectTableClientProps) {
                 onClick={() => setPage(Math.min(safePage + 1, totalPages))}
                 aria-disabled={safePage === totalPages}
                 className={
-                  safePage === totalPages ? "pointer-events-none opacity-50 text-xs" : "text-xs"
+                  safePage === totalPages
+                    ? "pointer-events-none text-xs opacity-50"
+                    : "text-xs"
                 }
               />
             </PaginationItem>

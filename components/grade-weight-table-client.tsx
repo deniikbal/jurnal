@@ -3,6 +3,12 @@
 import { useCallback, useMemo, useState } from "react"
 import { PercentIcon } from "lucide-react"
 
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
 import { GradeWeightActions } from "@/components/grade-weight-actions"
 import { GradeWeightCreateDialog } from "@/components/grade-weight-create-dialog"
 import { GradeWeightFilter } from "@/components/grade-weight-filter"
@@ -79,7 +85,7 @@ export function GradeWeightTableClient({
 
   const subjectById = useMemo(
     () => new Map(subjects.map((item) => [item.id, item])),
-    [subjects],
+    [subjects]
   )
 
   const handleSearchChange = useCallback((value: string) => {
@@ -111,7 +117,8 @@ export function GradeWeightTableClient({
     return weights
       .filter((item) => {
         const query = search.toLowerCase()
-        const subjectName = subjectById.get(item.subjectId)?.name?.toLowerCase() ?? ""
+        const subjectName =
+          subjectById.get(item.subjectId)?.name?.toLowerCase() ?? ""
         const matchSearch =
           !query ||
           item.name.toLowerCase().includes(query) ||
@@ -132,16 +139,23 @@ export function GradeWeightTableClient({
   const totalPages = Math.max(Math.ceil(totalFiltered / PAGE_SIZE), 1)
   const safePage = Math.min(page, totalPages)
   const startIndex = (safePage - 1) * PAGE_SIZE
-  const paginatedWeights = filteredWeights.slice(startIndex, startIndex + PAGE_SIZE)
+  const paginatedWeights = filteredWeights.slice(
+    startIndex,
+    startIndex + PAGE_SIZE
+  )
 
   return (
     <section className="overflow-hidden rounded-md border border-border bg-card">
       <div className="flex flex-col gap-3 border-b border-border px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
         <div>
-          <h2 className="text-sm font-semibold text-foreground">Daftar bobot</h2>
+          <h2 className="text-sm font-semibold text-foreground">
+            Daftar bobot
+          </h2>
           <p className="text-xs text-muted-foreground">
             {totalFiltered} data
-            {search || subjectId !== "all" || status !== "all" ? " (terfilter)" : ""}
+            {search || subjectId !== "all" || status !== "all"
+              ? " (terfilter)"
+              : ""}
           </p>
         </div>
         <div className="w-full sm:w-auto">
@@ -193,11 +207,13 @@ export function GradeWeightTableClient({
                 const subject = subjectById.get(item.subjectId)
                 return (
                   <TableRow key={item.id} className="group">
-                    <TableCell className="pl-5 text-xs tabular-nums text-muted-foreground">
+                    <TableCell className="pl-5 text-xs text-muted-foreground tabular-nums">
                       {startIndex + index + 1}
                     </TableCell>
                     <TableCell>
-                      <span className="text-sm font-medium text-foreground">{item.name}</span>
+                      <span className="text-sm font-medium text-foreground">
+                        {item.name}
+                      </span>
                     </TableCell>
                     <TableCell className="text-sm text-foreground">
                       {subject?.name ?? (
@@ -209,7 +225,7 @@ export function GradeWeightTableClient({
                         </span>
                       ) : null}
                     </TableCell>
-                    <TableCell className="text-sm tabular-nums text-foreground">
+                    <TableCell className="text-sm text-foreground tabular-nums">
                       {item.weight}%
                     </TableCell>
                     <TableCell>
@@ -226,10 +242,14 @@ export function GradeWeightTableClient({
             ) : (
               <TableRow className="hover:bg-transparent">
                 <TableCell colSpan={6} className="h-40">
-                  <div className="flex flex-col items-center justify-center gap-2 text-center">
-                    <PercentIcon className="size-7 text-muted-foreground/35" />
-                    <p className="text-sm text-muted-foreground">Tidak ada data yang cocok.</p>
-                  </div>
+                  <Empty>
+                    <EmptyHeader>
+                      <EmptyMedia variant="icon">
+                        <PercentIcon />
+                      </EmptyMedia>
+                      <EmptyTitle>Tidak ada data yang cocok.</EmptyTitle>
+                    </EmptyHeader>
+                  </Empty>
                 </TableCell>
               </TableRow>
             )}
@@ -246,7 +266,7 @@ export function GradeWeightTableClient({
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 space-y-0.5">
                     <div className="flex items-baseline gap-2">
-                      <span className="text-[11px] tabular-nums text-muted-foreground">
+                      <span className="text-[11px] text-muted-foreground tabular-nums">
                         {startIndex + index + 1}.
                       </span>
                       <h3 className="truncate text-sm font-medium text-foreground">
@@ -256,7 +276,9 @@ export function GradeWeightTableClient({
                     <p className="pl-5 text-xs text-muted-foreground">
                       {subject?.name ?? "Mapel tidak ditemukan"}
                       <span className="mx-1.5 text-border">·</span>
-                      <span className="tabular-nums text-foreground">{item.weight}%</span>
+                      <span className="text-foreground tabular-nums">
+                        {item.weight}%
+                      </span>
                     </p>
                   </div>
                   <StatusMark status={item.status} />
@@ -268,10 +290,14 @@ export function GradeWeightTableClient({
             )
           })
         ) : (
-          <div className="flex flex-col items-center gap-2 py-14 text-center">
-            <PercentIcon className="size-7 text-muted-foreground/35" />
-            <p className="text-sm text-muted-foreground">Tidak ada data yang cocok.</p>
-          </div>
+          <Empty className="border">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <PercentIcon />
+              </EmptyMedia>
+              <EmptyTitle>Tidak ada data yang cocok.</EmptyTitle>
+            </EmptyHeader>
+          </Empty>
         )}
       </div>
 
@@ -289,14 +315,24 @@ export function GradeWeightTableClient({
                 text="Sebelumnya"
                 onClick={() => setPage(Math.max(safePage - 1, 1))}
                 aria-disabled={safePage === 1}
-                className={safePage === 1 ? "pointer-events-none opacity-50 text-xs" : "text-xs"}
+                className={
+                  safePage === 1
+                    ? "pointer-events-none text-xs opacity-50"
+                    : "text-xs"
+                }
               />
             </PaginationItem>
             {Array.from({ length: totalPages }, (_, index) => index + 1)
-              .filter((p) => p === 1 || p === totalPages || Math.abs(p - safePage) <= 1)
+              .filter(
+                (p) =>
+                  p === 1 || p === totalPages || Math.abs(p - safePage) <= 1
+              )
               .map((p) => (
                 <PaginationItem key={p}>
-                  <PaginationLink isActive={p === safePage} onClick={() => setPage(p)}>
+                  <PaginationLink
+                    isActive={p === safePage}
+                    onClick={() => setPage(p)}
+                  >
                     {p}
                   </PaginationLink>
                 </PaginationItem>
@@ -307,7 +343,9 @@ export function GradeWeightTableClient({
                 onClick={() => setPage(Math.min(safePage + 1, totalPages))}
                 aria-disabled={safePage === totalPages}
                 className={
-                  safePage === totalPages ? "pointer-events-none opacity-50 text-xs" : "text-xs"
+                  safePage === totalPages
+                    ? "pointer-events-none text-xs opacity-50"
+                    : "text-xs"
                 }
               />
             </PaginationItem>

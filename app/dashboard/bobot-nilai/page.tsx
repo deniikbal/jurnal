@@ -1,10 +1,18 @@
 import type { Metadata } from "next"
-import { PercentIcon, ScaleIcon, AlertTriangleIcon, CheckCircle2Icon } from "lucide-react"
+import {
+  PercentIcon,
+  ScaleIcon,
+  AlertTriangleIcon,
+  CheckCircle2Icon,
+} from "lucide-react"
 
 import { PageHeader } from "@/components/page-header"
 import { StatCard } from "@/components/stat-card"
 import { GradeWeightTableClient } from "@/components/grade-weight-table-client"
-import { getGradeWeightsForCurrentUser, getSubjectsForCurrentUser } from "@/lib/dal"
+import {
+  getGradeWeightsForCurrentUser,
+  getSubjectsForCurrentUser,
+} from "@/lib/dal"
 
 export const metadata: Metadata = { title: "Bobot Nilai" }
 
@@ -16,15 +24,21 @@ export default async function GradeWeightPage() {
 
   const activeWeights = weights.filter((item) => item.status === "aktif")
   const inactiveWeights = weights.filter((item) => item.status !== "aktif")
-  const totalActiveWeight = activeWeights.reduce((total, item) => total + item.weight, 0)
+  const totalActiveWeight = activeWeights.reduce(
+    (total, item) => total + item.weight,
+    0
+  )
 
   const subjectTotals = new Map<string, number>()
   for (const item of activeWeights) {
-    subjectTotals.set(item.subjectId, (subjectTotals.get(item.subjectId) ?? 0) + item.weight)
+    subjectTotals.set(
+      item.subjectId,
+      (subjectTotals.get(item.subjectId) ?? 0) + item.weight
+    )
   }
 
   const incompleteSubjects = Array.from(subjectTotals.values()).filter(
-    (total) => total !== 100,
+    (total) => total !== 100
   ).length
   const completeSubjects = subjectTotals.size - incompleteSubjects
   const subjectsWithoutWeights = subjects.length - subjectTotals.size

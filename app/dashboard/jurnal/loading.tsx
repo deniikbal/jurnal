@@ -10,15 +10,13 @@ function HeaderStatSkeleton({ emphasis = false }: { emphasis?: boolean }) {
       }
     >
       <div className="flex items-center justify-between gap-2">
-        <Skeleton className={emphasis ? "h-3 w-20 bg-primary/15" : "h-3 w-20"} />
+        <Skeleton
+          className={emphasis ? "h-3 w-20 bg-primary/15" : "h-3 w-20"}
+        />
         <Skeleton className="size-3.5" />
       </div>
       <Skeleton
-        className={
-          emphasis
-            ? "mt-1 h-7 w-12 bg-primary/15"
-            : "mt-1 h-6 w-12"
-        }
+        className={emphasis ? "mt-1 h-7 w-12 bg-primary/15" : "mt-1 h-6 w-12"}
       />
       <Skeleton className="mt-1.5 h-3 w-24" />
     </div>

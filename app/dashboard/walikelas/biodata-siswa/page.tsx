@@ -18,11 +18,14 @@ export default async function BiodataSiswaPage() {
   ])
 
   return (
-    <Suspense fallback={<div className="p-8 text-center text-sm text-muted-foreground">Memuat data...</div>}>
-      <BiodataSiswaTableClient
-        items={biodataList}
-        kelasList={kelasList}
-      />
+    <Suspense
+      fallback={
+        <div className="p-8 text-center text-sm text-muted-foreground">
+          Memuat data...
+        </div>
+      }
+    >
+      <BiodataSiswaTableClient items={biodataList} kelasList={kelasList} />
     </Suspense>
   )
 }

@@ -19,9 +19,18 @@ import { Button } from "@/components/ui/button"
 
 const initialState: JournalActionState = { success: false, message: "" }
 
-export function JournalDeleteButton({ id, title }: { id: string; title: string }) {
+export function JournalDeleteButton({
+  id,
+  title,
+}: {
+  id: string
+  title: string
+}) {
   const [open, setOpen] = useState(false)
-  const [state, formAction, isPending] = useActionState(deleteJournal, initialState)
+  const [state, formAction, isPending] = useActionState(
+    deleteJournal,
+    initialState
+  )
 
   useEffect(() => {
     if (!state.message) return
@@ -37,7 +46,12 @@ export function JournalDeleteButton({ id, title }: { id: string; title: string }
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button type="button" variant="destructive" size="icon" className="size-7">
+        <Button
+          type="button"
+          variant="destructive"
+          size="icon"
+          className="size-7"
+        >
           <Trash2Icon className="size-3.5" />
         </Button>
       </AlertDialogTrigger>
@@ -47,7 +61,9 @@ export function JournalDeleteButton({ id, title }: { id: string; title: string }
           <AlertDialogHeader>
             <AlertDialogTitle>Hapus jurnal?</AlertDialogTitle>
             <AlertDialogDescription>
-              Jurnal <span className="font-medium text-foreground">{title}</span> akan dihapus permanen.
+              Jurnal{" "}
+              <span className="font-medium text-foreground">{title}</span> akan
+              dihapus permanen.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

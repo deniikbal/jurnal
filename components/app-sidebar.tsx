@@ -146,7 +146,9 @@ export function AppSidebar() {
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton
                           asChild
-                          isActive={isActive("/dashboard/walikelas/biodata-siswa")}
+                          isActive={isActive(
+                            "/dashboard/walikelas/biodata-siswa"
+                          )}
                         >
                           <Link href="/dashboard/walikelas/biodata-siswa">
                             <UsersIcon />

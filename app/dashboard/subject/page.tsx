@@ -53,8 +53,12 @@ export default async function SubjectPage() {
 
       {totalNonaktif > 0 ? (
         <p className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span className="size-1.5 rounded-full bg-muted-foreground" aria-hidden />
-          {totalNonaktif} mapel berstatus nonaktif tidak ditampilkan di ringkasan.
+          <span
+            className="size-1.5 rounded-full bg-muted-foreground"
+            aria-hidden
+          />
+          {totalNonaktif} mapel berstatus nonaktif tidak ditampilkan di
+          ringkasan.
         </p>
       ) : null}
 

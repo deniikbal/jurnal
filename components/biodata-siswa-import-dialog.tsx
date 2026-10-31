@@ -4,7 +4,10 @@ import { useActionState, useEffect, useState } from "react"
 import { toast } from "sonner"
 import { DownloadIcon } from "lucide-react"
 
-import { importBiodataSiswaByClass, type BiodataSiswaActionState } from "@/lib/biodata-siswa-actions"
+import {
+  importBiodataSiswaByClass,
+  type BiodataSiswaActionState,
+} from "@/lib/biodata-siswa-actions"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -34,7 +37,10 @@ export function BiodataSiswaImportDialog({
 }) {
   const [open, setOpen] = useState(false)
   const [selectedKelas, setSelectedKelas] = useState("")
-  const [state, formAction, isPending] = useActionState(importBiodataSiswaByClass, initialState)
+  const [state, formAction, isPending] = useActionState(
+    importBiodataSiswaByClass,
+    initialState
+  )
 
   useEffect(() => {
     if (!state.message) return

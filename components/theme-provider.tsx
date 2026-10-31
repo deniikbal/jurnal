@@ -43,7 +43,8 @@ function applyDocumentTheme(resolved: ResolvedTheme) {
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = React.useState<Theme>("system")
-  const [resolvedTheme, setResolvedTheme] = React.useState<ResolvedTheme>("light")
+  const [resolvedTheme, setResolvedTheme] =
+    React.useState<ResolvedTheme>("light")
 
   React.useEffect(() => {
     const initial = readStoredTheme()
@@ -123,7 +124,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const value = React.useMemo<ThemeContextValue>(
     () => ({ theme, resolvedTheme, setTheme, toggle }),
-    [theme, resolvedTheme, setTheme, toggle],
+    [theme, resolvedTheme, setTheme, toggle]
   )
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>

@@ -42,7 +42,10 @@ type GradeImportDialogProps = {
 export function GradeImportDialog({ assessment }: GradeImportDialogProps) {
   const [open, setOpen] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
-  const [state, formAction, isPending] = useActionState(importGrades, initialState)
+  const [state, formAction, isPending] = useActionState(
+    importGrades,
+    initialState
+  )
   const done = state.success || (!state.success && state.message && !isPending)
 
   useEffect(() => {
@@ -60,23 +63,36 @@ export function GradeImportDialog({ assessment }: GradeImportDialogProps) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={(next) => { if (!next) handleClose(); else setOpen(true) }}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        if (!next) handleClose()
+        else setOpen(true)
+      }}
+    >
       <DialogTrigger asChild>
-        <Button type="button" size="icon" variant="ghost" aria-label="Import Excel">
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          aria-label="Import Excel"
+        >
           <UploadIcon />
         </Button>
       </DialogTrigger>
       <DialogContent
         className={cn(
           "max-w-[calc(100vw-1.5rem)] p-4 sm:p-6",
-          done && state.rows ? "sm:max-w-2xl" : "sm:max-w-md",
+          done && state.rows ? "sm:max-w-2xl" : "sm:max-w-md"
         )}
       >
         <form ref={formRef} action={formAction} className="space-y-4">
           <input type="hidden" name="assessmentId" value={assessment.id} />
           <DialogHeader>
             <DialogTitle className="text-base sm:text-lg">
-              {done && state.rows ? "Hasil Import Nilai" : "Import Nilai dari Excel"}
+              {done && state.rows
+                ? "Hasil Import Nilai"
+                : "Import Nilai dari Excel"}
             </DialogTitle>
             <DialogDescription className="text-xs sm:text-sm">
               {done && state.rows
@@ -85,10 +101,12 @@ export function GradeImportDialog({ assessment }: GradeImportDialogProps) {
             </DialogDescription>
           </DialogHeader>
 
-          {(!done || !state.rows) ? (
+          {!done || !state.rows ? (
             <>
               <div className="grid gap-1.5">
-                <Label htmlFor="file" className="text-xs sm:text-sm">File Excel</Label>
+                <Label htmlFor="file" className="text-xs sm:text-sm">
+                  File Excel
+                </Label>
                 <Input
                   id="file"
                   name="file"
@@ -100,16 +118,21 @@ export function GradeImportDialog({ assessment }: GradeImportDialogProps) {
                 />
               </div>
 
-              <DialogFooter className="flex-col-reverse sm:flex-row gap-2 pt-2">
+              <DialogFooter className="flex-col-reverse gap-2 pt-2 sm:flex-row">
                 <DialogClose asChild>
-                  <Button type="button" variant="outline" disabled={isPending} className="w-full sm:w-auto text-xs">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={isPending}
+                    className="w-full text-xs sm:w-auto"
+                  >
                     Batal
                   </Button>
                 </DialogClose>
                 <Button
                   type="submit"
                   disabled={isPending}
-                  className="w-full sm:w-auto text-xs gap-1.5"
+                  className="w-full gap-1.5 text-xs sm:w-auto"
                 >
                   {isPending ? "Memproses..." : "Import"}
                 </Button>
@@ -138,8 +161,15 @@ export function GradeImportDialog({ assessment }: GradeImportDialogProps) {
                             <XIcon className="size-4 text-destructive" />
                           )}
                         </TableCell>
-                        <TableCell className="text-muted-foreground">{index + 1}</TableCell>
-                        <TableCell className={cn("font-medium", !row.matched && "text-destructive")}>
+                        <TableCell className="text-muted-foreground">
+                          {index + 1}
+                        </TableCell>
+                        <TableCell
+                          className={cn(
+                            "font-medium",
+                            !row.matched && "text-destructive"
+                          )}
+                        >
                           {row.name}
                           {!row.matched && row.reason && (
                             <span className="ml-1.5 text-xs font-normal text-destructive/70">
@@ -147,10 +177,17 @@ export function GradeImportDialog({ assessment }: GradeImportDialogProps) {
                             </span>
                           )}
                         </TableCell>
-                        <TableCell className={cn(!row.matched && "text-destructive/60")}>
+                        <TableCell
+                          className={cn(!row.matched && "text-destructive/60")}
+                        >
                           {row.nis ?? "-"}
                         </TableCell>
-                        <TableCell className={cn("text-right tabular-nums font-semibold", !row.matched && "text-destructive/60")}>
+                        <TableCell
+                          className={cn(
+                            "text-right font-semibold tabular-nums",
+                            !row.matched && "text-destructive/60"
+                          )}
+                        >
                           {row.matched ? row.score : "—"}
                         </TableCell>
                       </TableRow>
@@ -162,7 +199,8 @@ export function GradeImportDialog({ assessment }: GradeImportDialogProps) {
               {state.skipped > 0 && (
                 <div className="max-h-32 overflow-y-auto rounded-sm border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
                   <p className="mb-1 font-medium text-foreground">
-                    {state.skipped} baris dilewati (nama/NIS tidak cocok dengan siswa di kelas):
+                    {state.skipped} baris dilewati (nama/NIS tidak cocok dengan
+                    siswa di kelas):
                   </p>
                   <ul className="list-inside list-disc space-y-0.5">
                     {state.rows
@@ -179,7 +217,12 @@ export function GradeImportDialog({ assessment }: GradeImportDialogProps) {
               )}
 
               <DialogFooter className="gap-2 pt-2">
-                <Button type="button" variant="outline" onClick={handleClose} className="w-full sm:w-auto text-xs">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleClose}
+                  className="w-full text-xs sm:w-auto"
+                >
                   Tutup
                 </Button>
               </DialogFooter>

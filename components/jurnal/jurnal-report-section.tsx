@@ -2,8 +2,16 @@
 
 import { useState } from "react"
 
+import { ClipboardListIcon } from "lucide-react"
+import { DataPagination } from "@/components/data-pagination"
 import { JournalDeleteButton } from "@/components/journal-delete-button"
-import { Button } from "@/components/ui/button"
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from "@/components/ui/empty"
 import { Card, CardContent } from "@/components/ui/card"
 import {
   Select,
@@ -34,7 +42,10 @@ export function JurnalReportSection({ journals, classrooms }: Props) {
   const [page, setPage] = useState(0)
 
   const sortedClassrooms = [...classrooms].sort((a, b) =>
-    a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" }),
+    a.name.localeCompare(b.name, undefined, {
+      numeric: true,
+      sensitivity: "base",
+    })
   )
 
   const rows = journals
@@ -50,8 +61,12 @@ export function JurnalReportSection({ journals, classrooms }: Props) {
       <CardContent className="p-0">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-4">
           <div>
-            <h2 className="text-sm font-semibold text-foreground">Laporan jurnal</h2>
-            <p className="text-xs text-muted-foreground">{rows.length} entri tercatat</p>
+            <h2 className="text-sm font-semibold text-foreground">
+              Laporan jurnal
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              {rows.length} entri tercatat
+            </p>
           </div>
           <Select
             value={classroomId}
@@ -111,10 +126,10 @@ export function JurnalReportSection({ journals, classrooms }: Props) {
               {pageRows.length > 0 ? (
                 pageRows.map((journal, index) => (
                   <TableRow key={journal.id} className="group">
-                    <TableCell className="pl-5 text-xs tabular-nums text-muted-foreground">
+                    <TableCell className="pl-5 text-xs text-muted-foreground tabular-nums">
                       {safePage * PAGE_SIZE + index + 1}
                     </TableCell>
-                    <TableCell className="whitespace-nowrap text-xs tabular-nums text-foreground">
+                    <TableCell className="text-xs whitespace-nowrap text-foreground tabular-nums">
                       {journal.date}
                     </TableCell>
                     <TableCell className="text-sm font-medium text-foreground">
@@ -128,7 +143,7 @@ export function JurnalReportSection({ journals, classrooms }: Props) {
                     <TableCell className="text-sm text-foreground">
                       {journal.classroomName}
                     </TableCell>
-                    <TableCell className="whitespace-nowrap text-xs tabular-nums text-muted-foreground">
+                    <TableCell className="text-xs whitespace-nowrap text-muted-foreground tabular-nums">
                       {journal.jamKe} · {journal.startTime}–{journal.endTime}
                     </TableCell>
                     <TableCell className="max-w-[12rem] truncate text-xs text-muted-foreground">
@@ -139,17 +154,25 @@ export function JurnalReportSection({ journals, classrooms }: Props) {
                     </TableCell>
                     <TableCell className="pr-5">
                       <div className="flex justify-end">
-                        <JournalDeleteButton id={journal.id} title={journal.subjectName} />
+                        <JournalDeleteButton
+                          id={journal.id}
+                          title={journal.subjectName}
+                        />
                       </div>
                     </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow className="hover:bg-transparent">
-                  <TableCell colSpan={8} className="h-40 text-center">
-                    <p className="text-sm text-muted-foreground">
-                      Belum ada jurnal tercatat.
-                    </p>
+                  <TableCell colSpan={8} className="h-40">
+                    <Empty>
+                      <EmptyHeader>
+                        <EmptyMedia variant="icon">
+                          <ClipboardListIcon />
+                        </EmptyMedia>
+                        <EmptyTitle>Belum ada jurnal tercatat.</EmptyTitle>
+                      </EmptyHeader>
+                    </Empty>
                   </TableCell>
                 </TableRow>
               )}
@@ -171,25 +194,39 @@ export function JurnalReportSection({ journals, classrooms }: Props) {
                       <span className="mx-1.5 text-border">·</span>
                       {journal.classroomName}
                       <span className="mx-1.5 text-border">·</span>
-                      Jam {journal.jamKe} ({journal.startTime}–{journal.endTime})
+                      Jam {journal.jamKe} ({journal.startTime}–{journal.endTime}
+                      )
                     </p>
                   </div>
-                  <JournalDeleteButton id={journal.id} title={journal.subjectName} />
+                  <JournalDeleteButton
+                    id={journal.id}
+                    title={journal.subjectName}
+                  />
                 </div>
                 <div className="space-y-1 text-xs text-muted-foreground">
                   <p>
-                    <span className="text-foreground/70">Materi:</span> {journal.materi}
+                    <span className="text-foreground/70">Materi:</span>{" "}
+                    {journal.materi}
                   </p>
                   <p>
-                    <span className="text-foreground/70">Kegiatan:</span> {journal.kegiatan}
+                    <span className="text-foreground/70">Kegiatan:</span>{" "}
+                    {journal.kegiatan}
                   </p>
                 </div>
               </div>
             ))
           ) : (
-            <div className="px-4 py-14 text-center">
-              <p className="text-sm text-muted-foreground">Belum ada jurnal tercatat.</p>
-            </div>
+            <Empty className="mx-4 border">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <ClipboardListIcon />
+                </EmptyMedia>
+                <EmptyTitle>Belum ada jurnal tercatat.</EmptyTitle>
+                <EmptyDescription>
+                  Isi jurnal lewat tab Input Jurnal agar laporan terbentuk.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
           )}
         </div>
 
@@ -197,44 +234,15 @@ export function JurnalReportSection({ journals, classrooms }: Props) {
           <div className="flex items-center justify-between gap-4 border-t border-border px-4 py-3 sm:px-5">
             <p className="text-xs text-muted-foreground">
               Menampilkan {safePage * PAGE_SIZE + 1}–
-              {Math.min((safePage + 1) * PAGE_SIZE, rows.length)} dari {rows.length} entri
+              {Math.min((safePage + 1) * PAGE_SIZE, rows.length)} dari{" "}
+              {rows.length} entri
             </p>
-            <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                disabled={safePage === 0}
-                onClick={() => setPage((p) => Math.max(p - 1, 0))}
-                className="text-xs"
-              >
-                Prev
-              </Button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1)
-                .filter(
-                  (p) =>
-                    p === 1 || p === totalPages || Math.abs(p - (safePage + 1)) <= 1,
-                )
-                .map((p) => (
-                  <Button
-                    key={p}
-                    variant={p === safePage + 1 ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setPage(p - 1)}
-                    className="min-w-[32px] text-xs"
-                  >
-                    {p}
-                  </Button>
-                ))}
-              <Button
-                variant="ghost"
-                size="sm"
-                disabled={safePage === totalPages - 1}
-                onClick={() => setPage((p) => Math.min(p + 1, totalPages - 1))}
-                className="text-xs"
-              >
-                Next
-              </Button>
-            </div>
+            <DataPagination
+              page={safePage + 1}
+              totalPages={totalPages}
+              onPageChange={(next) => setPage(next - 1)}
+              className="justify-end"
+            />
           </div>
         )}
       </CardContent>

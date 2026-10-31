@@ -19,8 +19,13 @@ import { cn } from "@/lib/utils"
 
 const dayMap = ["minggu", "senin", "selasa", "rabu", "kamis", "jumat", "sabtu"]
 const dayLabel: Record<string, string> = {
-  minggu: "Min", senin: "Sen", selasa: "Sel",
-  rabu: "Rab", kamis: "Kam", jumat: "Jum", sabtu: "Sab",
+  minggu: "Min",
+  senin: "Sen",
+  selasa: "Sel",
+  rabu: "Rab",
+  kamis: "Kam",
+  jumat: "Jum",
+  sabtu: "Sab",
 }
 
 function today() {
@@ -47,50 +52,93 @@ function addDays(date: string, n: number) {
 
 function formatLongDate(date: string) {
   return new Date(`${date}T00:00:00`).toLocaleDateString("id-ID", {
-    weekday: "long", day: "numeric", month: "long", year: "numeric",
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
   })
 }
 
 export type Schedule = {
-  id: string; day: string; jamKe: number
-  startTime: string; endTime: string
-  subjectId: string; classroomId: string
+  id: string
+  day: string
+  jamKe: number
+  startTime: string
+  endTime: string
+  subjectId: string
+  classroomId: string
 }
 export type Subject = { id: string; name: string; kode: string | null }
 export type Classroom = { id: string; name: string }
 export type Journal = {
-  id: string; scheduleId: string; date: string; jamKe: number
-  startTime: string; endTime: string; subjectName: string
-  subjectKode: string | null; classroomId: string; classroomName: string
-  materi: string; kegiatan: string; catatan: string | null
+  id: string
+  scheduleId: string
+  date: string
+  jamKe: number
+  startTime: string
+  endTime: string
+  subjectName: string
+  subjectKode: string | null
+  classroomId: string
+  classroomName: string
+  materi: string
+  kegiatan: string
+  catatan: string | null
 }
 export type Student = {
-  id: string; name: string; nis: string | null
-  classroomId: string; status: "aktif" | "keluar"
+  id: string
+  name: string
+  nis: string | null
+  classroomId: string
+  status: "aktif" | "keluar"
 }
 export type Attendance = {
-  scheduleId: string; date: string; siswaId: string
+  scheduleId: string
+  date: string
+  siswaId: string
   status: "hadir" | "sakit" | "izin" | "alfa"
 }
 export type GradeWeight = {
-  id: string; name: string; weight: number; subjectId: string; status: string
+  id: string
+  name: string
+  weight: number
+  subjectId: string
+  status: string
 }
 export type Assessment = {
-  id: string; title: string; description: string | null; date: string | null
-  gradeWeightId: string; gradeWeightName: string
-  classroomId: string; subjectId: string
+  id: string
+  title: string
+  description: string | null
+  date: string | null
+  gradeWeightId: string
+  gradeWeightName: string
+  classroomId: string
+  subjectId: string
 }
 export type Grade = { assessmentId: string; siswaId: string; score: number }
 
 export type JurnalPageClientProps = {
-  schedules: Schedule[]; subjects: Subject[]; classrooms: Classroom[]
-  journals: Journal[]; students: Student[]; attendances: Attendance[]
-  grades: Grade[]; gradeWeights: GradeWeight[]; assessments: Assessment[]
+  schedules: Schedule[]
+  subjects: Subject[]
+  classrooms: Classroom[]
+  journals: Journal[]
+  students: Student[]
+  attendances: Attendance[]
+  grades: Grade[]
+  gradeWeights: GradeWeight[]
+  assessments: Assessment[]
 }
 
 export function JurnalPageClient({
-  schedules, subjects, classrooms, journals, students,
-  attendances, grades, gradeWeights, assessments,
+  schedules,
+  subjects,
+  classrooms,
+  journals,
+  students,
+  attendances,
+  grades,
+  gradeWeights,
+  assessments,
 }: JurnalPageClientProps) {
   const [date, setDate] = useState(today)
   const [tab, setTab] = useState<"input" | "laporan" | "rekap">("input")
@@ -100,28 +148,32 @@ export function JurnalPageClient({
   const weekStart = useMemo(() => startOfWeek(date), [date])
   const weekDays = useMemo(
     () => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)),
-    [weekStart],
+    [weekStart]
   )
 
   const schedulesToday = useMemo(
     () =>
       schedules
         .filter((s) => s.day === selectedDay)
-        .sort((a, b) => a.jamKe - b.jamKe || a.startTime.localeCompare(b.startTime)),
-    [schedules, selectedDay],
+        .sort(
+          (a, b) => a.jamKe - b.jamKe || a.startTime.localeCompare(b.startTime)
+        ),
+    [schedules, selectedDay]
   )
 
   const journalsToday = useMemo(
     () => journals.filter((j) => j.date === date),
-    [journals, date],
+    [journals, date]
   )
 
   const journalBySchedule = useMemo(
     () => new Map(journalsToday.map((j) => [j.scheduleId, j])),
-    [journalsToday],
+    [journalsToday]
   )
 
-  const filledSchedules = schedulesToday.filter((s) => journalBySchedule.has(s.id)).length
+  const filledSchedules = schedulesToday.filter((s) =>
+    journalBySchedule.has(s.id)
+  ).length
   const fillRate =
     schedulesToday.length > 0
       ? Math.round((filledSchedules / schedulesToday.length) * 100)
@@ -129,7 +181,7 @@ export function JurnalPageClient({
 
   const attendancesOnDate = useMemo(
     () => attendances.filter((a) => a.date === date),
-    [attendances, date],
+    [attendances, date]
   )
 
   const attendanceSummary = useMemo(() => {
@@ -139,14 +191,15 @@ export function JurnalPageClient({
   }, [attendancesOnDate])
 
   const attendanceTotal =
-    attendanceSummary.hadir + attendanceSummary.sakit +
-    attendanceSummary.izin + attendanceSummary.alfa
+    attendanceSummary.hadir +
+    attendanceSummary.sakit +
+    attendanceSummary.izin +
+    attendanceSummary.alfa
 
   const pendingSessions = schedulesToday.length - filledSchedules
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 py-2">
-
       {/* Header */}
       <header className="flex flex-col gap-1">
         <div className="flex items-center gap-1.5 text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
@@ -160,7 +213,9 @@ export function JurnalPageClient({
           <span className="text-xs text-muted-foreground">
             {pendingSessions > 0 ? (
               <>
-                <span className="font-medium text-foreground tabular-nums">{pendingSessions}</span>{" "}
+                <span className="font-medium text-foreground tabular-nums">
+                  {pendingSessions}
+                </span>{" "}
                 sesi belum diisi
               </>
             ) : schedulesToday.length > 0 ? (
@@ -210,7 +265,9 @@ export function JurnalPageClient({
       <div className="surface rounded-xl bg-card p-2.5 ring-1 ring-foreground/10 sm:p-3">
         <div className="mb-2 flex items-center justify-between gap-2 px-1">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-foreground">Pilih tanggal</span>
+            <span className="text-xs font-medium text-foreground">
+              Pilih tanggal
+            </span>
             <button
               type="button"
               onClick={() => setDate(todayDate)}
@@ -225,7 +282,9 @@ export function JurnalPageClient({
               id="manual-date"
               type="date"
               value={date}
-              onChange={(e) => { if (e.target.value) setDate(e.target.value) }}
+              onChange={(e) => {
+                if (e.target.value) setDate(e.target.value)
+              }}
               className="h-7 w-auto border-0 bg-transparent p-0 text-xs shadow-none focus-visible:ring-0"
               aria-label="Pilih tanggal manual"
             />
@@ -251,8 +310,12 @@ export function JurnalPageClient({
         <div className="grid grid-cols-7 gap-1">
           {weekDays.map((dayDate) => {
             const dayName = getDayName(dayDate)
-            const daySessions = schedules.filter((s) => s.day === dayName).length
-            const dayJournals = journals.filter((j) => j.date === dayDate).length
+            const daySessions = schedules.filter(
+              (s) => s.day === dayName
+            ).length
+            const dayJournals = journals.filter(
+              (j) => j.date === dayDate
+            ).length
             const isActive = dayDate === date
             const isTodayWeek = dayDate === todayDate
             const complete = daySessions > 0 && dayJournals >= daySessions
@@ -266,10 +329,12 @@ export function JurnalPageClient({
                   "relative flex flex-col items-center gap-1 rounded-lg py-2 transition-colors",
                   isActive
                     ? "bg-primary text-primary-foreground"
-                    : "text-foreground hover:bg-accent",
+                    : "text-foreground hover:bg-accent"
                 )}
               >
-                <span className="text-[10px] font-medium opacity-70">{dayLabel[dayName]}</span>
+                <span className="text-[10px] font-medium opacity-70">
+                  {dayLabel[dayName]}
+                </span>
                 <span className="text-sm font-semibold tabular-nums">
                   {Number(dayDate.slice(8))}
                 </span>
@@ -279,13 +344,20 @@ export function JurnalPageClient({
                     daySessions === 0
                       ? "opacity-0"
                       : complete
-                        ? isActive ? "bg-primary-foreground" : "bg-primary"
-                        : isActive ? "bg-primary-foreground/40" : "bg-foreground/20",
+                        ? isActive
+                          ? "bg-primary-foreground"
+                          : "bg-primary"
+                        : isActive
+                          ? "bg-primary-foreground/40"
+                          : "bg-foreground/20"
                   )}
                   aria-hidden
                 />
                 {isTodayWeek && !isActive ? (
-                  <span className="absolute inset-x-3 bottom-0.5 h-px bg-primary" aria-hidden />
+                  <span
+                    className="absolute inset-x-3 bottom-0.5 h-px bg-primary"
+                    aria-hidden
+                  />
                 ) : null}
               </button>
             )
@@ -371,10 +443,12 @@ function RingkasanCell({
       <span className="text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
         {label}
       </span>
-      <span className="text-xl font-semibold tracking-tight tabular-nums text-brand-ink">
+      <span className="text-xl font-semibold tracking-tight text-brand-ink tabular-nums">
         {value}
       </span>
-      <span className="block text-[11px] leading-snug text-muted-foreground">{hint}</span>
+      <span className="block text-[11px] leading-snug text-muted-foreground">
+        {hint}
+      </span>
     </div>
   )
 }

@@ -58,8 +58,14 @@ export function KelasFilter({
       </div>
 
       <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0">
-        <Select value={filter} onValueChange={(value) => onFilterChange?.(value)}>
-          <SelectTrigger className="h-9 w-full text-sm lg:w-[9.5rem]" aria-label="Urutkan kelas">
+        <Select
+          value={filter}
+          onValueChange={(value) => onFilterChange?.(value)}
+        >
+          <SelectTrigger
+            className="h-9 w-full text-sm lg:w-[9.5rem]"
+            aria-label="Urutkan kelas"
+          >
             <SelectValue placeholder="Urutan" />
           </SelectTrigger>
           <SelectContent>

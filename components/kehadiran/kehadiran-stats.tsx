@@ -32,7 +32,8 @@ export function KehadiranStats({
   filteredHint,
 }: Props) {
   const total = summary.hadir + summary.sakit + summary.izin + summary.alfa
-  const attendanceRate = total > 0 ? Math.round((summary.hadir / total) * 100) : 0
+  const attendanceRate =
+    total > 0 ? Math.round((summary.hadir / total) * 100) : 0
   const notPresent = summary.sakit + summary.izin + summary.alfa
 
   return (
@@ -41,7 +42,9 @@ export function KehadiranStats({
         <StatCard
           label="Sesi hari ini"
           value={filteredCount}
-          hint={filteredHint ? `Terfilter: ${filteredHint}` : "Total sesi jadwal"}
+          hint={
+            filteredHint ? `Terfilter: ${filteredHint}` : "Total sesi jadwal"
+          }
           icon={ClockIcon}
         />
         <StatCard
@@ -114,10 +117,18 @@ export function KehadiranStats({
           {total > 0 && (
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
               {statusItems.map((item) => (
-                <span key={item.key} className="inline-flex items-center gap-1.5">
-                  <span className={cn("size-1.5 rounded-full", item.dot)} aria-hidden />
+                <span
+                  key={item.key}
+                  className="inline-flex items-center gap-1.5"
+                >
+                  <span
+                    className={cn("size-1.5 rounded-full", item.dot)}
+                    aria-hidden
+                  />
                   {item.label}
-                  <span className="tabular-nums text-foreground">{summary[item.key]}</span>
+                  <span className="text-foreground tabular-nums">
+                    {summary[item.key]}
+                  </span>
                 </span>
               ))}
             </div>

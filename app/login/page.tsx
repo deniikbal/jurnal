@@ -16,11 +16,11 @@ export default function LoginPage() {
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -right-32 top-1/3 size-96 rounded-full border border-primary-foreground/15"
+          className="pointer-events-none absolute top-1/3 -right-32 size-96 rounded-full border border-primary-foreground/15"
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -right-48 top-1/2 size-[28rem] rounded-full border border-primary-foreground/10"
+          className="pointer-events-none absolute top-1/2 -right-48 size-[28rem] rounded-full border border-primary-foreground/10"
         />
 
         <div className="relative flex items-center gap-3">
@@ -38,12 +38,12 @@ export default function LoginPage() {
             <span className="size-1.5 rounded-full bg-primary-foreground" />
             Untuk guru dan administrator sekolah
           </div>
-          <h1 className="text-balance text-3xl font-semibold leading-tight tracking-tight xl:text-4xl">
+          <h1 className="text-3xl leading-tight font-semibold tracking-tight text-balance xl:text-4xl">
             Catat jurnal kelas,
             <br />
             tanpa ribet.
           </h1>
-          <p className="max-w-md text-pretty text-sm leading-relaxed text-primary-foreground/75">
+          <p className="max-w-md text-sm leading-relaxed text-pretty text-primary-foreground/75">
             Satu tempat untuk mengelola data siswa, jadwal mengajar, presensi
             harian, dan jurnal pembelajaran. Masuk dengan akun yang diberikan
             sekolah.

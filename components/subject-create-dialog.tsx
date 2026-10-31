@@ -30,7 +30,10 @@ const initialState: SubjectActionState = { success: false, message: "" }
 export function SubjectCreateDialog() {
   const [open, setOpen] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
-  const [state, formAction, isPending] = useActionState(createSubject, initialState)
+  const [state, formAction, isPending] = useActionState(
+    createSubject,
+    initialState
+  )
 
   useEffect(() => {
     if (!state.message) return
@@ -47,12 +50,16 @@ export function SubjectCreateDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="w-full sm:w-auto text-xs sm:text-sm">Tambah Mapel</Button>
+        <Button className="w-full text-xs sm:w-auto sm:text-sm">
+          Tambah Mapel
+        </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-[calc(100vw-1.5rem)] sm:max-w-md p-4 sm:p-6">
+      <DialogContent className="max-w-[calc(100vw-1.5rem)] p-4 sm:max-w-md sm:p-6">
         <form ref={formRef} action={formAction} className="space-y-4">
           <DialogHeader>
-            <DialogTitle className="text-base sm:text-lg">Tambah Mata Pelajaran</DialogTitle>
+            <DialogTitle className="text-base sm:text-lg">
+              Tambah Mata Pelajaran
+            </DialogTitle>
             <DialogDescription className="text-xs sm:text-sm">
               Masukkan nama, kode, dan status mata pelajaran.
             </DialogDescription>
@@ -60,13 +67,22 @@ export function SubjectCreateDialog() {
 
           <SubjectFormFields disabled={isPending} />
 
-          <DialogFooter className="flex-col-reverse sm:flex-row gap-2 pt-2">
+          <DialogFooter className="flex-col-reverse gap-2 pt-2 sm:flex-row">
             <DialogClose asChild>
-              <Button type="button" variant="outline" disabled={isPending} className="w-full sm:w-auto text-xs">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isPending}
+                className="w-full text-xs sm:w-auto"
+              >
                 Batal
               </Button>
             </DialogClose>
-            <Button type="submit" disabled={isPending} className="w-full sm:w-auto text-xs">
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="w-full text-xs sm:w-auto"
+            >
               {isPending ? "Menyimpan..." : "Simpan"}
             </Button>
           </DialogFooter>

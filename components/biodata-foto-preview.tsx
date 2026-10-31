@@ -18,7 +18,10 @@ type BiodataFotoPreviewProps = {
   nama: string
 }
 
-export function BiodataFotoPreview({ fotoRumah, nama }: BiodataFotoPreviewProps) {
+export function BiodataFotoPreview({
+  fotoRumah,
+  nama,
+}: BiodataFotoPreviewProps) {
   const [open, setOpen] = useState(false)
   const [hasError, setHasError] = useState(false)
   const imageUrl = getDriveImageUrl(fotoRumah) ?? ""
@@ -26,7 +29,7 @@ export function BiodataFotoPreview({ fotoRumah, nama }: BiodataFotoPreviewProps)
   if (hasError || !imageUrl) {
     return (
       <div
-        className="flex size-10 sm:size-11 shrink-0 items-center justify-center rounded-sm border bg-muted/40 text-muted-foreground"
+        className="flex size-10 shrink-0 items-center justify-center rounded-sm border bg-muted/40 text-muted-foreground sm:size-11"
         title="Foto tidak dapat dimuat"
       >
         <HomeIcon className="size-4" />
@@ -39,7 +42,7 @@ export function BiodataFotoPreview({ fotoRumah, nama }: BiodataFotoPreviewProps)
       <DialogTrigger asChild>
         <button
           type="button"
-          className="group relative flex size-10 sm:size-11 shrink-0 items-center justify-center overflow-hidden rounded-sm border bg-muted/30 transition-all hover:ring-2 hover:ring-primary/50 focus:outline-hidden cursor-pointer"
+          className="group relative flex size-10 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-sm border bg-muted/30 transition-all hover:ring-2 hover:ring-primary/50 focus:outline-hidden sm:size-11"
           title="Klik untuk melihat foto lebih besar"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -54,17 +57,21 @@ export function BiodataFotoPreview({ fotoRumah, nama }: BiodataFotoPreviewProps)
           </div>
         </button>
       </DialogTrigger>
-      <DialogContent className="max-w-[calc(100vw-1.5rem)] sm:max-w-xl p-4 sm:p-6 overflow-hidden">
+      <DialogContent className="max-w-[calc(100vw-1.5rem)] overflow-hidden p-4 sm:max-w-xl sm:p-6">
         <DialogHeader className="text-left">
-          <DialogTitle className="text-base sm:text-lg truncate">Foto Rumah - {nama}</DialogTitle>
-          <DialogDescription className="sr-only">Tampilan foto rumah siswa {nama}</DialogDescription>
+          <DialogTitle className="truncate text-base sm:text-lg">
+            Foto Rumah - {nama}
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            Tampilan foto rumah siswa {nama}
+          </DialogDescription>
         </DialogHeader>
-        <div className="mt-2 relative overflow-hidden rounded-sm border bg-black/5 flex items-center justify-center p-1 min-h-48">
+        <div className="relative mt-2 flex min-h-48 items-center justify-center overflow-hidden rounded-sm border bg-black/5 p-1">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={imageUrl}
             alt={`Foto rumah ${nama}`}
-            className="max-h-[70vh] w-full object-contain rounded-sm shadow-md"
+            className="max-h-[70vh] w-full rounded-sm object-contain shadow-md"
             onError={() => setHasError(true)}
           />
         </div>
@@ -72,4 +79,3 @@ export function BiodataFotoPreview({ fotoRumah, nama }: BiodataFotoPreviewProps)
     </Dialog>
   )
 }
-

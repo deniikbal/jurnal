@@ -3,11 +3,14 @@
 import { useActionState, useEffect, useMemo, useState } from "react"
 import {
   AlertTriangleIcon,
+  ClipboardListIcon,
   DownloadIcon,
   PencilIcon,
   PlusIcon,
+  ScaleIcon,
   SearchIcon,
   Trash2Icon,
+  UsersIcon,
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -16,6 +19,13 @@ import {
   saveAssessment,
   type GradeActionState,
 } from "@/lib/grade-actions"
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from "@/components/ui/empty"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { GradeImportDialog } from "@/components/grade-import-dialog"
@@ -119,13 +129,16 @@ export function GradeDialog({
 
   const weightById = useMemo(
     () => new Map(weights.map((w) => [w.id, w])),
-    [weights],
+    [weights]
   )
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button type="button" variant={assessments.length ? "outline" : "secondary"}>
+        <Button
+          type="button"
+          variant={assessments.length ? "outline" : "secondary"}
+        >
           Penilaian{assessments.length ? ` (${assessments.length})` : ""}
         </Button>
       </DialogTrigger>
@@ -139,7 +152,9 @@ export function GradeDialog({
             weights={weights}
             assessment={view.assessment}
             initialScores={
-              view.assessment ? scoresByAssessment[view.assessment.id] ?? {} : {}
+              view.assessment
+                ? (scoresByAssessment[view.assessment.id] ?? {})
+                : {}
             }
             onDone={() => setOpen(false)}
             onCancel={() => setView({ type: "list" })}
@@ -149,7 +164,8 @@ export function GradeDialog({
             <DialogHeader>
               <DialogTitle>Penilaian {classroomName}</DialogTitle>
               <DialogDescription>
-                {subjectName} • Jam {schedule.jamKe} • {schedule.startTime}–{schedule.endTime}
+                {subjectName} • Jam {schedule.jamKe} • {schedule.startTime}–
+                {schedule.endTime}
               </DialogDescription>
             </DialogHeader>
             <div className="flex gap-1 border-b pb-2">
@@ -219,7 +235,10 @@ function AssessmentList({
   onEdit: (assessment: AssessmentItem) => void
   onDeleted: () => void
 }) {
-  const [state, formAction, isPending] = useActionState(deleteAssessment, initialState)
+  const [state, formAction, isPending] = useActionState(
+    deleteAssessment,
+    initialState
+  )
 
   useEffect(() => {
     if (!state.message) return
@@ -236,19 +255,28 @@ function AssessmentList({
   return (
     <div className="space-y-4">
       {!hasWeights ? (
-        <div className="rounded-sm border py-10 text-center text-sm text-muted-foreground">
-          Belum ada komponen bobot nilai untuk mapel ini. Tambahkan dulu di menu
-          Bobot Nilai.
-        </div>
+        <Empty className="border">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <ScaleIcon />
+            </EmptyMedia>
+            <EmptyTitle>
+              Belum ada komponen bobot nilai untuk mapel ini.
+            </EmptyTitle>
+            <EmptyDescription>
+              Tambahkan dulu di menu Bobot Nilai sebelum mengisi nilai.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       ) : (
         <>
           <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">
-              Daftar penilaian.
-            </p>
+            <p className="text-sm text-muted-foreground">Daftar penilaian.</p>
             <div className="flex items-center gap-2">
               <Button asChild size="sm" variant="outline">
-                <a href={`/api/nilai/template?classroomId=${encodeURIComponent(classroomId)}`}>
+                <a
+                  href={`/api/nilai/template?classroomId=${encodeURIComponent(classroomId)}`}
+                >
                   <DownloadIcon />
                   Template Excel
                 </a>
@@ -280,16 +308,22 @@ function AssessmentList({
                       studentScores &&
                       students.every(
                         (s) =>
-                          studentScores[s.id] !== undefined && studentScores[s.id] > 0,
+                          studentScores[s.id] !== undefined &&
+                          studentScores[s.id] > 0
                       )
 
                     return (
                       <TableRow key={item.id}>
-                        <TableCell className="text-muted-foreground">{index + 1}</TableCell>
-                        <TableCell className="font-medium">{item.title}</TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {index + 1}
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {item.title}
+                        </TableCell>
                         <TableCell>
                           <Badge variant="secondary">
-                            {weightById.get(item.gradeWeightId)?.name ?? item.gradeWeightName}
+                            {weightById.get(item.gradeWeightId)?.name ??
+                              item.gradeWeightName}
                           </Badge>
                         </TableCell>
                         <TableCell>
@@ -343,9 +377,19 @@ function AssessmentList({
                     )
                   })
                 ) : (
-                  <TableRow>
-                    <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
-                      Belum ada penilaian. Klik &quot;Tambah Penilaian&quot;.
+                  <TableRow className="hover:bg-transparent">
+                    <TableCell colSpan={5} className="h-24">
+                      <Empty>
+                        <EmptyHeader>
+                          <EmptyMedia variant="icon">
+                            <ClipboardListIcon />
+                          </EmptyMedia>
+                          <EmptyTitle>Belum ada penilaian.</EmptyTitle>
+                          <EmptyDescription>
+                            Klik &quot;Tambah Penilaian&quot; untuk membuatnya.
+                          </EmptyDescription>
+                        </EmptyHeader>
+                      </Empty>
                     </TableCell>
                   </TableRow>
                 )}
@@ -384,17 +428,22 @@ function AssessmentForm({
   onDone: () => void
   onCancel: () => void
 }) {
-  const [state, formAction, isPending] = useActionState(saveAssessment, initialState)
+  const [state, formAction, isPending] = useActionState(
+    saveAssessment,
+    initialState
+  )
   const [selectedWeightId, setSelectedWeightId] = useState(
-    assessment?.gradeWeightId ?? weights[0]?.id ?? "",
+    assessment?.gradeWeightId ?? weights[0]?.id ?? ""
   )
   const [scores, setScores] = useState<Record<string, string>>(() =>
     Object.fromEntries(
       students.map((student) => [
         student.id,
-        initialScores[student.id] !== undefined ? String(initialScores[student.id]) : "",
-      ]),
-    ),
+        initialScores[student.id] !== undefined
+          ? String(initialScores[student.id])
+          : "",
+      ])
+    )
   )
   const [statusFilter, setStatusFilter] = useState("")
   const [searchQuery, setSearchQuery] = useState("")
@@ -411,7 +460,11 @@ function AssessmentForm({
   const query = searchQuery.trim().toLowerCase()
 
   const filteredStudents = students.filter((s) => {
-    const matchStatus = statusFilter ? (statusFilter === "sudah" ? isDinilai(s.id) : !isDinilai(s.id)) : true
+    const matchStatus = statusFilter
+      ? statusFilter === "sudah"
+        ? isDinilai(s.id)
+        : !isDinilai(s.id)
+      : true
     const matchSearch = !query || s.name.toLowerCase().includes(query)
     return matchStatus && matchSearch
   })
@@ -438,7 +491,9 @@ function AssessmentForm({
 
   return (
     <form action={formAction} className="space-y-4">
-      {assessment ? <input type="hidden" name="assessmentId" value={assessment.id} /> : null}
+      {assessment ? (
+        <input type="hidden" name="assessmentId" value={assessment.id} />
+      ) : null}
       <input type="hidden" name="scheduleId" value={schedule.id} />
       <input type="hidden" name="gradeWeightId" value={selectedWeightId} />
       {/* Siswa yang difilter (tidak visible) tidak dikirim — server skip key tsb
@@ -450,7 +505,8 @@ function AssessmentForm({
           {assessment ? "Edit Penilaian" : "Tambah Penilaian"} · {classroomName}
         </DialogTitle>
         <DialogDescription>
-          {subjectName} • Jam {schedule.jamKe} • {schedule.startTime}–{schedule.endTime}
+          {subjectName} • Jam {schedule.jamKe} • {schedule.startTime}–
+          {schedule.endTime}
         </DialogDescription>
       </DialogHeader>
 
@@ -467,8 +523,8 @@ function AssessmentForm({
             </p>
             {siswaTersembunyi > 0 ? (
               <p className="text-amber-800/80 dark:text-amber-300/80">
-                {siswaTersembunyi} siswa disembunyikan oleh filter. Reset
-                filter sebelum simpan kalau ingin menilai mereka.
+                {siswaTersembunyi} siswa disembunyikan oleh filter. Reset filter
+                sebelum simpan kalau ingin menilai mereka.
               </p>
             ) : null}
           </div>
@@ -534,7 +590,10 @@ function AssessmentForm({
             value="1"
             className="size-4 rounded-sm border-gray-300"
           />
-          <Label htmlFor="applyAll" className="text-sm font-normal cursor-pointer">
+          <Label
+            htmlFor="applyAll"
+            className="cursor-pointer text-sm font-normal"
+          >
             Terapkan juga ke semua kelas dengan mapel ini
           </Label>
         </div>
@@ -555,7 +614,9 @@ function AssessmentForm({
         </div>
         <button
           type="button"
-          onClick={() => setStatusFilter(statusFilter === "sudah" ? "" : "sudah")}
+          onClick={() =>
+            setStatusFilter(statusFilter === "sudah" ? "" : "sudah")
+          }
           className="flex items-center gap-1.5 rounded-sm border px-3 py-1.5 text-xs transition-colors hover:bg-muted data-active:bg-muted"
           data-active={statusFilter === "sudah" || undefined}
         >
@@ -564,12 +625,16 @@ function AssessmentForm({
         </button>
         <button
           type="button"
-          onClick={() => setStatusFilter(statusFilter === "belum" ? "" : "belum")}
+          onClick={() =>
+            setStatusFilter(statusFilter === "belum" ? "" : "belum")
+          }
           className="flex items-center gap-1.5 rounded-sm border px-3 py-1.5 text-xs transition-colors hover:bg-muted data-active:bg-muted"
           data-active={statusFilter === "belum" || undefined}
         >
           <span className="text-muted-foreground">Belum dinilai</span>
-          <span className="font-semibold text-muted-foreground">{belumDinilai}</span>
+          <span className="font-semibold text-muted-foreground">
+            {belumDinilai}
+          </span>
         </button>
         {statusFilter && (
           <button
@@ -589,7 +654,9 @@ function AssessmentForm({
           type="button"
           variant="outline"
           size="sm"
-          onClick={() => setScores(Object.fromEntries(students.map((s) => [s.id, "100"])))}
+          onClick={() =>
+            setScores(Object.fromEntries(students.map((s) => [s.id, "100"])))
+          }
           disabled={isPending}
           className="ml-auto"
         >
@@ -611,7 +678,9 @@ function AssessmentForm({
             {filteredStudents.length > 0 ? (
               filteredStudents.map((student, index) => (
                 <TableRow key={student.id} className="*:py-1.5">
-                  <TableCell className="text-muted-foreground">{index + 1}</TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {index + 1}
+                  </TableCell>
                   <TableCell className="font-medium">{student.name}</TableCell>
                   <TableCell>{student.nis ?? "-"}</TableCell>
                   <TableCell>
@@ -622,9 +691,11 @@ function AssessmentForm({
                         max={100}
                         name={`score-${student.id}`}
                         value={scores[student.id] ?? ""}
-                        onChange={(event) => setStudentScore(student.id, event.target.value)}
+                        onChange={(event) =>
+                          setStudentScore(student.id, event.target.value)
+                        }
                         disabled={isPending}
-                        className="w-16 h-7"
+                        className="h-7 w-16"
                       />
                       <Button
                         type="button"
@@ -641,13 +712,22 @@ function AssessmentForm({
                 </TableRow>
               ))
             ) : (
-              <TableRow>
-                <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
-                  {searchQuery
-                    ? "Tidak ada siswa yang sesuai dengan pencarian."
-                    : statusFilter
-                      ? `Tidak ada siswa dengan status "${statusFilter === "sudah" ? "sudah dinilai" : "belum dinilai"}".`
-                      : "Belum ada siswa aktif di kelas ini."}
+              <TableRow className="hover:bg-transparent">
+                <TableCell colSpan={4} className="h-24">
+                  <Empty>
+                    <EmptyHeader>
+                      <EmptyMedia variant="icon">
+                        <UsersIcon />
+                      </EmptyMedia>
+                      <EmptyTitle>
+                        {searchQuery
+                          ? "Tidak ada siswa yang sesuai dengan pencarian."
+                          : statusFilter
+                            ? `Tidak ada siswa dengan status "${statusFilter === "sudah" ? "sudah dinilai" : "belum dinilai"}".`
+                            : "Belum ada siswa aktif di kelas ini."}
+                      </EmptyTitle>
+                    </EmptyHeader>
+                  </Empty>
                 </TableCell>
               </TableRow>
             )}
@@ -656,7 +736,12 @@ function AssessmentForm({
       </div>
 
       <DialogFooter>
-        <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          disabled={isPending}
+        >
           Kembali
         </Button>
         <Button
@@ -704,18 +789,32 @@ function AssessmentSummary({
 
   const byClassroom = new Map<string, Map<string, AssessmentItem>>()
   for (const a of allAssessments) {
-    if (!byClassroom.has(a.classroomId)) byClassroom.set(a.classroomId, new Map())
+    if (!byClassroom.has(a.classroomId))
+      byClassroom.set(a.classroomId, new Map())
     byClassroom.get(a.classroomId)!.set(`${a.title}::${a.gradeWeightId}`, a)
   }
 
-  const collator = new Intl.Collator("id-ID", { numeric: true, sensitivity: "base" })
-  const sortedClassrooms = allClassrooms.toSorted((a, b) => collator.compare(a.name, b.name))
+  const collator = new Intl.Collator("id-ID", {
+    numeric: true,
+    sensitivity: "base",
+  })
+  const sortedClassrooms = allClassrooms.toSorted((a, b) =>
+    collator.compare(a.name, b.name)
+  )
 
   if (!columnKeys.length) {
     return (
-      <div className="rounded-sm border py-16 text-center text-sm text-muted-foreground">
-        Belum ada penilaian untuk mapel ini di kelas manapun.
-      </div>
+      <Empty className="border">
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <ClipboardListIcon />
+          </EmptyMedia>
+          <EmptyTitle>Belum ada penilaian untuk mapel ini.</EmptyTitle>
+          <EmptyDescription>
+            Buat penilaian di salah satu kelas agar rekap bisa ditampilkan.
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
     )
   }
 
@@ -728,7 +827,9 @@ function AssessmentSummary({
             {columnLabels.map((col) => (
               <TableHead key={col.title} className="text-center">
                 <div>{col.title}</div>
-                <div className="text-xs font-normal text-muted-foreground">{col.weightName}</div>
+                <div className="text-xs font-normal text-muted-foreground">
+                  {col.weightName}
+                </div>
               </TableHead>
             ))}
           </TableRow>
@@ -741,7 +842,10 @@ function AssessmentSummary({
                 const a = byClassroom.get(cls.id)?.get(key)
                 if (!a) {
                   return (
-                    <TableCell key={key} className="text-center text-muted-foreground">
+                    <TableCell
+                      key={key}
+                      className="text-center text-muted-foreground"
+                    >
                       Belum
                     </TableCell>
                   )
@@ -756,7 +860,7 @@ function AssessmentSummary({
                     key={key}
                     className={`text-center tabular-nums ${
                       complete
-                        ? "text-primary font-semibold"
+                        ? "font-semibold text-primary"
                         : empty
                           ? "text-destructive"
                           : "text-muted-foreground"

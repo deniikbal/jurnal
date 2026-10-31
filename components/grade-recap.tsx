@@ -3,6 +3,12 @@
 import { Fragment, useMemo, useState } from "react"
 import { ClipboardListIcon, FileSpreadsheetIcon } from "lucide-react"
 
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
 import { Button } from "@/components/ui/button"
 import {
   Select,
@@ -71,7 +77,10 @@ type GradeRecapProps = {
   gradeWeights: GradeWeight[]
 }
 
-const collator = new Intl.Collator("id-ID", { numeric: true, sensitivity: "base" })
+const collator = new Intl.Collator("id-ID", {
+  numeric: true,
+  sensitivity: "base",
+})
 
 function fmt(value: number | null) {
   if (value === null) return "—"
@@ -89,11 +98,11 @@ export function GradeRecap({
 }: GradeRecapProps) {
   const sortedClassrooms = useMemo(
     () => [...classrooms].sort((a, b) => collator.compare(a.name, b.name)),
-    [classrooms],
+    [classrooms]
   )
   const sortedSubjects = useMemo(
     () => [...subjects].sort((a, b) => collator.compare(a.name, b.name)),
-    [subjects],
+    [subjects]
   )
 
   const [classroomId, setClassroomId] = useState(sortedClassrooms[0]?.id ?? "")
@@ -101,7 +110,7 @@ export function GradeRecap({
 
   const classroomAssessments = useMemo(
     () => assessments.filter((a) => a.classroomId === classroomId),
-    [assessments, classroomId],
+    [assessments, classroomId]
   )
 
   const subjectOptions = useMemo(() => {
@@ -119,14 +128,17 @@ export function GradeRecap({
   const weights = useMemo(
     () =>
       gradeWeights
-        .filter((w) => w.status === "aktif" && w.subjectId === effectiveSubjectId)
+        .filter(
+          (w) => w.status === "aktif" && w.subjectId === effectiveSubjectId
+        )
         .sort((a, b) => collator.compare(a.name, b.name)),
-    [gradeWeights, effectiveSubjectId],
+    [gradeWeights, effectiveSubjectId]
   )
 
   const recappedAssessments = useMemo(
-    () => classroomAssessments.filter((a) => a.subjectId === effectiveSubjectId),
-    [classroomAssessments, effectiveSubjectId],
+    () =>
+      classroomAssessments.filter((a) => a.subjectId === effectiveSubjectId),
+    [classroomAssessments, effectiveSubjectId]
   )
 
   const columns = useMemo(
@@ -137,10 +149,11 @@ export function GradeRecap({
           .filter((a) => a.gradeWeightId === weight.id)
           .sort(
             (a, b) =>
-              (a.date ?? "").localeCompare(b.date ?? "") || collator.compare(a.title, b.title),
+              (a.date ?? "").localeCompare(b.date ?? "") ||
+              collator.compare(a.title, b.title)
           ),
       })),
-    [weights, recappedAssessments],
+    [weights, recappedAssessments]
   )
 
   const gradesByAssessment = useMemo(() => {
@@ -158,23 +171,29 @@ export function GradeRecap({
       students
         .filter((s) => s.status === "aktif" && s.classroomId === classroomId)
         .sort((a, b) => collator.compare(a.name, b.name)),
-    [students, classroomId],
+    [students, classroomId]
   )
 
   const rows = useMemo(() => {
     return classStudents.map((student) => {
       const weightResults = columns.map((col) => {
         const values = col.assessments.map((a) => {
-          const score = gradesByAssessment.get(a.id)?.find((g) => g.siswaId === student.id)?.score ?? 0
+          const score =
+            gradesByAssessment.get(a.id)?.find((g) => g.siswaId === student.id)
+              ?.score ?? 0
           return score > 0 ? score : null
         })
         const filled = values.filter((v): v is number => v !== null)
-        const avg = filled.length ? filled.reduce((s, v) => s + v, 0) / filled.length : null
+        const avg = filled.length
+          ? filled.reduce((s, v) => s + v, 0) / filled.length
+          : null
         return { values, avg }
       })
 
       const filledPairs = columns
-        .map((col, index) => [col.weight.weight, weightResults[index].avg] as const)
+        .map(
+          (col, index) => [col.weight.weight, weightResults[index].avg] as const
+        )
         .filter(([, avg]) => avg !== null) as [number, number][]
 
       const finalScore =
@@ -190,10 +209,15 @@ export function GradeRecap({
   const scoredRows = rows.filter((r) => r.finalScore !== null)
   const classAverage =
     scoredRows.length > 0
-      ? scoredRows.reduce((sum, r) => sum + r.finalScore!, 0) / scoredRows.length
+      ? scoredRows.reduce((sum, r) => sum + r.finalScore!, 0) /
+        scoredRows.length
       : null
-  const classHighest = scoredRows.length ? Math.max(...scoredRows.map((r) => r.finalScore!)) : null
-  const classLowest = scoredRows.length ? Math.min(...scoredRows.map((r) => r.finalScore!)) : null
+  const classHighest = scoredRows.length
+    ? Math.max(...scoredRows.map((r) => r.finalScore!))
+    : null
+  const classLowest = scoredRows.length
+    ? Math.min(...scoredRows.map((r) => r.finalScore!))
+    : null
 
   const classAverageByColumn = columns.map((col, colIndex) =>
     col.assessments.map((_, assIndex) => {
@@ -201,7 +225,7 @@ export function GradeRecap({
         .map((r) => r.weightResults[colIndex].values[assIndex])
         .filter((v): v is number => v !== null)
       return vals.length ? vals.reduce((s, v) => s + v, 0) / vals.length : null
-    }),
+    })
   )
 
   const classAverageByWeight = columns.map((col, colIndex) => {
@@ -260,7 +284,12 @@ export function GradeRecap({
               ))}
             </SelectContent>
           </Select>
-          <Button asChild variant="outline" size="default" className="h-9 text-sm">
+          <Button
+            asChild
+            variant="outline"
+            size="default"
+            className="h-9 text-sm"
+          >
             <a href="/api/rekap-nilai/export">
               <FileSpreadsheetIcon />
               Export Excel
@@ -272,36 +301,44 @@ export function GradeRecap({
       <dl className="grid grid-cols-3 divide-x divide-border border-b border-border text-center">
         <div className="px-2 py-3">
           <dt className="text-[11px] text-muted-foreground">Rata-rata kelas</dt>
-          <dd className="text-sm font-semibold tabular-nums text-foreground">
+          <dd className="text-sm font-semibold text-foreground tabular-nums">
             {fmt(classAverage)}
           </dd>
         </div>
         <div className="px-2 py-3">
           <dt className="text-[11px] text-muted-foreground">Tertinggi</dt>
-          <dd className="text-sm font-semibold tabular-nums text-foreground">
+          <dd className="text-sm font-semibold text-foreground tabular-nums">
             {fmt(classHighest)}
           </dd>
         </div>
         <div className="px-2 py-3">
           <dt className="text-[11px] text-muted-foreground">Terendah</dt>
-          <dd className="text-sm font-semibold tabular-nums text-foreground">
+          <dd className="text-sm font-semibold text-foreground tabular-nums">
             {fmt(classLowest)}
           </dd>
         </div>
       </dl>
 
       {classroomAssessments.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 py-14 text-center">
-          <ClipboardListIcon className="size-7 text-muted-foreground/35" />
-          <p className="text-sm text-muted-foreground">Belum ada penilaian untuk kelas ini.</p>
-        </div>
+        <Empty className="border">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <ClipboardListIcon />
+            </EmptyMedia>
+            <EmptyTitle>Belum ada penilaian untuk kelas ini.</EmptyTitle>
+          </EmptyHeader>
+        </Empty>
       ) : weights.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 py-14 text-center">
-          <ClipboardListIcon className="size-7 text-muted-foreground/35" />
-          <p className="text-sm text-muted-foreground">
-            Belum ada komponen bobot nilai untuk mapel ini.
-          </p>
-        </div>
+        <Empty className="border">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <ClipboardListIcon />
+            </EmptyMedia>
+            <EmptyTitle>
+              Belum ada komponen bobot nilai untuk mapel ini.
+            </EmptyTitle>
+          </EmptyHeader>
+        </Empty>
       ) : (
         <div className="overflow-x-auto">
           <Table>
@@ -332,7 +369,9 @@ export function GradeRecap({
                     className="border-l border-border text-center text-[11px] font-medium tracking-wide text-muted-foreground uppercase"
                   >
                     <div>{col.weight.name}</div>
-                    <div className="font-normal text-muted-foreground/70">{col.weight.weight}%</div>
+                    <div className="font-normal text-muted-foreground/70">
+                      {col.weight.weight}%
+                    </div>
                   </TableHead>
                 ))}
                 <TableHead
@@ -363,10 +402,10 @@ export function GradeRecap({
             <TableBody>
               {rows.map((row, index) => (
                 <TableRow key={row.student.id}>
-                  <TableCell className="pl-5 text-xs tabular-nums text-muted-foreground">
+                  <TableCell className="pl-5 text-xs text-muted-foreground tabular-nums">
                     {index + 1}
                   </TableCell>
-                  <TableCell className="text-xs tabular-nums text-muted-foreground">
+                  <TableCell className="text-xs text-muted-foreground tabular-nums">
                     {row.student.nis ?? "—"}
                   </TableCell>
                   <TableCell className="text-sm font-medium text-foreground">
@@ -377,23 +416,26 @@ export function GradeRecap({
                       {wr.values.map((value, j) => (
                         <TableCell
                           key={columns[i].assessments[j].id}
-                          className="border-l border-border text-center text-xs tabular-nums text-foreground"
+                          className="border-l border-border text-center text-xs text-foreground tabular-nums"
                         >
                           {fmt(value)}
                         </TableCell>
                       ))}
-                      <TableCell className="text-center text-xs font-medium tabular-nums text-foreground">
+                      <TableCell className="text-center text-xs font-medium text-foreground tabular-nums">
                         {fmt(wr.avg)}
                       </TableCell>
                     </Fragment>
                   ))}
-                  <TableCell className="pr-5 text-right text-sm font-semibold tabular-nums text-foreground">
+                  <TableCell className="pr-5 text-right text-sm font-semibold text-foreground tabular-nums">
                     {fmt(row.finalScore)}
                   </TableCell>
                 </TableRow>
               ))}
               <TableRow className="border-t-2 border-border bg-muted/40 hover:bg-muted/40">
-                <TableCell className="pl-5 text-xs font-medium text-foreground" colSpan={3}>
+                <TableCell
+                  className="pl-5 text-xs font-medium text-foreground"
+                  colSpan={3}
+                >
                   Rata-rata kelas
                 </TableCell>
                 {columns.map((col, i) => (
@@ -401,17 +443,17 @@ export function GradeRecap({
                     {col.assessments.map((a, j) => (
                       <TableCell
                         key={a.id}
-                        className="border-l border-border text-center text-xs tabular-nums text-muted-foreground"
+                        className="border-l border-border text-center text-xs text-muted-foreground tabular-nums"
                       >
                         {fmt(classAverageByColumn[i]?.[j] ?? null)}
                       </TableCell>
                     ))}
-                    <TableCell className="text-center text-xs font-medium tabular-nums text-foreground">
+                    <TableCell className="text-center text-xs font-medium text-foreground tabular-nums">
                       {fmt(classAverageByWeight[i] ?? null)}
                     </TableCell>
                   </Fragment>
                 ))}
-                <TableCell className="pr-5 text-right text-sm font-semibold tabular-nums text-foreground">
+                <TableCell className="pr-5 text-right text-sm font-semibold text-foreground tabular-nums">
                   {fmt(classAverage)}
                 </TableCell>
               </TableRow>

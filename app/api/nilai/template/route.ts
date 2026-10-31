@@ -9,14 +9,19 @@ import { classroom, siswa } from "@/lib/db/schema"
 // aturan importGrades di lib/grade-actions.ts. Baris 1 = header, dilewati saat import.
 export async function GET(request: Request) {
   const session = await verifySession()
-  const classroomId = new URL(request.url).searchParams.get("classroomId")?.trim()
+  const classroomId = new URL(request.url).searchParams
+    .get("classroomId")
+    ?.trim()
 
-  if (!classroomId) return new Response("classroomId wajib diisi", { status: 400 })
+  if (!classroomId)
+    return new Response("classroomId wajib diisi", { status: 400 })
 
   const [cls] = await db
     .select({ name: classroom.name })
     .from(classroom)
-    .where(and(eq(classroom.id, classroomId), eq(classroom.userId, session.userId)))
+    .where(
+      and(eq(classroom.id, classroomId), eq(classroom.userId, session.userId))
+    )
     .limit(1)
 
   if (!cls) return new Response("Kelas tidak ditemukan", { status: 404 })
@@ -28,11 +33,12 @@ export async function GET(request: Request) {
       and(
         eq(siswa.classroomId, classroomId),
         eq(siswa.userId, session.userId),
-        eq(siswa.status, "aktif"),
-      ),
+        eq(siswa.status, "aktif")
+      )
     )
 
-  if (!students.length) return new Response("Tidak ada siswa aktif di kelas ini", { status: 404 })
+  if (!students.length)
+    return new Response("Tidak ada siswa aktif di kelas ini", { status: 404 })
 
   const rows = students
     .toSorted((a, b) => a.name.localeCompare(b.name, "id"))
@@ -45,11 +51,15 @@ export async function GET(request: Request) {
   XLSX.utils.book_append_sheet(wb, ws, "Nilai")
 
   const buf = XLSX.write(wb, { type: "buffer", bookType: "xlsx" }) as Buffer
-  const slug = cls.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
+  const slug = cls.name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
 
   return new Response(new Uint8Array(buf), {
     headers: {
-      "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "Content-Type":
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       "Content-Disposition": `attachment; filename=template-nilai-${slug || "kelas"}.xlsx`,
     },
   })

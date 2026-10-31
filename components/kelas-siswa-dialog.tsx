@@ -38,7 +38,7 @@ const naturalCollator = new Intl.Collator("id-ID", {
 
 export function KelasSiswaDialog({ kelasName, siswa }: KelasSiswaDialogProps) {
   const sortedSiswa = siswa.toSorted((a, b) =>
-    naturalCollator.compare(a.name, b.name),
+    naturalCollator.compare(a.name, b.name)
   )
 
   return (
@@ -49,9 +49,11 @@ export function KelasSiswaDialog({ kelasName, siswa }: KelasSiswaDialogProps) {
           {siswa.length} siswa
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-[calc(100vw-1.5rem)] sm:max-w-2xl p-4 sm:p-6">
+      <DialogContent className="max-w-[calc(100vw-1.5rem)] p-4 sm:max-w-2xl sm:p-6">
         <DialogHeader className="text-left">
-          <DialogTitle className="text-base sm:text-lg">Siswa Kelas {kelasName}</DialogTitle>
+          <DialogTitle className="text-base sm:text-lg">
+            Siswa Kelas {kelasName}
+          </DialogTitle>
           <DialogDescription className="text-xs sm:text-sm">
             Total siswa di kelas ini: {siswa.length}.
           </DialogDescription>
@@ -79,7 +81,10 @@ export function KelasSiswaDialog({ kelasName, siswa }: KelasSiswaDialogProps) {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={3} className="h-32 text-center text-muted-foreground">
+                  <TableCell
+                    colSpan={3}
+                    className="h-32 text-center text-muted-foreground"
+                  >
                     Belum ada siswa di kelas ini.
                   </TableCell>
                 </TableRow>

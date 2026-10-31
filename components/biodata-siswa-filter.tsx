@@ -64,12 +64,9 @@ export function BiodataSiswaFilter({
         />
       </div>
       <div className="flex items-center gap-2 sm:shrink-0">
-        <Select
-          value={filter}
-          onValueChange={(value) => onFilterChange(value)}
-        >
+        <Select value={filter} onValueChange={(value) => onFilterChange(value)}>
           <SelectTrigger
-            className="h-9 w-full border-0 bg-transparent shadow-none sm:w-36 text-xs sm:text-sm"
+            className="h-9 w-full border-0 bg-transparent text-xs shadow-none sm:w-36 sm:text-sm"
             aria-label="Urutkan"
           >
             <SelectValue placeholder="Natural" />

@@ -64,7 +64,10 @@ export function SiswaActions({ siswa, classrooms }: SiswaActionsProps) {
 
 function SiswaEditDialog({ siswa, classrooms }: SiswaActionsProps) {
   const [open, setOpen] = useState(false)
-  const [state, formAction, isPending] = useActionState(updateSiswa, initialState)
+  const [state, formAction, isPending] = useActionState(
+    updateSiswa,
+    initialState
+  )
 
   useEffect(() => {
     if (!state.message) return
@@ -80,16 +83,25 @@ function SiswaEditDialog({ siswa, classrooms }: SiswaActionsProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button type="button" variant="outline" size="icon" className="size-8 sm:size-7">
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          className="size-8 sm:size-7"
+        >
           <PencilIcon className="size-4 sm:size-3.5" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-[calc(100vw-1.5rem)] sm:max-w-md p-4 sm:p-6">
+      <DialogContent className="max-w-[calc(100vw-1.5rem)] p-4 sm:max-w-md sm:p-6">
         <form action={formAction} className="space-y-4">
           <input type="hidden" name="id" value={siswa.id} />
           <DialogHeader>
-            <DialogTitle className="text-base sm:text-lg">Edit Siswa</DialogTitle>
-            <DialogDescription className="text-xs sm:text-sm">Ubah data siswa.</DialogDescription>
+            <DialogTitle className="text-base sm:text-lg">
+              Edit Siswa
+            </DialogTitle>
+            <DialogDescription className="text-xs sm:text-sm">
+              Ubah data siswa.
+            </DialogDescription>
           </DialogHeader>
 
           <SiswaFormFields
@@ -98,13 +110,22 @@ function SiswaEditDialog({ siswa, classrooms }: SiswaActionsProps) {
             defaultValues={siswa}
           />
 
-          <DialogFooter className="flex-col-reverse sm:flex-row gap-2 pt-2">
+          <DialogFooter className="flex-col-reverse gap-2 pt-2 sm:flex-row">
             <DialogClose asChild>
-              <Button type="button" variant="outline" disabled={isPending} className="w-full sm:w-auto text-xs">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isPending}
+                className="w-full text-xs sm:w-auto"
+              >
                 Batal
               </Button>
             </DialogClose>
-            <Button type="submit" disabled={isPending} className="w-full sm:w-auto text-xs">
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="w-full text-xs sm:w-auto"
+            >
               {isPending ? "Menyimpan..." : "Simpan Perubahan"}
             </Button>
           </DialogFooter>
@@ -116,7 +137,10 @@ function SiswaEditDialog({ siswa, classrooms }: SiswaActionsProps) {
 
 function SiswaDeleteDialog({ siswa }: { siswa: SiswaItem }) {
   const [open, setOpen] = useState(false)
-  const [state, formAction, isPending] = useActionState(deleteSiswa, initialState)
+  const [state, formAction, isPending] = useActionState(
+    deleteSiswa,
+    initialState
+  )
 
   useEffect(() => {
     if (!state.message) return
@@ -132,24 +156,42 @@ function SiswaDeleteDialog({ siswa }: { siswa: SiswaItem }) {
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button type="button" variant="destructive" size="icon" className="size-8 sm:size-7">
+        <Button
+          type="button"
+          variant="destructive"
+          size="icon"
+          className="size-8 sm:size-7"
+        >
           <Trash2Icon className="size-4 sm:size-3.5" />
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent className="max-w-[calc(100vw-1.5rem)] sm:max-w-md p-4 sm:p-6">
+      <AlertDialogContent className="max-w-[calc(100vw-1.5rem)] p-4 sm:max-w-md sm:p-6">
         <form action={formAction} className="space-y-4">
           <input type="hidden" name="id" value={siswa.id} />
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-base sm:text-lg">Hapus siswa?</AlertDialogTitle>
+            <AlertDialogTitle className="text-base sm:text-lg">
+              Hapus siswa?
+            </AlertDialogTitle>
             <AlertDialogDescription className="text-xs sm:text-sm">
-              Data siswa <span className="font-medium text-foreground">{siswa.name}</span> akan dihapus permanen.
+              Data siswa{" "}
+              <span className="font-medium text-foreground">{siswa.name}</span>{" "}
+              akan dihapus permanen.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="flex-col-reverse sm:flex-row gap-2 pt-2">
-            <AlertDialogCancel type="button" disabled={isPending} className="w-full sm:w-auto text-xs">
+          <AlertDialogFooter className="flex-col-reverse gap-2 pt-2 sm:flex-row">
+            <AlertDialogCancel
+              type="button"
+              disabled={isPending}
+              className="w-full text-xs sm:w-auto"
+            >
               Batal
             </AlertDialogCancel>
-            <Button type="submit" variant="destructive" disabled={isPending} className="w-full sm:w-auto text-xs">
+            <Button
+              type="submit"
+              variant="destructive"
+              disabled={isPending}
+              className="w-full text-xs sm:w-auto"
+            >
               {isPending ? "Menghapus..." : "Hapus"}
             </Button>
           </AlertDialogFooter>

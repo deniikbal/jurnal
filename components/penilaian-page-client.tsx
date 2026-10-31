@@ -1,12 +1,13 @@
 "use client"
 
-import { useMemo, useState } from "react"
-import { useActionState, useEffect } from "react"
+import { useActionState, useEffect, useMemo, useState } from "react"
 import {
   AlertTriangleIcon,
   CheckCircle2Icon,
+  ClipboardListIcon,
   PlusIcon,
   SaveIcon,
+  UsersIcon,
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -14,6 +15,13 @@ import {
   saveAssessmentStandalone,
   type GradeActionState,
 } from "@/lib/grade-actions"
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from "@/components/ui/empty"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -113,17 +121,20 @@ export function PenilaianPageClient({
   const [scores, setScores] = useState<Record<string, string>>({})
   const [state, formAction, isPending] = useActionState(
     saveAssessmentStandalone,
-    initialState,
+    initialState
   )
 
   const activeSubjects = useMemo(
     () => subjects.filter((s) => s.status === "aktif"),
-    [subjects],
+    [subjects]
   )
 
   const activeWeights = useMemo(
-    () => gradeWeights.filter((w) => w.status === "aktif" && w.subjectId === subjectId),
-    [gradeWeights, subjectId],
+    () =>
+      gradeWeights.filter(
+        (w) => w.status === "aktif" && w.subjectId === subjectId
+      ),
+    [gradeWeights, subjectId]
   )
 
   const subjectAssessments = useMemo(
@@ -133,18 +144,19 @@ export function PenilaianPageClient({
           (a) =>
             a.subjectId === subjectId &&
             a.classroomId === classroomId &&
-            (gradeWeightId ? a.gradeWeightId === gradeWeightId : true),
+            (gradeWeightId ? a.gradeWeightId === gradeWeightId : true)
         )
-        .sort((a, b) =>
-          (b.date ?? "").localeCompare(a.date ?? "") ||
-          naturalCollator.compare(a.title, b.title),
+        .sort(
+          (a, b) =>
+            (b.date ?? "").localeCompare(a.date ?? "") ||
+            naturalCollator.compare(a.title, b.title)
         ),
-    [assessments, subjectId, classroomId, gradeWeightId],
+    [assessments, subjectId, classroomId, gradeWeightId]
   )
 
   const selectedAssessment = useMemo(
     () => assessments.find((a) => a.id === assessmentId),
-    [assessments, assessmentId],
+    [assessments, assessmentId]
   )
 
   const classroomStudents = useMemo(() => {
@@ -170,7 +182,7 @@ export function PenilaianPageClient({
     const initial: Record<string, string> = {}
     for (const student of classroomStudents) {
       const found = grades.find(
-        (g) => g.assessmentId === assessmentId && g.siswaId === student.id,
+        (g) => g.assessmentId === assessmentId && g.siswaId === student.id
       )
       initial[student.id] = found ? String(found.score) : ""
     }
@@ -418,14 +430,17 @@ export function PenilaianPageClient({
           ) : null}
 
           {classroomStudents.length === 0 ? (
-            <div className="rounded-md border border-border bg-card px-6 py-12 text-center">
-              <p className="text-sm font-medium text-foreground">
-                Belum ada siswa aktif di kelas ini
-              </p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Tambahkan siswa dulu di menu Siswa.
-              </p>
-            </div>
+            <Empty className="border bg-card">
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <UsersIcon />
+                </EmptyMedia>
+                <EmptyTitle>Belum ada siswa aktif di kelas ini</EmptyTitle>
+                <EmptyDescription>
+                  Tambahkan siswa dulu di menu Siswa.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
           ) : (
             <>
               <div className="overflow-hidden rounded-md border border-border bg-card">
@@ -435,7 +450,7 @@ export function PenilaianPageClient({
                       Daftar siswa
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      <span className="font-mono tabular-nums text-foreground">
+                      <span className="font-mono text-foreground tabular-nums">
                         {sudahDinilai}
                       </span>
                       {" / "}
@@ -452,8 +467,8 @@ export function PenilaianPageClient({
                     onClick={() =>
                       setScores(
                         Object.fromEntries(
-                          classroomStudents.map((s) => [s.id, "100"]),
-                        ),
+                          classroomStudents.map((s) => [s.id, "100"])
+                        )
                       )
                     }
                     disabled={isPending}
@@ -488,13 +503,13 @@ export function PenilaianPageClient({
                         const adaNilai = isDinilai(student.id)
                         return (
                           <TableRow key={student.id}>
-                            <TableCell className="pl-4 font-mono text-xs tabular-nums text-muted-foreground">
+                            <TableCell className="pl-4 font-mono text-xs text-muted-foreground tabular-nums">
                               {index + 1}
                             </TableCell>
                             <TableCell className="text-sm font-medium text-foreground">
                               {student.name}
                             </TableCell>
-                            <TableCell className="font-mono text-xs tabular-nums text-muted-foreground">
+                            <TableCell className="font-mono text-xs text-muted-foreground tabular-nums">
                               {student.nis ?? (
                                 <span className="inline-flex h-5 items-center rounded-sm border border-dashed border-border px-1.5 text-[11px] text-muted-foreground">
                                   Tanpa NIS
@@ -512,16 +527,16 @@ export function PenilaianPageClient({
                                   onChange={(event) =>
                                     setStudentScore(
                                       student.id,
-                                      event.target.value,
+                                      event.target.value
                                     )
                                   }
                                   disabled={isPending}
                                   aria-label={`Nilai ${student.name}`}
-                                  className={`!h-8 w-20 text-right font-mono tabular-nums text-sm ${
+                                  className={`!h-8 w-20 text-right font-mono text-sm tabular-nums ${
                                     parsed !== null
-                                          ? "text-foreground"
-                                          : "text-muted-foreground"
-                                      }`}
+                                      ? "text-foreground"
+                                      : "text-muted-foreground"
+                                  }`}
                                 />
                                 {adaNilai ? (
                                   <CheckCircle2Icon
@@ -563,14 +578,17 @@ export function PenilaianPageClient({
           )}
         </form>
       ) : (
-        <div className="rounded-md border border-border bg-card px-6 py-16 text-center">
-          <p className="text-sm font-medium text-foreground">
-            Mulai dengan memilih mapel, kelas, dan komponen bobot
-          </p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Atau buat penilaian baru dari dropdown Penilaian.
-          </p>
-        </div>
+        <Empty className="border bg-card">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <ClipboardListIcon />
+            </EmptyMedia>
+            <EmptyTitle>Pilih mapel, kelas, dan komponen bobot</EmptyTitle>
+            <EmptyDescription>
+              Atau buat penilaian baru dari dropdown Penilaian.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       )}
     </div>
   )

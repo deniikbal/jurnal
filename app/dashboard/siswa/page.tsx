@@ -19,15 +19,23 @@ export default async function SiswaPage() {
   const kelasById = new Map(daftarKelas.map((item) => [item.id, item]))
 
   const totalSiswa = daftarSiswa.length
-  const totalAktif = daftarSiswa.filter((item) => item.status === "aktif").length
-  const totalKeluar = daftarSiswa.filter((item) => item.status === "keluar").length
-  const totalLaki = daftarSiswa.filter((item) => item.jenisKelamin === "laki-laki").length
+  const totalAktif = daftarSiswa.filter(
+    (item) => item.status === "aktif"
+  ).length
+  const totalKeluar = daftarSiswa.filter(
+    (item) => item.status === "keluar"
+  ).length
+  const totalLaki = daftarSiswa.filter(
+    (item) => item.jenisKelamin === "laki-laki"
+  ).length
   const totalPerempuan = daftarSiswa.filter(
-    (item) => item.jenisKelamin === "perempuan",
+    (item) => item.jenisKelamin === "perempuan"
   ).length
 
   const persen = (n: number) =>
-    totalSiswa > 0 ? `${Math.round((n / totalSiswa) * 100)}% dari total` : "Belum ada data"
+    totalSiswa > 0
+      ? `${Math.round((n / totalSiswa) * 100)}% dari total`
+      : "Belum ada data"
 
   return (
     <div className="flex flex-col gap-6">
@@ -66,7 +74,10 @@ export default async function SiswaPage() {
 
       {totalKeluar > 0 ? (
         <p className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span className="size-1.5 rounded-full bg-muted-foreground" aria-hidden />
+          <span
+            className="size-1.5 rounded-full bg-muted-foreground"
+            aria-hidden
+          />
           {totalKeluar} siswa berstatus keluar tidak ditampilkan di ringkasan.
         </p>
       ) : null}

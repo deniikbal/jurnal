@@ -45,7 +45,7 @@ export function StatCard({
       <div className="flex flex-col gap-1">
         <p
           className={cn(
-            "font-semibold tracking-tight tabular-nums text-foreground",
+            "font-semibold tracking-tight text-foreground tabular-nums",
             emphasis ? "text-3xl" : "text-2xl"
           )}
         >

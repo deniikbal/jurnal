@@ -14,7 +14,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Separator } from "@/components/ui/separator"
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar"
 import { getCurrentUser } from "@/lib/dal"
 
 function getInitials(name?: string | null, email?: string | null) {
@@ -52,13 +56,18 @@ export default async function DashboardLayout({
                 aria-label="Buka menu pengguna"
               >
                 <Avatar className="size-8 rounded-sm">
-                  <AvatarImage src={user?.image ?? undefined} alt={user?.name ?? "User"} />
+                  <AvatarImage
+                    src={user?.image ?? undefined}
+                    alt={user?.name ?? "User"}
+                  />
                   <AvatarFallback className="rounded-sm">
                     {getInitials(user?.name, user?.email)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="hidden min-w-0 text-sm leading-tight sm:grid">
-                  <span className="truncate font-medium">{user?.name ?? "User"}</span>
+                  <span className="truncate font-medium">
+                    {user?.name ?? "User"}
+                  </span>
                   <span className="truncate text-xs text-muted-foreground">
                     {user?.email}
                   </span>

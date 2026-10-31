@@ -13,7 +13,7 @@ function TableRowSkeleton() {
   return (
     <div className="flex items-center gap-4 px-5 py-3.5">
       <Skeleton className="h-3 w-5 shrink-0" />
-      <Skeleton className="h-3.5 flex-1 max-w-[14rem]" />
+      <Skeleton className="h-3.5 max-w-[14rem] flex-1" />
       <Skeleton className="h-3.5 w-20" />
       <Skeleton className="h-3.5 w-16" />
       <Skeleton className="h-3.5 w-6" />
@@ -91,10 +91,7 @@ export default function SiswaLoading() {
 
         <div className="hidden sm:block">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div
-              key={i}
-              className="border-b border-border last:border-b-0"
-            >
+            <div key={i} className="border-b border-border last:border-b-0">
               <TableRowSkeleton />
             </div>
           ))}

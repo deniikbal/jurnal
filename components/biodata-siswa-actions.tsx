@@ -61,7 +61,10 @@ export function BiodataSiswaActions({ biodata }: BiodataActionsProps) {
 
 function BiodataEditDialog({ biodata }: BiodataActionsProps) {
   const [open, setOpen] = useState(false)
-  const [state, formAction, isPending] = useActionState(updateBiodataSiswa, initialState)
+  const [state, formAction, isPending] = useActionState(
+    updateBiodataSiswa,
+    initialState
+  )
 
   useEffect(() => {
     if (!state.message) return
@@ -121,7 +124,10 @@ function BiodataEditDialog({ biodata }: BiodataActionsProps) {
 
 function BiodataDeleteDialog({ biodata }: BiodataActionsProps) {
   const [open, setOpen] = useState(false)
-  const [state, formAction, isPending] = useActionState(deleteBiodataSiswa, initialState)
+  const [state, formAction, isPending] = useActionState(
+    deleteBiodataSiswa,
+    initialState
+  )
 
   useEffect(() => {
     if (!state.message) return
@@ -137,7 +143,12 @@ function BiodataDeleteDialog({ biodata }: BiodataActionsProps) {
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button type="button" variant="destructive" size="icon" className="size-7">
+        <Button
+          type="button"
+          variant="destructive"
+          size="icon"
+          className="size-7"
+        >
           <Trash2Icon className="size-3.5" />
         </Button>
       </AlertDialogTrigger>
@@ -147,7 +158,11 @@ function BiodataDeleteDialog({ biodata }: BiodataActionsProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Hapus biodata siswa?</AlertDialogTitle>
             <AlertDialogDescription>
-              Biodata siswa <span className="font-medium text-foreground">{biodata.nama}</span> akan dihapus permanen.
+              Biodata siswa{" "}
+              <span className="font-medium text-foreground">
+                {biodata.nama}
+              </span>{" "}
+              akan dihapus permanen.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

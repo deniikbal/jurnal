@@ -38,19 +38,25 @@ export function AttendanceReportFilter({
     const params = new URLSearchParams(searchParams)
     params.set("tab", "laporan")
 
-    if (value && value !== defaultValue && !(key === "month" && value === currentMonth))
+    if (
+      value &&
+      value !== defaultValue &&
+      !(key === "month" && value === currentMonth)
+    )
       params.set(key, value)
     else params.delete(key)
 
     startTransition(() => {
       const query = params.toString()
-      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false })
+      router.replace(query ? `${pathname}?${query}` : pathname, {
+        scroll: false,
+      })
     })
   }
 
   return (
     <div
-      className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row data-pending:opacity-70"
+      className="flex w-full flex-col gap-2 data-pending:opacity-70 sm:w-auto sm:flex-row"
       data-pending={isPending || undefined}
     >
       <Input
@@ -60,7 +66,10 @@ export function AttendanceReportFilter({
         className="h-9 w-full border-border/80 bg-background text-sm shadow-none sm:w-auto"
         aria-label="Filter bulan laporan"
       />
-      <Select value={classroomId} onValueChange={(value) => updateParam("classroomId", value)}>
+      <Select
+        value={classroomId}
+        onValueChange={(value) => updateParam("classroomId", value)}
+      >
         <SelectTrigger
           className="h-9 w-full text-sm shadow-none sm:w-40"
           aria-label="Filter kelas laporan"
@@ -76,7 +85,10 @@ export function AttendanceReportFilter({
           ))}
         </SelectContent>
       </Select>
-      <Select value={subjectId} onValueChange={(value) => updateParam("subjectId", value)}>
+      <Select
+        value={subjectId}
+        onValueChange={(value) => updateParam("subjectId", value)}
+      >
         <SelectTrigger
           className="h-9 w-full text-sm shadow-none sm:w-44"
           aria-label="Filter mapel laporan"

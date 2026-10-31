@@ -76,11 +76,16 @@
   --shadow-offset-y: 1px;
   --shadow-2xs: 0 1px 2px 0px hsl(0 0% 0% / 0.04);
   --shadow-xs: 0 1px 2px 0px hsl(0 0% 0% / 0.05);
-  --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.06), 0 1px 2px -1px hsl(0 0% 0% / 0.06);
-  --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.07), 0 1px 2px -1px hsl(0 0% 0% / 0.07);
-  --shadow-md: 0 2px 4px -1px hsl(0 0% 0% / 0.07), 0 1px 3px -1px hsl(0 0% 0% / 0.05);
-  --shadow-lg: 0 4px 8px -2px hsl(0 0% 0% / 0.08), 0 2px 4px -2px hsl(0 0% 0% / 0.05);
-  --shadow-xl: 0 8px 16px -4px hsl(0 0% 0% / 0.09), 0 4px 8px -4px hsl(0 0% 0% / 0.05);
+  --shadow-sm:
+    0 1px 3px 0px hsl(0 0% 0% / 0.06), 0 1px 2px -1px hsl(0 0% 0% / 0.06);
+  --shadow:
+    0 1px 3px 0px hsl(0 0% 0% / 0.07), 0 1px 2px -1px hsl(0 0% 0% / 0.07);
+  --shadow-md:
+    0 2px 4px -1px hsl(0 0% 0% / 0.07), 0 1px 3px -1px hsl(0 0% 0% / 0.05);
+  --shadow-lg:
+    0 4px 8px -2px hsl(0 0% 0% / 0.08), 0 2px 4px -2px hsl(0 0% 0% / 0.05);
+  --shadow-xl:
+    0 8px 16px -4px hsl(0 0% 0% / 0.09), 0 4px 8px -4px hsl(0 0% 0% / 0.05);
   --shadow-2xl: 0 16px 32px -8px hsl(0 0% 0% / 0.14);
 
   --letter-spacing: 0em;
@@ -131,14 +136,19 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.84 0.21 126);
 
-  --shadow-2xs: 0 1px 2px 0px hsl(0 0% 0% / 0.20);
+  --shadow-2xs: 0 1px 2px 0px hsl(0 0% 0% / 0.2);
   --shadow-xs: 0 1px 2px 0px hsl(0 0% 0% / 0.24);
-  --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.28), 0 1px 2px -1px hsl(0 0% 0% / 0.24);
-  --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.30), 0 1px 2px -1px hsl(0 0% 0% / 0.24);
-  --shadow-md: 0 2px 4px -1px hsl(0 0% 0% / 0.32), 0 1px 3px -1px hsl(0 0% 0% / 0.24);
-  --shadow-lg: 0 4px 8px -2px hsl(0 0% 0% / 0.36), 0 2px 4px -2px hsl(0 0% 0% / 0.24);
-  --shadow-xl: 0 8px 16px -4px hsl(0 0% 0% / 0.40), 0 4px 8px -4px hsl(0 0% 0% / 0.24);
-  --shadow-2xl: 0 16px 32px -8px hsl(0 0% 0% / 0.50);
+  --shadow-sm:
+    0 1px 3px 0px hsl(0 0% 0% / 0.28), 0 1px 2px -1px hsl(0 0% 0% / 0.24);
+  --shadow:
+    0 1px 3px 0px hsl(0 0% 0% / 0.3), 0 1px 2px -1px hsl(0 0% 0% / 0.24);
+  --shadow-md:
+    0 2px 4px -1px hsl(0 0% 0% / 0.32), 0 1px 3px -1px hsl(0 0% 0% / 0.24);
+  --shadow-lg:
+    0 4px 8px -2px hsl(0 0% 0% / 0.36), 0 2px 4px -2px hsl(0 0% 0% / 0.24);
+  --shadow-xl:
+    0 8px 16px -4px hsl(0 0% 0% / 0.4), 0 4px 8px -4px hsl(0 0% 0% / 0.24);
+  --shadow-2xl: 0 16px 32px -8px hsl(0 0% 0% / 0.5);
 }
 
 @theme inline {
@@ -270,12 +280,24 @@
   --subject-6: oklch(0.77 0.09 150);
 }
 
-.tone-1 { --tone: var(--subject-1); }
-.tone-2 { --tone: var(--subject-2); }
-.tone-3 { --tone: var(--subject-3); }
-.tone-4 { --tone: var(--subject-4); }
-.tone-5 { --tone: var(--subject-5); }
-.tone-6 { --tone: var(--subject-6); }
+.tone-1 {
+  --tone: var(--subject-1);
+}
+.tone-2 {
+  --tone: var(--subject-2);
+}
+.tone-3 {
+  --tone: var(--subject-3);
+}
+.tone-4 {
+  --tone: var(--subject-4);
+}
+.tone-5 {
+  --tone: var(--subject-5);
+}
+.tone-6 {
+  --tone: var(--subject-6);
+}
 
 @layer components {
   /* Elevasi: dipakai hanya pada kartu yang memang bisa diaksi, supaya
@@ -308,7 +330,9 @@
   }
 
   .surface-hover {
-    transition: box-shadow 160ms ease, transform 160ms ease;
+    transition:
+      box-shadow 160ms ease,
+      transform 160ms ease;
   }
 
   .surface-hover:hover {
@@ -335,8 +359,16 @@
   }
 
   .subject-chip {
-    background-color: color-mix(in oklch, var(--tone, var(--muted)) 14%, var(--card));
-    color: color-mix(in oklch, var(--tone, var(--foreground)) 62%, var(--foreground));
+    background-color: color-mix(
+      in oklch,
+      var(--tone, var(--muted)) 14%,
+      var(--card)
+    );
+    color: color-mix(
+      in oklch,
+      var(--tone, var(--foreground)) 62%,
+      var(--foreground)
+    );
   }
 
   .subject-dot {
@@ -344,6 +376,10 @@
   }
 
   .subject-wash:hover {
-    background-color: color-mix(in oklch, var(--tone, var(--muted)) 5%, var(--card));
+    background-color: color-mix(
+      in oklch,
+      var(--tone, var(--muted)) 5%,
+      var(--card)
+    );
   }
 }

@@ -38,17 +38,25 @@ export function KehadiranFilter({
 
     startTransition(() => {
       const query = params.toString()
-      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false })
+      router.replace(query ? `${pathname}?${query}` : pathname, {
+        scroll: false,
+      })
     })
   }
 
   return (
     <div
-      className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row data-pending:opacity-70"
+      className="flex w-full flex-col gap-2 data-pending:opacity-70 sm:w-auto sm:flex-row"
       data-pending={isPending || undefined}
     >
-      <Select value={classroomId} onValueChange={(value) => updateParam("classroomId", value)}>
-        <SelectTrigger className="h-9 w-full text-sm shadow-none sm:w-40" aria-label="Filter kelas">
+      <Select
+        value={classroomId}
+        onValueChange={(value) => updateParam("classroomId", value)}
+      >
+        <SelectTrigger
+          className="h-9 w-full text-sm shadow-none sm:w-40"
+          aria-label="Filter kelas"
+        >
           <SelectValue placeholder="Semua kelas" />
         </SelectTrigger>
         <SelectContent>
@@ -60,8 +68,14 @@ export function KehadiranFilter({
           ))}
         </SelectContent>
       </Select>
-      <Select value={subjectId} onValueChange={(value) => updateParam("subjectId", value)}>
-        <SelectTrigger className="h-9 w-full text-sm shadow-none sm:w-44" aria-label="Filter mapel">
+      <Select
+        value={subjectId}
+        onValueChange={(value) => updateParam("subjectId", value)}
+      >
+        <SelectTrigger
+          className="h-9 w-full text-sm shadow-none sm:w-44"
+          aria-label="Filter mapel"
+        >
           <SelectValue placeholder="Semua mapel" />
         </SelectTrigger>
         <SelectContent>

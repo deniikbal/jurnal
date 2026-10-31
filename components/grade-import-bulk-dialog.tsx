@@ -28,7 +28,12 @@ import {
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 
-const initialState: BulkImportState = { success: false, message: "", imported: 0, skipped: 0 }
+const initialState: BulkImportState = {
+  success: false,
+  message: "",
+  imported: 0,
+  skipped: 0,
+}
 
 type Props = {
   assessment: { id: string; title: string; gradeWeightName: string }
@@ -37,7 +42,10 @@ type Props = {
 export function GradeImportBulkDialog({ assessment }: Props) {
   const [open, setOpen] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
-  const [state, formAction, isPending] = useActionState(importGradesBulk, initialState)
+  const [state, formAction, isPending] = useActionState(
+    importGradesBulk,
+    initialState
+  )
   const done = !isPending && !!state.message
 
   useEffect(() => {
@@ -60,7 +68,12 @@ export function GradeImportBulkDialog({ assessment }: Props) {
       }}
     >
       <DialogTrigger asChild>
-        <Button type="button" size="icon" variant="ghost" aria-label="Import Bulk ke Semua Kelas">
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          aria-label="Import Bulk ke Semua Kelas"
+        >
           <LayersIcon />
         </Button>
       </DialogTrigger>
@@ -68,7 +81,7 @@ export function GradeImportBulkDialog({ assessment }: Props) {
       <DialogContent
         className={cn(
           "max-w-[calc(100vw-1.5rem)] p-4 sm:p-6",
-          done && state.rows ? "sm:max-w-3xl" : "sm:max-w-md",
+          done && state.rows ? "sm:max-w-3xl" : "sm:max-w-md"
         )}
       >
         <form ref={formRef} action={formAction} className="space-y-4">
@@ -76,23 +89,31 @@ export function GradeImportBulkDialog({ assessment }: Props) {
 
           <DialogHeader>
             <DialogTitle className="text-base sm:text-lg">
-              {done && state.rows ? "Hasil Import Nilai Bulk" : "Import Nilai Bulk (Semua Kelas)"}
+              {done && state.rows
+                ? "Hasil Import Nilai Bulk"
+                : "Import Nilai Bulk (Semua Kelas)"}
             </DialogTitle>
             <DialogDescription className="text-xs sm:text-sm">
               {done && state.rows ? (
                 <>
-                  <span className="text-green-600 font-medium">{state.imported} berhasil</span>
+                  <span className="font-medium text-green-600">
+                    {state.imported} berhasil
+                  </span>
                   {" · "}
-                  <span className="text-destructive font-medium">{state.skipped} dilewati</span>
+                  <span className="font-medium text-destructive">
+                    {state.skipped} dilewati
+                  </span>
                 </>
               ) : (
                 <>
-                  Referensi: <strong>&quot;{assessment.title}&quot;</strong> ({assessment.gradeWeightName}).
-                  Sistem akan mencari semua kelas yang memiliki penilaian berjudul sama, lalu
-                  mencocokkan NIS dari file Excel ke siswa di kelas masing-masing.
+                  Referensi: <strong>&quot;{assessment.title}&quot;</strong> (
+                  {assessment.gradeWeightName}). Sistem akan mencari semua kelas
+                  yang memiliki penilaian berjudul sama, lalu mencocokkan NIS
+                  dari file Excel ke siswa di kelas masing-masing.
                   <br />
                   <span className="mt-1 inline-block text-muted-foreground">
-                    Format: A (No) · B (NIS) · C (Nama) · D (Nilai). Baris 1 dilewati.
+                    Format: A (No) · B (NIS) · C (Nama) · D (Nilai). Baris 1
+                    dilewati.
                   </span>
                 </>
               )}
@@ -116,13 +137,22 @@ export function GradeImportBulkDialog({ assessment }: Props) {
                 />
               </div>
 
-              <DialogFooter className="flex-col-reverse gap-2 sm:flex-row pt-2">
+              <DialogFooter className="flex-col-reverse gap-2 pt-2 sm:flex-row">
                 <DialogClose asChild>
-                  <Button type="button" variant="outline" disabled={isPending} className="w-full sm:w-auto text-xs">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={isPending}
+                    className="w-full text-xs sm:w-auto"
+                  >
                     Batal
                   </Button>
                 </DialogClose>
-                <Button type="submit" disabled={isPending} className="w-full sm:w-auto text-xs gap-1.5">
+                <Button
+                  type="submit"
+                  disabled={isPending}
+                  className="w-full gap-1.5 text-xs sm:w-auto"
+                >
                   {isPending ? "Memproses..." : "Import ke Semua Kelas"}
                 </Button>
               </DialogFooter>
@@ -150,10 +180,17 @@ export function GradeImportBulkDialog({ assessment }: Props) {
                             <XIcon className="size-4 text-destructive" />
                           )}
                         </TableCell>
-                        <TableCell className={cn(!row.matched && "text-destructive/60")}>
+                        <TableCell
+                          className={cn(!row.matched && "text-destructive/60")}
+                        >
                           {row.nis}
                         </TableCell>
-                        <TableCell className={cn("font-medium", !row.matched && "text-destructive")}>
+                        <TableCell
+                          className={cn(
+                            "font-medium",
+                            !row.matched && "text-destructive"
+                          )}
+                        >
                           {row.name}
                           {!row.matched && row.reason && (
                             <span className="ml-1.5 text-xs font-normal text-destructive/70">
@@ -161,10 +198,20 @@ export function GradeImportBulkDialog({ assessment }: Props) {
                             </span>
                           )}
                         </TableCell>
-                        <TableCell className={cn("text-sm", !row.matched && "text-muted-foreground")}>
+                        <TableCell
+                          className={cn(
+                            "text-sm",
+                            !row.matched && "text-muted-foreground"
+                          )}
+                        >
                           {row.classroomName}
                         </TableCell>
-                        <TableCell className={cn("text-right tabular-nums font-semibold", !row.matched && "text-destructive/60")}>
+                        <TableCell
+                          className={cn(
+                            "text-right font-semibold tabular-nums",
+                            !row.matched && "text-destructive/60"
+                          )}
+                        >
                           {row.matched ? row.score : "—"}
                         </TableCell>
                       </TableRow>
@@ -174,7 +221,12 @@ export function GradeImportBulkDialog({ assessment }: Props) {
               </div>
 
               <DialogFooter className="gap-2 pt-2">
-                <Button type="button" variant="outline" onClick={handleClose} className="w-full sm:w-auto text-xs">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleClose}
+                  className="w-full text-xs sm:w-auto"
+                >
                   Tutup
                 </Button>
               </DialogFooter>

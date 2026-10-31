@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
       `https://www.googleapis.com/drive/v3/files/${id}?alt=media`,
       {
         headers: { Authorization: `Bearer ${accessToken}` },
-      },
+      }
     )
 
     if (!res.ok) {
@@ -23,8 +23,7 @@ export async function GET(request: NextRequest) {
       return new NextResponse(null, { status: 502 })
     }
 
-    const contentType =
-      res.headers.get("content-type") ?? "image/jpeg"
+    const contentType = res.headers.get("content-type") ?? "image/jpeg"
 
     return new NextResponse(res.body, {
       headers: {

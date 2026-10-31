@@ -42,7 +42,11 @@ const modul = [
     icon: BookOpenTextIcon,
     title: "Jurnal pembelajaran",
     desc: "Catat kegiatan belajar mengajar setiap sesi. Materi, kegiatan, catatan.",
-    bullets: ["Riwayat kronologis", "Per kelas & mapel", "Telusur berdasarkan tanggal"],
+    bullets: [
+      "Riwayat kronologis",
+      "Per kelas & mapel",
+      "Telusur berdasarkan tanggal",
+    ],
   },
 ]
 
@@ -122,7 +126,7 @@ export default async function Page() {
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -right-40 top-0 -z-10 size-[36rem] rounded-full bg-primary/5 blur-3xl"
+          className="pointer-events-none absolute top-0 -right-40 -z-10 size-[36rem] rounded-full bg-primary/5 blur-3xl"
         />
         <div className="mx-auto grid w-full max-w-6xl gap-12 px-6 py-16 sm:py-24 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16 lg:py-32">
           <div className="flex flex-col justify-center">
@@ -130,12 +134,12 @@ export default async function Page() {
               <span className="size-1.5 rounded-full bg-primary" />
               Untuk guru dan administrator sekolah
             </div>
-            <h1 className="mt-5 text-balance text-4xl font-semibold leading-[1.1] tracking-tight text-foreground sm:text-5xl">
+            <h1 className="mt-5 text-4xl leading-[1.1] font-semibold tracking-tight text-balance text-foreground sm:text-5xl">
               Catat jurnal kelas,
               <br />
               <span className="text-primary">tanpa ribet.</span>
             </h1>
-            <p className="mt-5 max-w-md text-pretty text-base leading-relaxed text-muted-foreground">
+            <p className="mt-5 max-w-md text-base leading-relaxed text-pretty text-muted-foreground">
               Satu tempat untuk mengelola data siswa, jadwal mengajar, presensi
               harian, dan jurnal pembelajaran. Masuk dengan akun yang diberikan
               sekolah.
@@ -179,9 +183,21 @@ export default async function Page() {
                 </div>
                 <ol className="mt-4 space-y-3">
                   {[
-                    { mapel: "Matematika", kelas: "X-1", materi: "Persamaan linear" },
-                    { mapel: "Bahasa Indonesia", kelas: "X-2", materi: "Teks negosiasi" },
-                    { mapel: "IPA", kelas: "IX-1", materi: "Sistem pencernaan" },
+                    {
+                      mapel: "Matematika",
+                      kelas: "X-1",
+                      materi: "Persamaan linear",
+                    },
+                    {
+                      mapel: "Bahasa Indonesia",
+                      kelas: "X-2",
+                      materi: "Teks negosiasi",
+                    },
+                    {
+                      mapel: "IPA",
+                      kelas: "IX-1",
+                      materi: "Sistem pencernaan",
+                    },
                   ].map((item, idx) => (
                     <li
                       key={item.mapel}
@@ -209,19 +225,19 @@ export default async function Page() {
                 </ol>
                 <div className="mt-4 grid grid-cols-3 gap-2 border-t border-border pt-4 text-center">
                   <div>
-                    <p className="text-lg font-semibold tabular-nums text-foreground">
+                    <p className="text-lg font-semibold text-foreground tabular-nums">
                       24
                     </p>
                     <p className="text-[11px] text-muted-foreground">Siswa</p>
                   </div>
                   <div className="border-x border-border">
-                    <p className="text-lg font-semibold tabular-nums text-foreground">
+                    <p className="text-lg font-semibold text-foreground tabular-nums">
                       3
                     </p>
                     <p className="text-[11px] text-muted-foreground">Kelas</p>
                   </div>
                   <div>
-                    <p className="text-lg font-semibold tabular-nums text-foreground">
+                    <p className="text-lg font-semibold text-foreground tabular-nums">
                       7
                     </p>
                     <p className="text-[11px] text-muted-foreground">Mapel</p>
@@ -242,12 +258,12 @@ export default async function Page() {
             <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
               Modul
             </p>
-            <h2 className="mt-2 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+            <h2 className="mt-2 text-3xl font-semibold tracking-tight text-balance text-foreground sm:text-4xl">
               Empat modul, satu alur kerja
             </h2>
-            <p className="mt-3 text-pretty text-base text-muted-foreground">
-              Setiap modul berdiri sendiri tapi saling terhubung. Data yang
-              Anda masuk di satu modul langsung tersedia di modul lain.
+            <p className="mt-3 text-base text-pretty text-muted-foreground">
+              Setiap modul berdiri sendiri tapi saling terhubung. Data yang Anda
+              masuk di satu modul langsung tersedia di modul lain.
             </p>
           </div>
 
@@ -289,7 +305,7 @@ export default async function Page() {
             <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
               Alur
             </p>
-            <h2 className="mt-2 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+            <h2 className="mt-2 text-3xl font-semibold tracking-tight text-balance text-foreground sm:text-4xl">
               Dari akun pertama sampai jurnal pertama
             </h2>
           </div>
@@ -300,7 +316,7 @@ export default async function Page() {
                 key={item.step}
                 className="relative rounded-xl border border-border bg-card p-5"
               >
-                <span className="font-mono text-xs font-semibold tabular-nums text-primary">
+                <span className="font-mono text-xs font-semibold text-primary tabular-nums">
                   {item.step}
                 </span>
                 <h3 className="mt-3 text-base font-semibold text-foreground">
@@ -317,10 +333,10 @@ export default async function Page() {
 
       <section className="border-t border-border bg-muted/30 py-20 sm:py-24">
         <div className="mx-auto w-full max-w-3xl px-6 text-center">
-          <h2 className="text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+          <h2 className="text-3xl font-semibold tracking-tight text-balance text-foreground sm:text-4xl">
             Siap mencatat pembelajaran hari ini?
           </h2>
-          <p className="mt-3 text-pretty text-base text-muted-foreground">
+          <p className="mt-3 text-base text-pretty text-muted-foreground">
             Masuk dengan akun yang diberikan sekolah, dan mulai isi jurnal
             pertama Anda.
           </p>

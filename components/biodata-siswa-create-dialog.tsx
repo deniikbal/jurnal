@@ -3,7 +3,10 @@
 import { useActionState, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 
-import { createBiodataSiswa, type BiodataSiswaActionState } from "@/lib/biodata-siswa-actions"
+import {
+  createBiodataSiswa,
+  type BiodataSiswaActionState,
+} from "@/lib/biodata-siswa-actions"
 import { getDriveImageUrl } from "@/lib/google-drive"
 import { Button } from "@/components/ui/button"
 import {
@@ -32,7 +35,10 @@ const initialState: BiodataSiswaActionState = { success: false, message: "" }
 export function BiodataSiswaCreateDialog() {
   const [open, setOpen] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
-  const [state, formAction, isPending] = useActionState(createBiodataSiswa, initialState)
+  const [state, formAction, isPending] = useActionState(
+    createBiodataSiswa,
+    initialState
+  )
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -43,9 +49,7 @@ export function BiodataSiswaCreateDialog() {
         <form ref={formRef} action={formAction} className="space-y-4">
           <DialogHeader>
             <DialogTitle>Tambah Biodata Siswa</DialogTitle>
-            <DialogDescription>
-              Masukkan data biodata siswa.
-            </DialogDescription>
+            <DialogDescription>Masukkan data biodata siswa.</DialogDescription>
           </DialogHeader>
 
           <BiodataSiswaFormFields disabled={isPending} />
@@ -185,7 +189,11 @@ export function BiodataSiswaFormFields({
         />
         {defaultValues?.fotoRumah && (
           <>
-            <input type="hidden" name="existing_foto" value={defaultValues.fotoRumah} />
+            <input
+              type="hidden"
+              name="existing_foto"
+              value={defaultValues.fotoRumah}
+            />
             <div className="mt-1 overflow-hidden rounded-sm border">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img

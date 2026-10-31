@@ -12,6 +12,15 @@ import {
   UsersIcon,
 } from "lucide-react"
 
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+  EmptyContent,
+} from "@/components/ui/empty"
+import { Button } from "@/components/ui/button"
 import { PageHeader } from "@/components/page-header"
 import { StatCard } from "@/components/stat-card"
 import {
@@ -105,15 +114,21 @@ const quickActions = [
 ]
 
 export default async function DashboardPage() {
-  const [user, daftarKelas, daftarSiswa, daftarMapel, daftarJurnal, daftarJadwal] =
-    await Promise.all([
-      getCurrentUser(),
-      getKelasForCurrentUser(),
-      getSiswaForCurrentUser(),
-      getSubjectsForCurrentUser(),
-      getJournalsForCurrentUser(),
-      getSchedulesForCurrentUser(),
-    ])
+  const [
+    user,
+    daftarKelas,
+    daftarSiswa,
+    daftarMapel,
+    daftarJurnal,
+    daftarJadwal,
+  ] = await Promise.all([
+    getCurrentUser(),
+    getKelasForCurrentUser(),
+    getSiswaForCurrentUser(),
+    getSubjectsForCurrentUser(),
+    getJournalsForCurrentUser(),
+    getSchedulesForCurrentUser(),
+  ])
 
   const today = new Date()
   const todayKey: DayKey = DAY_KEYS[today.getDay()]
@@ -127,14 +142,19 @@ export default async function DashboardPage() {
       count: siswaAktif.filter((s) => s.classroomId === kelas.id).length,
     }))
     .sort((a, b) =>
-      a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" }),
+      a.name.localeCompare(b.name, undefined, {
+        numeric: true,
+        sensitivity: "base",
+      })
     )
   const maxSiswa = Math.max(...siswaPerKelas.map((k) => k.count), 1)
 
   const jurnalTerbaru = [...daftarJurnal]
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice(0, 5)
-  const jurnalHariIni = daftarJurnal.filter((j) => isToday(j.date, today)).length
+  const jurnalHariIni = daftarJurnal.filter((j) =>
+    isToday(j.date, today)
+  ).length
 
   const subjectMap = new Map(daftarMapel.map((m) => [m.id, m]))
   const jadwalHariIni = daftarJadwal
@@ -145,10 +165,11 @@ export default async function DashboardPage() {
       subjectName: subjectMap.get(s.subjectId)?.name ?? "Mata pelajaran",
     }))
   const sesiAktif = jadwalHariIni.find(
-    (s) => nowMinutes >= toMinutes(s.startTime) && nowMinutes <= toMinutes(s.endTime),
+    (s) =>
+      nowMinutes >= toMinutes(s.startTime) && nowMinutes <= toMinutes(s.endTime)
   )
   const sesiBerikutnya = jadwalHariIni.find(
-    (s) => toMinutes(s.startTime) > nowMinutes,
+    (s) => toMinutes(s.startTime) > nowMinutes
   )
 
   const firstName = user?.name?.split(" ")[0] ?? "User"
@@ -296,7 +317,7 @@ export default async function DashboardPage() {
                           style={{ width: `${pct}%` }}
                         />
                       </div>
-                      <span className="text-right text-sm tabular-nums text-muted-foreground">
+                      <span className="text-right text-sm text-muted-foreground tabular-nums">
                         {item.count}
                       </span>
                     </li>
@@ -304,23 +325,34 @@ export default async function DashboardPage() {
                 })}
               </ul>
             ) : (
-              <div className="flex flex-col items-center gap-3 py-10 text-center">
-                <p className="text-sm text-muted-foreground">Belum ada data kelas</p>
-                <Link
-                  href="/dashboard/kelas"
-                  className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground hover:underline"
-                >
-                  Tambah kelas
-                  <ArrowRightIcon className="size-3" />
-                </Link>
-              </div>
+              <Empty className="border">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <SchoolIcon />
+                  </EmptyMedia>
+                  <EmptyTitle>Belum ada data kelas</EmptyTitle>
+                  <EmptyDescription>
+                    Tambahkan kelas untuk mulai mengelola siswa dan jadwal.
+                  </EmptyDescription>
+                </EmptyHeader>
+                <EmptyContent>
+                  <Button asChild size="sm" variant="outline">
+                    <Link href="/dashboard/kelas">
+                      Tambah kelas
+                      <ArrowRightIcon />
+                    </Link>
+                  </Button>
+                </EmptyContent>
+              </Empty>
             )}
           </div>
         </section>
 
         <section className="flex flex-col gap-3 lg:col-span-2">
           <div className="flex items-baseline justify-between gap-3">
-            <h2 className="text-sm font-medium text-foreground">Jurnal terbaru</h2>
+            <h2 className="text-sm font-medium text-foreground">
+              Jurnal terbaru
+            </h2>
             {jurnalTerbaru.length > 0 ? (
               <Link
                 href="/dashboard/jurnal"
@@ -360,7 +392,7 @@ export default async function DashboardPage() {
                         </p>
                       </div>
                       <time
-                        className="shrink-0 text-xs tabular-nums text-muted-foreground"
+                        className="shrink-0 text-xs text-muted-foreground tabular-nums"
                         dateTime={j.date}
                       >
                         {todayRow ? "Hari ini" : formatDateShort(j.date)}
@@ -370,16 +402,25 @@ export default async function DashboardPage() {
                 })}
               </ol>
             ) : (
-              <div className="flex flex-col items-center gap-3 px-4 py-10 text-center">
-                <p className="text-sm text-muted-foreground">Belum ada jurnal</p>
-                <Link
-                  href="/dashboard/jurnal"
-                  className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground hover:underline"
-                >
-                  Buat jurnal pertama
-                  <ArrowRightIcon className="size-3" />
-                </Link>
-              </div>
+              <Empty className="border">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <BookOpenTextIcon />
+                  </EmptyMedia>
+                  <EmptyTitle>Belum ada jurnal</EmptyTitle>
+                  <EmptyDescription>
+                    Catat kegiatan mengajar harian Anda agar mudah ditelusuri.
+                  </EmptyDescription>
+                </EmptyHeader>
+                <EmptyContent>
+                  <Button asChild size="sm" variant="outline">
+                    <Link href="/dashboard/jurnal">
+                      Buat jurnal pertama
+                      <ArrowRightIcon />
+                    </Link>
+                  </Button>
+                </EmptyContent>
+              </Empty>
             )}
           </div>
         </section>

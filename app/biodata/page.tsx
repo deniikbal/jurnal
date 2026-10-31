@@ -34,8 +34,8 @@ export default function BiodataPage() {
             Biodata siswa
           </h1>
           <p className="max-w-lg text-sm leading-relaxed text-muted-foreground">
-            Isi atau perbarui data pribadi dan keluarga. Mulai dengan memasukkan NIS
-            yang terdaftar di sekolah.
+            Isi atau perbarui data pribadi dan keluarga. Mulai dengan memasukkan
+            NIS yang terdaftar di sekolah.
           </p>
         </header>
 
